@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "564361688597",
+    "firebase_url": "https://typhoon-1edaf.firebaseio.com",
+    "project_id": "typhoon-1edaf",
+    "storage_bucket": "typhoon-1edaf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:564361688597:android:0403c8e242a2645f",
+        "android_client_info": {
+          "package_name": "com.elektra.typhoon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "564361688597-uusmiqp22u4vb8jev1vv9akrlglsahvt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBu1HO13-afYnEFcFjWLG9eFTigv893xlc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
