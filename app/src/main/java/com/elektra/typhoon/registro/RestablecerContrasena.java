@@ -1,21 +1,21 @@
-package com.elektra.typhoon;
+package com.elektra.typhoon.registro;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.elektra.typhoon.R;
 /**
  * Proyecto: TYPHOON
- * Autor: Emmanuel Rangel Reyes
- * Fecha: 04/01/2019.
+ * Autor: Francis Susana Carreto Espinoza
+ * Fecha: 11/01/2019.
  * Empresa: Elektra
  * Area: Auditoria Sistemas y Monitoreo de Alarmas
  */
-
-public class MainActivity extends AppCompatActivity {
+public class RestablecerContrasena extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_restablecer_contrasena);
     }
 }

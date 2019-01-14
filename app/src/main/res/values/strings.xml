@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">Typhoon</string>
+    <string name="usuario">No. Empleado / Correo</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="entrar">Entrar</string>
+    <string name="registro">Registro</string>
+    <string name="nombre">Nombre</string>
+    <string name="apellido">Apellido</string>
+    <string name="correo">Correo electrónico</string>
+    <string name="registrarse">Registrarse</string>
+    <string name="validar">Validar</string>
+    <string name="bienvenido">Bienvenido</string>
+    <string name="confirmarcontrasena">Confirmar contraseña</string>
+    <string name="usuarioExterno"><u>¿Eres usuario externo?</u></string>
+    <string name="restablecerContrasena">Restablecer contraseña</string>
+    <string name="folios">Folios</string>
+    <string name="enviar">Enviar</string>
+    <string name="iniciarSesion">Iniciar sesión</string>
 </resources>

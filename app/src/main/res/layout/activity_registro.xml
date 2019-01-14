@@ -1,57 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".login.MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:background="@drawable/drawable_background"
         android:orientation="vertical"
+        android:background="@drawable/drawable_background"
         android:padding="30dp">
 
         <ImageView
+            android:id="@+id/imageViewRegistro"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="20dp"
-            android:background="@mipmap/ic_login" />
-
-        <ImageView
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/typhoone" />
+            app:srcCompat="@mipmap/ic_register" />
 
         <TextView
-            android:id="@+id/textViewTitulo"
+            android:id="@+id/textViewBienvenido"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="20dp"
-            android:text="@string/iniciarSesion"
+            android:padding="5dp"
+            android:text="@string/registro"
             android:textColor="@color/azul"
             android:textSize="20sp"
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/editTextUsuario"
+            android:id="@+id/editTextCorreo"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="20dp"
             android:background="@drawable/drawable_editext"
-            android:drawableLeft="@mipmap/ic_user"
-            android:drawablePadding="5dp"
             android:ems="10"
-            android:hint="@string/usuario"
-            android:inputType="textPersonName"
-            android:padding="2dp"
+            android:hint="@string/correo"
+            android:inputType="textEmailAddress"
+            android:paddingBottom="5dp"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
             android:textColor="@color/grisObscuro" />
 
         <EditText
@@ -61,43 +54,41 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="20dp"
             android:background="@drawable/drawable_editext"
-            android:drawableLeft="@mipmap/ic_pass"
-            android:drawablePadding="5dp"
             android:ems="10"
             android:hint="@string/contrasena"
             android:inputType="textPassword"
-            android:padding="2dp"
+            android:paddingBottom="5dp"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:textColor="@color/grisObscuro" />
+
+        <EditText
+            android:id="@+id/editTextConfirmarContrasena"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/drawable_editext"
+            android:ems="10"
+            android:hint="@string/confirmarcontrasena"
+            android:inputType="textPassword"
+            android:paddingBottom="5dp"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
             android:textColor="@color/grisObscuro" />
 
         <Button
-            android:id="@+id/buttonEntrar"
+            android:id="@+id/buttonRegistrarse"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
             android:background="@drawable/drawable_button"
             android:padding="5dp"
-            android:text="@string/entrar"
+            android:text="@string/registrarse"
             android:textColor="@color/blanco" />
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:orientation="vertical">
-        <Button
-            android:id="@+id/buttonRegistro"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:background="@color/transparente"
-            android:text="@string/usuarioExterno"
-            android:textSize="15sp"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textAllCaps="false"/>
     </LinearLayout>
 
 </RelativeLayout>
