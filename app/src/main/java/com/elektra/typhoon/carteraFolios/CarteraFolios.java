@@ -1,20 +1,25 @@
 package com.elektra.typhoon.carteraFolios;
 
-import android.support.v4.view.MenuItemCompat;
+import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.widget.RelativeLayout;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.adapters.AdapterReciclerViewCartera;
-import com.elektra.typhoon.objetos.Folio;
+import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.service.ApiInterface;
+import com.elektra.typhoon.objetos.request.CarteraData;
+import com.elektra.typhoon.objetos.request.RequestCartera;
+import com.elektra.typhoon.objetos.response.ResponseCartera;
 
-import java.util.ArrayList;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import utils.Utils;
 
 /**
  * Proyecto: TYPHOON
@@ -26,7 +31,7 @@ import java.util.ArrayList;
 public class CarteraFolios extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private ArrayList<Folio> folios;
+    //private ArrayList<Folio> folios;
     private AdapterReciclerViewCartera adapterReciclerViewCartera;
 
 
@@ -40,20 +45,7 @@ public class CarteraFolios extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(CarteraFolios.this);
         recyclerView.setLayoutManager(layoutManager);
 
-        folios = new ArrayList<>();
-        folios.add(new Folio("2019"));
-        folios.add(new Folio("1001","Enero","Set transparent background of an imageview on Android"));
-        folios.add(new Folio("1002","Febrero","Set transparent background of an imageview on Android"));
-        folios.add(new Folio("1003","Marzo","Set transparent background of an imageview on Android"));
-        folios.add(new Folio("1004","Abril","Set transparent background of an imageview on Android"));
-        folios.add(new Folio("2018"));
-        folios.add(new Folio("0001","Enero","Lorem Ipsum is simply dummy text of the printing and typesetting industry"));
-        folios.add(new Folio("0002","Febrero","Lorem Ipsum is simply dummy text of the printing and typesetting industry"));
-        folios.add(new Folio("0003","Marzo","Lorem Ipsum is simply dummy text of the printing and typesetting industry"));
-        folios.add(new Folio("0004","Abril","Lorem Ipsum is simply dummy text of the printing and typesetting industry"));
-
-        adapterReciclerViewCartera = new AdapterReciclerViewCartera(CarteraFolios.this,folios);
-        recyclerView.setAdapter(adapterReciclerViewCartera);
+        obtenerFolios(-1,-1,-1);
     }
 
     @Override
@@ -61,5 +53,46 @@ public class CarteraFolios extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void obtenerFolios(int idRevision,int anio,int mes){
+
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Descargando folios");
+        progressDialog.show();
+
+        ApiInterface mApiService = Utils.getInterfaceService();
+
+        RequestCartera requestCartera = new RequestCartera();
+        CarteraData carteraData = new CarteraData();
+        carteraData.setIdRevision(idRevision);
+        carteraData.setAnio(anio);
+        carteraData.setMes(mes);
+        requestCartera.setCarteraData(carteraData);
+
+        Call<ResponseCartera> mService = mApiService.carteraRevisiones(requestCartera);
+        mService.enqueue(new Callback<ResponseCartera>() {
+
+            @Override
+            public void onResponse(Call<ResponseCartera> call, Response<ResponseCartera> response) {
+                progressDialog.dismiss();
+                if(response.body() != null) {
+                    if(response.body().getCarteraRevisiones().getExito()){
+                        adapterReciclerViewCartera = new AdapterReciclerViewCartera(CarteraFolios.this,response.body().getCarteraRevisiones().getFolioRevision());
+                        recyclerView.setAdapter(adapterReciclerViewCartera);
+                    }else{
+                        Utils.message(getApplicationContext(), response.body().getCarteraRevisiones().getError());
+                    }
+                }else{
+                    Utils.message(getApplicationContext(),"Error al descargar folios");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseCartera> call, Throwable t) {
+                progressDialog.dismiss();
+                Utils.message(CarteraFolios.this, Constants.MSG_ERR_CONN);
+            }
+        });
     }
 }

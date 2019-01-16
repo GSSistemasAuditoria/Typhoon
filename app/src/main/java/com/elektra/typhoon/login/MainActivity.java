@@ -10,12 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.carteraFolios.CarteraFolios;
 import com.elektra.typhoon.constants.Constants;
-import com.elektra.typhoon.service.ResponseLogin;
+import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.registro.NuevoRegistro;
 import com.elektra.typhoon.registro.RestablecerContrasena;
 import com.elektra.typhoon.service.ApiInterface;
@@ -25,6 +24,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import utils.Utils;
 
 /**
  * Proyecto: TYPHOON
@@ -63,7 +63,11 @@ public class MainActivity extends AppCompatActivity {
                 if(!usuario.equals("")){
                     if(!contrasena.equals("")){
                         iniciarSesion(usuario,contrasena);
+                    }else{
+                        Utils.message(getApplicationContext(),"Debe introducir la contraseña");
                     }
+                }else{
+                    Utils.message(getApplicationContext(),"Debe introducir id de empleado o su correo");
                 }
             }
         });
@@ -101,9 +105,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     private ApiInterface getInterfaceService() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.URL_PUBLIC + "ValidarEmpleado")
+                .baseUrl(Constants.URL_PUBLIC)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         final ApiInterface mInterfaceService = retrofit.create(ApiInterface.class);
@@ -113,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
     private void iniciarSesion(final String usuario, String contrasena){
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Iniciando...");
+        progressDialog.setMessage("Iniciando sesión");
         progressDialog.show();
 
         ApiInterface mApiService = this.getInterfaceService();
@@ -122,14 +127,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseLogin> call, Response<ResponseLogin> response) {
                 progressDialog.dismiss();
-                if(response.body().getExito()) {
-                    Toast.makeText(getApplicationContext(), "Inicio exitoso", Toast.LENGTH_LONG).show();
+                if(response.body() != null) {
+                    if(response.body().getValidarEmpleado().getExito()){
+                        Intent intent = new Intent(MainActivity.this,CarteraFolios.class);
+                        startActivity(intent);
+                    }else{
+                        Utils.message(getApplicationContext(), response.body().getValidarEmpleado().getError());
+                    }
+                }else{
+                    Utils.message(getApplicationContext(),"Error al iniciar sesión");
                 }
             }
             @Override
             public void onFailure(Call<ResponseLogin> call, Throwable t) {
                 progressDialog.dismiss();
-                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_LONG).show();
+                Utils.message(MainActivity.this, Constants.MSG_ERR_CONN);
             }
         });
     }

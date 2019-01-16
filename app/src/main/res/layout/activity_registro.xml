@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="10dp"
             android:padding="5dp"
             android:text="@string/registro"
             android:textColor="@color/azul"
@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="10dp"
             android:background="@drawable/drawable_editext"
             android:ems="10"
             android:hint="@string/correo"
@@ -47,12 +47,24 @@
             android:paddingTop="5dp"
             android:textColor="@color/grisObscuro" />
 
+        <Button
+            android:id="@+id/buttonValidar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/drawable_button"
+            android:layout_marginBottom="10dp"
+            android:padding="5dp"
+            android:textAllCaps="false"
+            android:text="@string/validar"
+            android:textColor="@color/blanco" />
+
         <EditText
             android:id="@+id/editTextContrasena"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="10dp"
             android:background="@drawable/drawable_editext"
             android:ems="10"
             android:hint="@string/contrasena"
@@ -68,7 +80,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="10dp"
             android:background="@drawable/drawable_editext"
             android:ems="10"
             android:hint="@string/confirmarcontrasena"
@@ -86,6 +98,7 @@
             android:layout_gravity="center_horizontal"
             android:background="@drawable/drawable_button"
             android:padding="5dp"
+            android:textAllCaps="false"
             android:text="@string/registrarse"
             android:textColor="@color/blanco" />
 

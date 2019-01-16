@@ -32,15 +32,16 @@
             <EditText
                 android:id="@+id/editTextBuscar"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/drawable_editext_busqueda"
-                android:drawableEnd="@mipmap/ic_search"
+                android:drawableEnd="@drawable/ic_search"
                 android:drawableTint="@color/blanco"
                 android:ems="10"
                 android:inputType="text"
                 android:padding="5dp"
+                android:textSize="16sp"
                 android:textColor="@color/grisObscuro" />
 
         </LinearLayout>

@@ -9,9 +9,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.elektra.typhoon.R;
-import com.elektra.typhoon.objetos.Folio;
+import com.elektra.typhoon.objetos.response.FolioRevision;
 
-import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Proyecto: TYPHOON
  * Autor: Francis Susana Carreto Espinoza
@@ -21,7 +22,8 @@ import java.util.ArrayList;
  */
 public class AdapterReciclerViewCartera extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private Context context;
-    private ArrayList<Folio> folios;
+    //private ArrayList<Folio> folios;
+    private List<FolioRevision> folios;
     private static final int header = 0;
     private static final int item = 1;
 
@@ -46,7 +48,8 @@ public class AdapterReciclerViewCartera extends RecyclerView.Adapter<RecyclerVie
         }
     }
 
-    public AdapterReciclerViewCartera(Context context, ArrayList<Folio> folios) {
+    //public AdapterReciclerViewCartera(Context context, ArrayList<Folio> folios) {
+    public AdapterReciclerViewCartera(Context context, List<FolioRevision> folios) {
         this.context = context;
         this.folios = folios;
     }
@@ -70,11 +73,15 @@ public class AdapterReciclerViewCartera extends RecyclerView.Adapter<RecyclerVie
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ItemViewHolder) {
-            ((ItemViewHolder)holder).textViewFolio.setText("Folio:" + folios.get(position).getFolio());
-            ((ItemViewHolder)holder).textViewFecha.setText(folios.get(position).getFecha());
-            ((ItemViewHolder)holder).textViewDescripcion.setText(folios.get(position).getDescripcion());
+            //((ItemViewHolder)holder).textViewFolio.setText("Folio:" + folios.get(position).getFolio());
+            //((ItemViewHolder)holder).textViewFecha.setText(folios.get(position).getFecha());
+            //((ItemViewHolder)holder).textViewDescripcion.setText(folios.get(position).getDescripcion());
+            ((ItemViewHolder)holder).textViewFolio.setText("Folio:" + folios.get(position).getIdRevision());
+            ((ItemViewHolder)holder).textViewFecha.setText(folios.get(position).getFechaInicio());
+            ((ItemViewHolder)holder).textViewDescripcion.setText(folios.get(position).getNombre());
         }else if(holder instanceof HeaderViewHolder){
-            ((HeaderViewHolder) holder).headerTitle.setText(folios.get(position).getFecha());
+            //((HeaderViewHolder) holder).headerTitle.setText(folios.get(position).getFecha());
+            ((HeaderViewHolder) holder).headerTitle.setText(folios.get(position).getFechaInicio());
         }
     }
 
@@ -91,7 +98,8 @@ public class AdapterReciclerViewCartera extends RecyclerView.Adapter<RecyclerVie
     }
 
     private boolean isPositionHeader(int position) {
-        if(folios.get(position).getFolio() == null){
+        //if(folios.get(position).getFolio() == null){
+        if(folios.get(position).getIdUsuario() == null){
             return true;
         }
         return false;
