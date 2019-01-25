@@ -3,6 +3,13 @@ package com.elektra.typhoon.objetos.response;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Proyecto: TYPHOON
+ * Autor: Emmanuel Rangel Reyes
+ * Fecha: 14/01/2019.
+ * Empresa: Elektra
+ * Area: Auditoria Sistemas y Monitoreo de Alarmas
+ */
 public class ResponseLogin {
 
     @SerializedName("ValidarEmpleadoResult")
@@ -66,7 +73,7 @@ public class ResponseLogin {
 
     }
 
-    public class Usuario {
+    public static class Usuario {
 
         @SerializedName("CORREO")
         @Expose

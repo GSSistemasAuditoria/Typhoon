@@ -1,6 +1,8 @@
 package com.elektra.typhoon.adapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.elektra.typhoon.R;
+import com.elektra.typhoon.checklist.ChecklistBarcos;
 import com.elektra.typhoon.objetos.response.FolioRevision;
 
 import java.util.List;
@@ -20,14 +23,16 @@ import java.util.List;
  * Empresa: Elektra
  * Area: Auditoria Sistemas y Monitoreo de Alarmas
  */
-public class AdapterReciclerViewCartera extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+
     private Context context;
+    private static Activity activity;
     //private ArrayList<Folio> folios;
     private List<FolioRevision> folios;
     private static final int header = 0;
     private static final int item = 1;
 
-    public static class ItemViewHolder extends RecyclerView.ViewHolder {
+    public static class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public TextView textViewFolio;
         public TextView textViewFecha;
         public TextView textViewDescripcion;
@@ -37,6 +42,13 @@ public class AdapterReciclerViewCartera extends RecyclerView.Adapter<RecyclerVie
             textViewFolio = v.findViewById(R.id.textViewFolio);
             textViewFecha = v.findViewById(R.id.textViewFecha);
             textViewDescripcion = v.findViewById(R.id.textViewDescripcion);
+            v.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(activity, ChecklistBarcos.class);
+            activity.startActivity(intent);
         }
     }
 
@@ -48,10 +60,11 @@ public class AdapterReciclerViewCartera extends RecyclerView.Adapter<RecyclerVie
         }
     }
 
-    //public AdapterReciclerViewCartera(Context context, ArrayList<Folio> folios) {
-    public AdapterReciclerViewCartera(Context context, List<FolioRevision> folios) {
+    //public AdapterRecyclerViewCartera(Context context, ArrayList<Folio> folios) {
+    public AdapterRecyclerViewCartera(Activity activity, Context context, List<FolioRevision> folios) {
         this.context = context;
         this.folios = folios;
+        this.activity = activity;
     }
 
 

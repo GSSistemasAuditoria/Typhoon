@@ -14,6 +14,7 @@ import android.widget.EditText;
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.carteraFolios.CarteraFolios;
 import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.database.TyphoonDataBase;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.registro.NuevoRegistro;
 import com.elektra.typhoon.registro.RestablecerContrasena;
@@ -24,7 +25,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import utils.Utils;
+import com.elektra.typhoon.utils.Utils;
 
 /**
  * Proyecto: TYPHOON
@@ -48,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        //setContentView(R.layout.activity_main);
+        setContentView(R.layout.login_layout);
 
         editTextUsuario = (EditText)findViewById(R.id.editTextUsuario);
         editTextContrasena = (EditText)findViewById(R.id.editTextContrasena);
@@ -104,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+
+        TyphoonDataBase typhoonDataBase = new TyphoonDataBase(getApplicationContext());
     }
 
     private ApiInterface getInterfaceService() {

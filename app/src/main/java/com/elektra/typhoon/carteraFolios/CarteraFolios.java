@@ -9,7 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 
 import com.elektra.typhoon.R;
-import com.elektra.typhoon.adapters.AdapterReciclerViewCartera;
+import com.elektra.typhoon.adapters.AdapterRecyclerViewCartera;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.service.ApiInterface;
 import com.elektra.typhoon.objetos.request.CarteraData;
@@ -19,7 +19,7 @@ import com.elektra.typhoon.objetos.response.ResponseCartera;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import utils.Utils;
+import com.elektra.typhoon.utils.Utils;
 
 /**
  * Proyecto: TYPHOON
@@ -32,7 +32,7 @@ public class CarteraFolios extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     //private ArrayList<Folio> folios;
-    private AdapterReciclerViewCartera adapterReciclerViewCartera;
+    private AdapterRecyclerViewCartera adapterRecyclerViewCartera;
 
 
     @Override
@@ -78,8 +78,8 @@ public class CarteraFolios extends AppCompatActivity {
                 progressDialog.dismiss();
                 if(response.body() != null) {
                     if(response.body().getCarteraRevisiones().getExito()){
-                        adapterReciclerViewCartera = new AdapterReciclerViewCartera(CarteraFolios.this,response.body().getCarteraRevisiones().getFolioRevision());
-                        recyclerView.setAdapter(adapterReciclerViewCartera);
+                        adapterRecyclerViewCartera = new AdapterRecyclerViewCartera(CarteraFolios.this,CarteraFolios.this,response.body().getCarteraRevisiones().getFolioRevision());
+                        recyclerView.setAdapter(adapterRecyclerViewCartera);
                     }else{
                         Utils.message(getApplicationContext(), response.body().getCarteraRevisiones().getError());
                     }

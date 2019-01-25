@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
+        android:background="@color/azul">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/blanco"
+                android:layout_marginEnd="3dp"
+                android:textStyle="bold"
+                android:text="@string/folio_tag"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/drawable_back_textview"
+                android:textColor="@color/blanco"
+                android:padding="3dp"
+                android:textStyle="bold"
+                android:text="1001"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/blanco"
+                android:layout_marginEnd="3dp"
+                android:textStyle="bold"
+                android:text="@string/inicio_tag"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/drawable_back_textview"
+                android:padding="3dp"
+                android:text="01-01-2019"
+                android:textStyle="bold"
+                android:textColor="@color/blanco" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/blanco"
+                android:layout_marginEnd="3dp"
+                android:textStyle="bold"
+                android:text="@string/fin_tag"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/blanco"
+                android:background="@drawable/drawable_back_textview"
+                android:padding="3dp"
+                android:textStyle="bold"
+                android:text="01-01-2019"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gris_claro2"
+        android:layout_below="@+id/relativeLayout1">
+
+        <LinearLayout
+            android:id="@+id/linearLayout1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/drawable_back_barco"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:src="@drawable/ship"/>
+
+            <TextView
+                android:id="@+id/textViewNombreBarco"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/azul"
+                android:textStyle="bold"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginEnd="10dp"
+                android:text="Far Sentinel"/>
+
+        </LinearLayout>
+
+        <Spinner
+            android:id="@+id/spinnerBarcos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_centerVertical="true"
+            style="@style/spinner_style"
+            android:layout_toEndOf="@+id/linearLayout1"
+             />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/relativeLayout2"
+        android:background="@color/grisMedio">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="11dp"
+            android:padding="10dp"
+            android:background="@drawable/drawable_back_checklist">
+
+            <com.mindorks.placeholderview.ExpandablePlaceHolderView
+                android:id="@+id/recyclerViewChecklist"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone">
+
+
+            </com.mindorks.placeholderview.ExpandablePlaceHolderView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/cardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                app:cardElevation="1dp"
+                app:cardCornerRadius="4dp"
+                app:cardBackgroundColor="@color/blanco">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/textViewTagCumplen"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/azul"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="5dp"
+                            android:text="@string/cumplen_tag"/>
+
+                        <TextView
+                            android:id="@+id/textViewCumplenValor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/drawable_back_textview_verde"
+                            android:textStyle="bold"
+                            android:paddingTop="1dp"
+                            android:paddingBottom="1dp"
+                            android:paddingStart="7dp"
+                            android:paddingEnd="7dp"
+                            android:layout_marginEnd="10dp"
+                            android:textColor="@color/blanco"
+                            android:text="0"/>
+
+                        <TextView
+                            android:id="@+id/textViewTagNoCumplen"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/azul"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="5dp"
+                            android:text="@string/no_cumplen_tag"/>
+
+                        <TextView
+                            android:id="@+id/textViewNoCumplenValor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/drawable_back_textview_rojo"
+                            android:textStyle="bold"
+                            android:textColor="@color/blanco"
+                            android:paddingTop="1dp"
+                            android:paddingBottom="1dp"
+                            android:paddingStart="7dp"
+                            android:paddingEnd="7dp"
+                            android:layout_marginEnd="10dp"
+                            android:text="0"/>
+
+                        <TextView
+                            android:id="@+id/textViewTagTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/azul"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="5dp"
+                            android:text="@string/total_tag"/>
+
+                        <TextView
+                            android:id="@+id/textViewValorTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/drawable_back_textview"
+                            android:textStyle="bold"
+                            android:textColor="@color/blanco"
+                            android:paddingTop="1dp"
+                            android:paddingBottom="1dp"
+                            android:paddingStart="7dp"
+                            android:paddingEnd="7dp"
+                            android:text="0"/>
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <ExpandableListView
+                android:id="@+id/expandableListViewChecklist"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/cardView">
+
+
+            </ExpandableListView>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

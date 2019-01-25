@@ -2,7 +2,6 @@ package com.elektra.typhoon.registro;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -13,12 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.elektra.typhoon.R;
-import com.elektra.typhoon.adapters.AdapterReciclerViewCartera;
-import com.elektra.typhoon.carteraFolios.CarteraFolios;
 import com.elektra.typhoon.constants.Constants;
-import com.elektra.typhoon.objetos.request.CarteraData;
-import com.elektra.typhoon.objetos.request.RequestCartera;
-import com.elektra.typhoon.objetos.response.ResponseCartera;
 import com.elektra.typhoon.objetos.response.ResponseNuevoUsuario;
 import com.elektra.typhoon.objetos.response.ResponseValidaUsuario;
 import com.elektra.typhoon.service.ApiInterface;
@@ -26,7 +20,7 @@ import com.elektra.typhoon.service.ApiInterface;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import utils.Utils;
+import com.elektra.typhoon.utils.Utils;
 
 /**
  * Proyecto: TYPHOON
