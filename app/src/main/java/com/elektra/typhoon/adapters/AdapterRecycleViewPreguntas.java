@@ -40,7 +40,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     private List<Pregunta> listPreguntas;
     private Activity activity;
     private int idRubro;
-    private int idPregunta;
+    //private int idPregunta;
     private TextView textViewCumplen;
     private TextView textViewNoCumplen;
     private AdapterExpandableChecklist adapterExpandableChecklist;
@@ -55,8 +55,9 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         public LinearLayout linearLayout;
         public LinearLayout linearLayoutAddEvidencias;
         public LinearLayout linearLayoutEvidencias;
-        public TextView textViewAddEvidencias;
+        public Button textViewAddEvidencias;
         public ImageView imageViewAddEvidencia;
+        public ImageView imageViewAgregaEvidencia;
         public HorizontalScrollView horizontalScrollView;
         public RadioGroup radioGroup;
 
@@ -65,10 +66,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             linearLayout = (LinearLayout) view.findViewById(R.id.linearLayoutEvidencias);
             linearLayoutAddEvidencias = (LinearLayout) view.findViewById(R.id.linearLayoutAgregarEvidencia);
             linearLayoutEvidencias = (LinearLayout) view.findViewById(R.id.linearLayoutImagenesEvidencia);
-            textViewAddEvidencias = (TextView) view.findViewById(R.id.textViewAgregarEvidencia);
+            textViewAddEvidencias = (Button) view.findViewById(R.id.textViewAgregarEvidencia);
             imageViewAddEvidencia = (ImageView) view.findViewById(R.id.imageViewAddEvidencia);
             horizontalScrollView = (HorizontalScrollView) view.findViewById(R.id.horizontalScrollView);
             radioGroup = (RadioGroup) view.findViewById(R.id.myRadioGroup);
+            imageViewAgregaEvidencia = (ImageView) view.findViewById(R.id.imageViewAgregaEvidencias);
             //view.setOnClickListener(this);
         }
 
@@ -112,7 +114,23 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
                 Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 activity.startActivityForResult(captureIntent, position);//*/
-                idPregunta = position;
+                //idPregunta = position;
+                /*CropImage.activity()
+                        .setGuidelines(CropImageView.Guidelines.ON)
+                        .start(activity);//*/
+            }
+        });
+
+        holder.imageViewAgregaEvidencia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //holder.linearLayout.setVisibility(View.VISIBLE);
+
+                //Utils.openCamera(activity);
+
+                Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                activity.startActivityForResult(captureIntent, position);//*/
+                //idPregunta = position;
                 /*CropImage.activity()
                         .setGuidelines(CropImageView.Guidelines.ON)
                         .start(activity);//*/
@@ -128,7 +146,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
                 Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 activity.startActivityForResult(captureIntent, position);//*/
-                idPregunta = position;
+                //idPregunta = position;
 
                 /*CropImage.activity()
                         .setGuidelines(CropImageView.Guidelines.ON)

@@ -16,13 +16,18 @@
     <string name="folios">Folios</string>
     <string name="enviar">Enviar</string>
     <string name="iniciarSesion">Iniciar sesión</string>
-    <string name="folio_tag">Folio</string>
-    <string name="inicio_tag">Inicio</string>
-    <string name="fin_tag">Fin</string>
+    <string name="folio_tag">Folio:</string>
+    <string name="inicio_tag">Inicio:</string>
+    <string name="fin_tag">Fin:</string>
     <string name="titulo_rubro_tag">Rubro</string>
     <string name="cumplen_tag">Cumplen</string>
     <string name="no_cumplen_tag">No cumplen</string>
     <string name="total_tag">Total</string>
     <string name="aplica_tag">Aplica</string>
     <string name="no_aplica_tag">No aplica</string>
+    <string name="anio_tag">Año</string>
+    <string name="mes_tag">Mes</string>
+    <string name="buscar_folio_hint">Buscar folio</string>
+    <string name="buscar_tag">Buscar</string>
+    <string name="agregar_evidencias_tag">Agregar evidencias</string>
 </resources>

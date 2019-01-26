@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.checklist.ChecklistBarcos;
 import com.elektra.typhoon.objetos.response.FolioRevision;
+import com.elektra.typhoon.utils.Utils;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
     private Context context;
     private static Activity activity;
     //private ArrayList<Folio> folios;
-    private List<FolioRevision> folios;
+    private static List<FolioRevision> folios;
     private static final int header = 0;
     private static final int item = 1;
 
@@ -47,7 +48,11 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
 
         @Override
         public void onClick(View v) {
+            FolioRevision folioRevision = folios.get(getAdapterPosition());
             Intent intent = new Intent(activity, ChecklistBarcos.class);
+            intent.putExtra("folio",folioRevision.getIdRevision());
+            intent.putExtra("fechaInicio",folioRevision.getFechaInicio());
+            intent.putExtra("fechaFin",folioRevision.getFechaFin());
             activity.startActivity(intent);
         }
     }
@@ -89,8 +94,8 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
             //((ItemViewHolder)holder).textViewFolio.setText("Folio:" + folios.get(position).getFolio());
             //((ItemViewHolder)holder).textViewFecha.setText(folios.get(position).getFecha());
             //((ItemViewHolder)holder).textViewDescripcion.setText(folios.get(position).getDescripcion());
-            ((ItemViewHolder)holder).textViewFolio.setText("Folio:" + folios.get(position).getIdRevision());
-            ((ItemViewHolder)holder).textViewFecha.setText(folios.get(position).getFechaInicio());
+            ((ItemViewHolder)holder).textViewFolio.setText("" + folios.get(position).getIdRevision());
+            ((ItemViewHolder)holder).textViewFecha.setText(Utils.getDateMonth(folios.get(position).getFechaInicio()));
             ((ItemViewHolder)holder).textViewDescripcion.setText(folios.get(position).getNombre());
         }else if(holder instanceof HeaderViewHolder){
             //((HeaderViewHolder) holder).headerTitle.setText(folios.get(position).getFecha());

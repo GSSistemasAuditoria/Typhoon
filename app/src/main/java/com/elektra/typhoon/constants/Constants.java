@@ -12,7 +12,8 @@ import android.os.Environment;
 public class Constants {
 
     //url del servicio
-    public static String URL_PUBLIC = "http://10.89.69.112/TyphoonService/TyphoonService.svc/";
+    //public static String URL_PUBLIC = "http://10.89.69.112/TyphoonService/TyphoonService.svc/";
+    public static String URL_PUBLIC = "http://www.auditoriags.com/TyphoonService/TyphoonService.svc/";
 
     //**********************************************************************************************
     public static String DB_NAME = "TyphoonDB";
@@ -22,6 +23,7 @@ public class Constants {
 
     //**********************************************************************************************
     public static String EMAIL_REGEX = "^[_a-z0-9-]+(\\.[_a-z0-9-]+)*@[a-z0-9-]+(\\.[a-z0-9-]+)*(\\.[a-z]{2,4})$";
+    public static String DATE_FORMAT_FULL = "yyyy-MM-dd HH:mm:ss.SSS";
 
     //**********************************************************************************************
     public final static String PATH = Environment.getExternalStorageDirectory().getPath() + "/Typhoon/";

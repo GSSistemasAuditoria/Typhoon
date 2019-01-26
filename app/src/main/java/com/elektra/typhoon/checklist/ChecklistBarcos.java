@@ -38,18 +38,36 @@ public class ChecklistBarcos extends AppCompatActivity{
     private List<Barco> listBarcos;
     private ExpandableListView expandableListView;
     private AdapterExpandableChecklist adapterExpandableChecklist;
+    private int folio;
+    private String fechaInicio;
+    private String fechaFin;
+    private TextView textViewValorTotal;
+    private TextView textViewCumplenValor;
+    private TextView textViewNoCumplenValor;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.checklist_layout);
 
+        folio = getIntent().getIntExtra("folio",0);
+        fechaInicio = getIntent().getStringExtra("fechaInicio");
+        fechaFin = getIntent().getStringExtra("fechaFin");
+
         Spinner spinnerBarco = (Spinner) findViewById(R.id.spinnerBarcos);
         textViewNombreBarco = (TextView) findViewById(R.id.textViewNombreBarco);
         expandableListView = (ExpandableListView) findViewById(R.id.expandableListViewChecklist);
-        TextView textViewValorTotal = findViewById(R.id.textViewValorTotal);
-        TextView textViewCumplenValor = findViewById(R.id.textViewCumplenValor);
-        TextView textViewNoCumplenValor = findViewById(R.id.textViewNoCumplenValor);
+        textViewValorTotal = findViewById(R.id.textViewValorTotal);
+        textViewCumplenValor = findViewById(R.id.textViewCumplenValor);
+        textViewNoCumplenValor = findViewById(R.id.textViewNoCumplenValor);
+
+        TextView textViewFolio = findViewById(R.id.textViewFolio);
+        TextView textViewFechaInicio = findViewById(R.id.textViewFechaInicio);
+        TextView textViewFechaFin = findViewById(R.id.textViewFechaFin);
+
+        textViewFolio.setText("" + folio);
+        textViewFechaInicio.setText(fechaSinHoras(fechaInicio));
+        textViewFechaFin.setText(fechaSinHoras(fechaFin));//*/
 
         listBarcos = new ArrayList<>();
         listBarcos.add(new Barco(1,"Far Sentinel"));
@@ -60,11 +78,20 @@ public class ChecklistBarcos extends AppCompatActivity{
                 .setGuidelines(CropImageView.Guidelines.ON)
                 .start(this);//*/
 
-        List<Rubro> listRubros2 = new ArrayList<>();
-        List<Pregunta> listPreguntas = new ArrayList<>();
-        listPreguntas.add(new Pregunta());
-        listPreguntas.add(new Pregunta());
-        listPreguntas.add(new Pregunta());
+        for(Barco barco:listBarcos){
+            List<Rubro> listRubros2 = new ArrayList<>();
+            listRubros2.add(new Rubro());
+            listRubros2.add(new Rubro());
+            listRubros2.add(new Rubro());
+            listRubros2.add(new Rubro());
+
+            for(Rubro rubro:listRubros2){
+                rubro.setListPreguntas(getPreguntas());
+            }
+            barco.setListRubros(listRubros2);
+        }
+
+        /*List<Rubro> listRubros2 = new ArrayList<>();
         listRubros2.add(new Rubro());
         listRubros2.add(new Rubro());
         listRubros2.add(new Rubro());
@@ -86,7 +113,7 @@ public class ChecklistBarcos extends AppCompatActivity{
 
         adapterExpandableChecklist = new AdapterExpandableChecklist(listRubros2,ChecklistBarcos.this,
                 textViewCumplenValor,textViewNoCumplenValor);
-        expandableListView.setAdapter(adapterExpandableChecklist);
+        expandableListView.setAdapter(adapterExpandableChecklist);//*/
 
         SpinnerBarcosAdapter spinnerBarcosAdapter = new SpinnerBarcosAdapter(ChecklistBarcos.this,R.layout.item_spinner_layout,listBarcos);
         spinnerBarco.setAdapter(spinnerBarcosAdapter);
@@ -95,10 +122,39 @@ public class ChecklistBarcos extends AppCompatActivity{
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if(listBarcos.size() != 0) {
-                    String nombre = listBarcos.get(i).getNombre();
+                    Barco barco = listBarcos.get(i);
+                    String nombre = barco.getNombre();
                     if (nombre != null) {
                         textViewNombreBarco.setText(nombre);
                     }
+
+                    int numeroPreguntas = 0;
+                    for(Rubro rubro:barco.getListRubros()){
+                        if(rubro.getListPreguntas() != null) {
+                            numeroPreguntas += rubro.getListPreguntas().size();
+                        }
+                    }
+
+                    textViewValorTotal.setText(String.valueOf(numeroPreguntas));
+                    textViewNoCumplenValor.setText(String.valueOf(numeroPreguntas));
+
+                    int cumple = 0;
+                    int noCumple = 0;
+                    for(Rubro rubro:listBarcos.get(i).getListRubros()){
+                        for(Pregunta pregunta:rubro.getListPreguntas()){
+                            if(pregunta.isCumple()){
+                                cumple++;
+                            }else{
+                                noCumple++;
+                            }
+                        }
+                    }
+                    textViewCumplenValor.setText(String.valueOf(cumple));
+                    textViewNoCumplenValor.setText(String.valueOf(noCumple));
+
+                    adapterExpandableChecklist = new AdapterExpandableChecklist(barco.getListRubros(),ChecklistBarcos.this,
+                            textViewCumplenValor,textViewNoCumplenValor);
+                    expandableListView.setAdapter(adapterExpandableChecklist);
                 }
             }
 
@@ -107,6 +163,15 @@ public class ChecklistBarcos extends AppCompatActivity{
 
             }
         });
+    }
+
+    private String fechaSinHoras(String fecha){
+        if(fecha.contains(" ")){
+            String[] temp = fecha.split(" ");
+            return temp[0];
+        }else{
+            return fecha;
+        }
     }
 
     public List<Pregunta> getPreguntas(){

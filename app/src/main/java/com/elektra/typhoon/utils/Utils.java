@@ -17,8 +17,10 @@ import com.elektra.typhoon.service.ApiInterface;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 import retrofit2.Retrofit;
@@ -116,5 +118,47 @@ public class Utils {
         //Bitmap scaled = Bitmap.createScaledBitmap(imageBitmap, 512, nh, true);
         Bitmap scaled = Bitmap.createScaledBitmap(imageBitmap, 512, 512, true);
         return scaled;
+    }
+
+    public static String getDateMonth(String fecha){
+        String mes = "";
+        try {
+            String[] temp = fecha.split("-");
+            mes = getMonth(Integer.parseInt(temp[1]));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return mes;
+    }
+
+    private static String getMonth(int mes){
+        switch (mes){
+            case 1:
+                return "Enero";
+            case 2:
+                return "Febrero";
+            case 3:
+                return "Marzo";
+            case 4:
+                return "Abril";
+            case 5:
+                return "Mayo";
+            case 6:
+                return "Junio";
+            case 7:
+                return "Julio";
+            case 8:
+                return "Agosto";
+            case 9:
+                return "Septiembre";
+            case 10:
+                return "Octubre";
+            case 11:
+                return "Noviembre";
+            case 12:
+                return "Diciembre";
+                default:
+                    return "";
+        }
     }
 }

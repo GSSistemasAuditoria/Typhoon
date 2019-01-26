@@ -28,10 +28,10 @@
                 android:text="@string/folio_tag"/>
 
             <TextView
+                android:id="@+id/textViewFolio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/drawable_back_textview"
-                android:textColor="@color/blanco"
+                android:textColor="@color/azulClaro"
                 android:padding="3dp"
                 android:textStyle="bold"
                 android:text="1001"/>
@@ -53,14 +53,14 @@
                 android:text="@string/inicio_tag"/>
 
             <TextView
+                android:id="@+id/textViewFechaInicio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
-                android:background="@drawable/drawable_back_textview"
                 android:padding="3dp"
                 android:text="01-01-2019"
                 android:textStyle="bold"
-                android:textColor="@color/blanco" />
+                android:textColor="@color/azulClaro" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -71,10 +71,10 @@
                 android:text="@string/fin_tag"/>
 
             <TextView
+                android:id="@+id/textViewFechaFin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/blanco"
-                android:background="@drawable/drawable_back_textview"
+                android:textColor="@color/azulClaro"
                 android:padding="3dp"
                 android:textStyle="bold"
                 android:text="01-01-2019"/>
