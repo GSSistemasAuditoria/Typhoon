@@ -12,6 +12,35 @@
         android:background="@color/gris"
         android:orientation="vertical">
 
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbarCartera"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/typhoone_logo_bn" />
+
+                <ImageView
+                    android:id="@+id/imageViewMenuCartera"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@mipmap/ic_menu_options"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"/>
+
+            </RelativeLayout>
+
+        </android.support.v7.widget.Toolbar>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,45 +50,52 @@
             <Spinner
                 android:id="@+id/spinnerAnio"
                 android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
+                android:layout_marginEnd="3dp"
                 style="@style/spinner_style"/>
 
             <Spinner
                 android:id="@+id/spinnerMes"
                 android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
+                android:layout_marginEnd="3dp"
                 style="@style/spinner_style"/>
 
+            <EditText
+                android:id="@+id/editTextBuscar"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/drawable_editext_busqueda"
+                android:hint="@string/buscar_folio_hint"
+                android:ems="10"
+                android:inputType="number"
+                android:padding="5dp"
+                android:textSize="14sp"
+                android:layout_marginEnd="3dp"
+                android:textColor="@color/grisObscuro" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:padding="7dp"
+                android:background="@drawable/drawable_button">
+
+                <Button
+                    android:id="@+id/buttonBuscar"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:textColor="@color/blanco"
+                    android:background="@drawable/ic_search"
+                    android:textAllCaps="false"
+                    />
+
+            </LinearLayout>
+
         </LinearLayout>
-
-        <EditText
-            android:id="@+id/editTextBuscar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:background="@drawable/drawable_editext_busqueda"
-            android:drawableStart="@drawable/ic_search"
-            android:hint="@string/buscar_folio_hint"
-            android:ems="10"
-            android:inputType="number"
-            android:padding="5dp"
-            android:textSize="16sp"
-            android:layout_marginEnd="10dp"
-            android:textColor="@color/grisObscuro" />
-
-        <Button
-            android:id="@+id/buttonBuscar"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:text="@string/buscar_tag"
-            android:textColor="@color/blanco"
-            android:layout_margin="10dp"
-            android:textAllCaps="false"
-            android:background="@drawable/drawable_button"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerViewFolios"

@@ -10,6 +10,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.constants.Constants;
@@ -36,21 +37,26 @@ public class NuevoRegistro extends AppCompatActivity {
     private EditText editTextCorreo;
     private EditText editTextPassword;
     private EditText editTextConfirmaPassword;
+    private LinearLayout linearLayoutContrasena;
+    private LinearLayout linearLayoutConfirmarContrasena;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_registro);
+        //setContentView(R.layout.activity_registro);
+        setContentView(R.layout.registro_layout);
 
         registrar = (Button) findViewById(R.id.buttonRegistrarse);
         Button validar = (Button) findViewById(R.id.buttonValidar);
         editTextCorreo = (EditText) findViewById(R.id.editTextCorreo);
         editTextPassword = (EditText) findViewById(R.id.editTextContrasena);
         editTextConfirmaPassword = (EditText) findViewById(R.id.editTextConfirmarContrasena);
+        linearLayoutContrasena = (LinearLayout) findViewById(R.id.linearLayoutContrasena);
+        linearLayoutConfirmarContrasena = (LinearLayout) findViewById(R.id.linearLayoutConfirmarContrasena);
 
         registrar.setVisibility(View.GONE);
-        editTextPassword.setVisibility(View.GONE);
-        editTextConfirmaPassword.setVisibility(View.GONE);
+        linearLayoutContrasena.setVisibility(View.GONE);
+        linearLayoutConfirmarContrasena.setVisibility(View.GONE);
 
         validar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,8 +90,8 @@ public class NuevoRegistro extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 if(editable.toString().equals("")){
                     registrar.setVisibility(View.GONE);
-                    editTextPassword.setVisibility(View.GONE);
-                    editTextConfirmaPassword.setVisibility(View.GONE);
+                    linearLayoutContrasena.setVisibility(View.GONE);
+                    linearLayoutConfirmarContrasena.setVisibility(View.GONE);
                 }
             }
         });
@@ -113,9 +119,7 @@ public class NuevoRegistro extends AppCompatActivity {
 
     private void validarUsuario(String correo){
 
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Validando usuario");
-        progressDialog.show();
+        final ProgressDialog progressDialog = Utils.typhoonLoader(NuevoRegistro.this,"Validando usuario...");
 
         ApiInterface mApiService = Utils.getInterfaceService();
 
@@ -128,8 +132,8 @@ public class NuevoRegistro extends AppCompatActivity {
                 if(response.body() != null) {
                     if(response.body().getValidaUsuario().getExito()){
                         registrar.setVisibility(View.VISIBLE);
-                        editTextPassword.setVisibility(View.VISIBLE);
-                        editTextConfirmaPassword.setVisibility(View.VISIBLE);
+                        linearLayoutContrasena.setVisibility(View.VISIBLE);
+                        linearLayoutConfirmarContrasena.setVisibility(View.VISIBLE);
                     }else{
                         Utils.message(getApplicationContext(), response.body().getValidaUsuario().getError());
                     }
@@ -148,9 +152,7 @@ public class NuevoRegistro extends AppCompatActivity {
 
     private void registrarUsuario(final Activity activity, String correo, String password){
 
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Registrando usuario");
-        progressDialog.show();
+        final ProgressDialog progressDialog = Utils.typhoonLoader(NuevoRegistro.this,"Registrando usuario...");
 
         ApiInterface mApiService = Utils.getInterfaceService();
 

@@ -4,6 +4,27 @@
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbarCartera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="50dp"
+                android:src="@drawable/typhoone_logo_bn" />
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.Toolbar>
+
     <RelativeLayout
         android:id="@+id/relativeLayout1"
         android:layout_width="match_parent"
@@ -12,6 +33,7 @@
         android:paddingEnd="10dp"
         android:paddingBottom="5dp"
         android:paddingTop="5dp"
+        android:layout_below="@+id/toolbarCartera"
         android:background="@color/azul">
 
         <LinearLayout
@@ -253,6 +275,7 @@
                 android:id="@+id/expandableListViewChecklist"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:groupIndicator="@null"
                 android:layout_below="@+id/cardView">
 
 

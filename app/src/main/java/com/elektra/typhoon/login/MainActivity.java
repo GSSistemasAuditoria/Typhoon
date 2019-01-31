@@ -2,6 +2,7 @@ package com.elektra.typhoon.login;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +15,11 @@ import android.widget.EditText;
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.carteraFolios.CarteraFolios;
 import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.TyphoonDataBase;
+import com.elektra.typhoon.database.UsuarioDBMethods;
+import com.elektra.typhoon.objetos.response.CatalogoBarco;
+import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.registro.NuevoRegistro;
 import com.elektra.typhoon.registro.RestablecerContrasena;
@@ -56,6 +61,20 @@ public class MainActivity extends AppCompatActivity {
         editTextContrasena = (EditText)findViewById(R.id.editTextContrasena);
         entrar = (Button) findViewById(R.id.buttonEntrar);
         registro = (Button)findViewById(R.id.buttonRegistro);
+
+        SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        if (sharedPrefs.contains(Constants.SP_LOGIN_TAG)) {
+            if (sharedPrefs.getBoolean(Constants.SP_LOGIN_TAG, false)) {
+                Intent intent = new Intent(getApplicationContext(), CarteraFolios.class);
+                startActivity(intent);
+                finish();
+            }
+        } else {
+            SharedPreferences.Editor ed;
+            ed = sharedPrefs.edit();
+            ed.putBoolean(Constants.SP_LOGIN_TAG, false);
+            ed.commit();
+        }//*/
 
         entrar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,6 +127,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         TyphoonDataBase typhoonDataBase = new TyphoonDataBase(getApplicationContext());
+
+        BarcoDBMethods barcoDBMethods = new BarcoDBMethods(this);
+        if(barcoDBMethods.readBarcos(null,null).size() == 0) {
+            descargaCatalogos();
+        }
     }
 
     private ApiInterface getInterfaceService() {
@@ -121,9 +145,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void iniciarSesion(final String usuario, String contrasena){
 
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Iniciando sesión");
-        progressDialog.show();
+        final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this,"Iniciando sesión...");
 
         ApiInterface mApiService = this.getInterfaceService();
         Call<ResponseLogin> mService = mApiService.authenticate(usuario, contrasena);
@@ -133,8 +155,18 @@ public class MainActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 if(response.body() != null) {
                     if(response.body().getValidarEmpleado().getExito()){
-                        Intent intent = new Intent(MainActivity.this,CarteraFolios.class);
-                        startActivity(intent);
+                        try {
+                            new UsuarioDBMethods(getApplicationContext()).createUsuario(response.body().getValidarEmpleado().getUsuario());
+                            SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+                            sharedPrefs.edit().putBoolean(Constants.SP_LOGIN_TAG, true).apply();
+                            sharedPrefs.edit().putString(Constants.SP_JWT_TAG, response.body().getValidarEmpleado().getUsuario().getJwt()).apply();
+                            Intent intent = new Intent(MainActivity.this,CarteraFolios.class);
+                            startActivity(intent);
+                            finish();
+                        }catch (Exception e){
+                            Utils.message(getApplicationContext(),"No se pudieron guardar los datos del usuario: " + e.getMessage());
+                            e.printStackTrace();
+                        }
                     }else{
                         Utils.message(getApplicationContext(), response.body().getValidarEmpleado().getError());
                     }
@@ -144,6 +176,48 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onFailure(Call<ResponseLogin> call, Throwable t) {
+                progressDialog.dismiss();
+                Utils.message(MainActivity.this, Constants.MSG_ERR_CONN);
+            }
+        });
+    }
+
+    private void descargaCatalogos(){
+
+        final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this,"Descargando catálogos...");
+
+        ApiInterface mApiService = this.getInterfaceService();
+        Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon();
+        mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
+            @Override
+            public void onResponse(Call<CatalogosTyphoonResponse> call, Response<CatalogosTyphoonResponse> response) {
+                if(response.body() != null) {
+                    if(response.body().getCatalogos().getExito()){
+                        try {
+                            BarcoDBMethods barcoDBMethods = new BarcoDBMethods(getApplicationContext());
+                            if(response.body().getCatalogos().getCatalogosData().getListBarcos() != null){
+                                for(CatalogoBarco catalogoBarco:response.body().getCatalogos().getCatalogosData().getListBarcos()){
+                                    barcoDBMethods.createBarco(catalogoBarco);
+                                }
+                            }
+                            progressDialog.dismiss();
+                            Utils.message(getApplicationContext(),"Catálogos descargados");
+                        }catch (Exception e){
+                            progressDialog.dismiss();
+                            Utils.message(getApplicationContext(),"Error al guardar los catálogos: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }else{
+                        progressDialog.dismiss();
+                        Utils.message(getApplicationContext(), response.body().getCatalogos().getError());
+                    }
+                }else{
+                    progressDialog.dismiss();
+                    Utils.message(getApplicationContext(),"Error al descargar catálogos");
+                }
+            }
+            @Override
+            public void onFailure(Call<CatalogosTyphoonResponse> call, Throwable t) {
                 progressDialog.dismiss();
                 Utils.message(MainActivity.this, Constants.MSG_ERR_CONN);
             }

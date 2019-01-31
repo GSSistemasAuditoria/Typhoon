@@ -1,10 +1,13 @@
 package com.elektra.typhoon.service;
 
 import com.elektra.typhoon.objetos.request.RequestCartera;
+import com.elektra.typhoon.objetos.request.SincronizacionPost;
+import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
 import com.elektra.typhoon.objetos.response.ResponseCartera;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.ResponseNuevoUsuario;
 import com.elektra.typhoon.objetos.response.ResponseValidaUsuario;
+import com.elektra.typhoon.objetos.response.SincronizacionResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -25,4 +28,10 @@ public interface ApiInterface {
 
     @GET("InsertaNuevoUsuario")
     Call<ResponseNuevoUsuario> insertarNuevoUsuario(@Query("correo") String correo,@Query("password") String password);
+
+    @POST("Sincronizar")
+    Call<SincronizacionResponse> sincronizacion(@Body SincronizacionPost sincronizacionPost);
+
+    @GET("GetCatalogosThyphoon")
+    Call<CatalogosTyphoonResponse> catalogosTyphoon();
 }

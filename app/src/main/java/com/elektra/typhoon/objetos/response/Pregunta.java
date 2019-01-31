@@ -16,24 +16,16 @@ import java.util.List;
  */
 public class Pregunta {
 
-    @SerializedName("ID_PREGUNTA")
-    @Expose
-        private int idPregunta;
-    @SerializedName("ID_RUBRO")
-    @Expose
-            private int idRubro;
-    @SerializedName("DESCRIPCION")
-    @Expose
-            private String descripcion;
-    @SerializedName("ESTATUS")
-    @Expose
+    private int idPregunta;
+    private int idRubro;
+    private String descripcion;
     private int estatus;
-
     private List<Evidencia> listEvidencias;
-
     private RadioGroup radioGroup;
-
     private boolean cumple;
+    private int idTipoRespuesta;
+    private int idRevision;
+    private int idChecklist;
 
     public Pregunta(){
 
@@ -100,5 +92,29 @@ public class Pregunta {
 
     public void setCumple(boolean cumple) {
         this.cumple = cumple;
+    }
+
+    public int getIdTipoRespuesta() {
+        return idTipoRespuesta;
+    }
+
+    public void setIdTipoRespuesta(int idTipoRespuesta) {
+        this.idTipoRespuesta = idTipoRespuesta;
+    }
+
+    public int getIdRevision() {
+        return idRevision;
+    }
+
+    public void setIdRevision(int idRevision) {
+        this.idRevision = idRevision;
+    }
+
+    public int getIdChecklist() {
+        return idChecklist;
+    }
+
+    public void setIdChecklist(int idChecklist) {
+        this.idChecklist = idChecklist;
     }
 }

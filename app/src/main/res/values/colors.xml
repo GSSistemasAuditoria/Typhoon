@@ -11,8 +11,10 @@
     <color name="grisObscuro">#808080</color>
     <color name="azul">#2e4562</color>
     <color name="transparente">#00000000</color>
+    <color name="transparente02">#80000000</color>
     <color name="azulClaro">#1ACFE8</color>
     <color name="gris_claro2">#F9FAFF</color>
     <color name="verde_chk">#1AE26A</color>
     <color name="rojo_chk">#EA1859</color>
+    <color name="background_popup">#EAEAEA</color>
 </resources>

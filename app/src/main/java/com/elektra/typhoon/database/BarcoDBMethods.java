@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.objetos.response.Barco;
+import com.elektra.typhoon.objetos.response.CatalogoBarco;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class BarcoDBMethods {
             "ID_BARCO INTEGER PRIMARY KEY, " +
             "NOMBRE TEXT)";
 
-    public void createBarco(Barco barco){
+    public void createBarco(CatalogoBarco barco){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ContentValues values = new ContentValues();
         values.put("ID_BARCO",barco.getIdBarco());
@@ -41,9 +42,9 @@ public class BarcoDBMethods {
         db.close();
     }
 
-    public List<Barco> readBarcos(String condition, String[] args){
+    public List<CatalogoBarco> readBarcos(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
-        List<Barco> listBarco = new ArrayList<>();
+        List<CatalogoBarco> listBarco = new ArrayList<>();
         String query = "SELECT ID_BARCO,NOMBRE FROM " + TP_CAT_BARCO;
         if(condition != null){
             query = query + " " + condition;
@@ -52,7 +53,7 @@ public class BarcoDBMethods {
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
-                    Barco barco = new Barco();
+                    CatalogoBarco barco = new CatalogoBarco();
                     barco.setIdBarco(cursor.getInt(0));
                     barco.setNombre(cursor.getString(1));
                     listBarco.add(barco);

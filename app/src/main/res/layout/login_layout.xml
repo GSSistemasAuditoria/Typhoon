@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/blanco">
+    android:background="@color/gris">
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
@@ -66,7 +66,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:adjustViewBounds="true"
-            android:src="@drawable/user" />
+            android:src="@drawable/usuario" />
 
         <EditText
             android:id="@+id/editTextUsuario"
@@ -75,7 +75,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="5dp"
             android:layout_weight="1"
-            android:background="@color/grisMedio"
+            android:background="@color/blanco"
             android:ems="10"
             android:hint="@string/usuario"
             android:inputType="textPersonName"
@@ -106,7 +106,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:adjustViewBounds="true"
-            android:src="@drawable/pass" />
+            android:src="@drawable/contrasena" />
 
         <EditText
             android:id="@+id/editTextContrasena"
@@ -115,7 +115,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="5dp"
             android:layout_weight="1"
-            android:background="@color/grisMedio"
+            android:background="@color/blanco"
             android:ems="10"
             android:hint="@string/contrasena"
             android:inputType="textPassword"
@@ -153,6 +153,7 @@
         android:text="@string/usuarioExterno"
         android:textAllCaps="false"
         android:textSize="15sp"
+        android:textColor="@color/azul"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

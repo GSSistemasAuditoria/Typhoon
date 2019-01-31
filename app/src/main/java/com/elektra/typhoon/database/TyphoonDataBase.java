@@ -30,7 +30,10 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(BarcoDBMethods.QUERY_CREATE_TABLE_TP_CAT_BARCO);
-        sqLiteDatabase.execSQL(ChecklistDBMethods.QUERY_CREATE_TABLE_TP_TRAN_CHECKLIST);
+        sqLiteDatabase.execSQL(ChecklistDBMethods.QUERY_CREATE_TABLE_TP_CAT_CHEKLIST);
+        sqLiteDatabase.execSQL(ChecklistDBMethods.QUERY_CREATE_TABLE_TP_CAT_CL_PREGUNTA);
+        sqLiteDatabase.execSQL(ChecklistDBMethods.QUERY_CREATE_TABLE_TP_CAT_CL_RUBRO);
+        sqLiteDatabase.execSQL(ChecklistDBMethods.QUERY_CREATE_TABLE_TP_TRAN_CL_RESPUESTA);
         sqLiteDatabase.execSQL(EvidenciasDBMethods.QUERY_CREATE_TABLE_TP_TRAN_CL_EVIDENCIA);
         sqLiteDatabase.execSQL(FoliosDBMethods.QUERY_CREATE_TABLE_TP_TRAN_REVISION);
         sqLiteDatabase.execSQL(UsuarioDBMethods.QUERY_CREATE_TABLE_TP_CAT_USUARIO);

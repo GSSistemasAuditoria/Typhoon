@@ -1,6 +1,7 @@
 package com.elektra.typhoon.utils;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -8,9 +9,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.elektra.typhoon.R;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.service.ApiInterface;
 
@@ -160,5 +167,28 @@ public class Utils {
                 default:
                     return "";
         }
+    }
+
+    /**
+     * Loader para ejecución de tareas
+     * @param context
+     * @param texto
+     * @return
+     */
+    public static ProgressDialog typhoonLoader(Context context,String texto){
+        LayoutInflater li = LayoutInflater.from(context);
+        View layoutDialog = li.inflate(R.layout.typhoon_loader_layout, null);
+
+        ImageView imageViewLoader = layoutDialog.findViewById(R.id.imageViewLoader);
+        Glide.with(context).load(R.raw.loader2).into(imageViewLoader);
+
+        TextView textView = (TextView) layoutDialog.findViewById(R.id.textViewLoader);
+        textView.setText(texto);
+
+        final ProgressDialog progressDialog = new ProgressDialog(context,R.style.ThemeTranslucent);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        progressDialog.setContentView(layoutDialog);
+        return progressDialog;
     }
 }

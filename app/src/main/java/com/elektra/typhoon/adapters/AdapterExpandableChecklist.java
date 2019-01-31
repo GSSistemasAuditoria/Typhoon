@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.elektra.typhoon.R;
@@ -96,9 +97,16 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         }
 
         TextView textViewTituloEncabezado = (TextView) view.findViewById(R.id.textViewTituloHeader);
+        ImageView imageView = (ImageView) view.findViewById(R.id.imageViewIconoGrupo);
         textViewTituloEncabezado.setText("Rubro " + i);
 
         rubroPosition = i;
+
+        if (b) {
+            imageView.setImageResource(R.mipmap.ic_group_close);
+        } else {
+            imageView.setImageResource(R.mipmap.ic_group_open);
+        }
 
         return view;
     }

@@ -43,7 +43,7 @@ public class UsuarioDBMethods {
         values.put("ID_USUARIO",usuario.getIdUsuario());
         values.put("CORREO",usuario.getCorreo());
         values.put("NOMBRE",usuario.getNombre());
-        values.put("PASSWORD",usuario.getPassword());
+        //values.put("PASSWORD",usuario.getPassword());
         if(usuario.getInterno()) {
             values.put("INTERNO", 1);
         }else{

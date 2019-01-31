@@ -10,7 +10,6 @@
         android:gravity="center_horizontal"
         android:textColor="@color/azul"
         android:textStyle="bold"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"/>
+        android:layout_margin="4dp" />
 
 </LinearLayout>

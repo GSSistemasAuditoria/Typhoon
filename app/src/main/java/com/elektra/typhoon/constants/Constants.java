@@ -17,6 +17,7 @@ public class Constants {
 
     //**********************************************************************************************
     public static String DB_NAME = "TyphoonDB";
+    public static String SP_NAME = "TyphoonSP";
 
     //**********************************************************************************************
     public static String MSG_ERR_CONN = "No se pudo conectar al servidor";
@@ -27,4 +28,12 @@ public class Constants {
 
     //**********************************************************************************************
     public final static String PATH = Environment.getExternalStorageDirectory().getPath() + "/Typhoon/";
+
+    //**********************************************************************************************
+    public final static String INTENT_FOLIO_TAG = "folio";
+    public final static String INTENT_FECHA_INICIO_TAG = "fechaInicio";
+    public final static String INTENT_FECHA_FIN_TAG = "fechaFin";
+
+    public final static String SP_LOGIN_TAG = "login";
+    public final static String SP_JWT_TAG = "jwt";
 }

@@ -27,7 +27,8 @@
     <string name="no_aplica_tag">No aplica</string>
     <string name="anio_tag">Año</string>
     <string name="mes_tag">Mes</string>
-    <string name="buscar_folio_hint">Buscar folio</string>
+    <string name="buscar_folio_hint">Folio</string>
     <string name="buscar_tag">Buscar</string>
     <string name="agregar_evidencias_tag">Agregar evidencias</string>
+    <string name="cerrar_sesion_menu">Cerrar sesión</string>
 </resources>

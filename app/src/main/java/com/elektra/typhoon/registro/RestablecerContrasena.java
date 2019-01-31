@@ -16,6 +16,6 @@ public class RestablecerContrasena extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_restablecer_contrasena);
+        setContentView(R.layout.restablecer_contrasena_layout);
     }
 }
