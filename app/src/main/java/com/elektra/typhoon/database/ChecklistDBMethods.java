@@ -12,6 +12,7 @@ import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.PreguntaData;
 import com.elektra.typhoon.objetos.response.ResponseCartera;
 import com.elektra.typhoon.objetos.response.RespuestaData;
+import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
 
 import java.util.ArrayList;
@@ -138,7 +139,7 @@ public class ChecklistDBMethods {
             "NOMBRE TEXT, " +
             "PRIMARY KEY (ID_REVISION,ID_CHECKLIST,ID_RUBRO))";
 
-    public void createRubro(RubroData rubroData){
+    public void createRubro(Rubro rubroData){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ContentValues values = new ContentValues();
         values.put("ID_REVISION",rubroData.getIdRevision());
@@ -216,7 +217,11 @@ public class ChecklistDBMethods {
                     Pregunta pregunta = new Pregunta();
                     pregunta.setIdRevision(cursor.getInt(0));
                     pregunta.setIdChecklist(cursor.getInt(1));
-
+                    pregunta.setIdPregunta(cursor.getInt(2));
+                    pregunta.setIdTipoRespuesta(cursor.getInt(3));
+                    pregunta.setIdRubro(cursor.getInt(4));
+                    pregunta.setEstatus(cursor.getInt(5));
+                    pregunta.setDescripcion(cursor.getString(6));
                     listPreguntas.add(pregunta);
                 }while(cursor.moveToNext());
             }

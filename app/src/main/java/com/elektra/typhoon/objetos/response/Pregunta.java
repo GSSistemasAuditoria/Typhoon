@@ -26,6 +26,7 @@ public class Pregunta {
     private int idTipoRespuesta;
     private int idRevision;
     private int idChecklist;
+    private int idBarco;
 
     public Pregunta(){
 
@@ -116,5 +117,13 @@ public class Pregunta {
 
     public void setIdChecklist(int idChecklist) {
         this.idChecklist = idChecklist;
+    }
+
+    public int getIdBarco() {
+        return idBarco;
+    }
+
+    public void setIdBarco(int idBarco) {
+        this.idBarco = idBarco;
     }
 }

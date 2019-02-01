@@ -40,7 +40,7 @@ public class ChecklistData {
 
     @SerializedName("Rubros")
     @Expose
-    private List<RubroData> listRubros;//*/
+    private List<Rubro> listRubros;//*/
 
     private int idRevision;
 
@@ -92,13 +92,13 @@ public class ChecklistData {
         this.ponderacion = ponderacion;
     }
 
-    public List<RubroData> getListRubros() {
+    public List<Rubro> getListRubros() {
         return listRubros;
     }
 
-    public void setListRubros(List<RubroData> listRubros) {
+    public void setListRubros(List<Rubro> listRubros) {
         this.listRubros = listRubros;
-    }
+    }//*/
 
     public int getIdRevision() {
         return idRevision;

@@ -16,13 +16,13 @@ public class CatalogosData {
 
     @SerializedName("CatalogoBarcos")
     @Expose
-    private List<CatalogoBarco> listBarcos;
+    private List<Barco> listBarcos;
 
-    public List<CatalogoBarco> getListBarcos() {
+    public List<Barco> getListBarcos() {
         return listBarcos;
     }
 
-    public void setListBarcos(List<CatalogoBarco> listBarcos) {
+    public void setListBarcos(List<Barco> listBarcos) {
         this.listBarcos = listBarcos;
     }
 }

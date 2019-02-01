@@ -18,6 +18,7 @@ import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.TyphoonDataBase;
 import com.elektra.typhoon.database.UsuarioDBMethods;
+import com.elektra.typhoon.objetos.response.Barco;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
@@ -127,11 +128,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         TyphoonDataBase typhoonDataBase = new TyphoonDataBase(getApplicationContext());
-
-        BarcoDBMethods barcoDBMethods = new BarcoDBMethods(this);
-        if(barcoDBMethods.readBarcos(null,null).size() == 0) {
-            descargaCatalogos();
-        }
     }
 
     private ApiInterface getInterfaceService() {
@@ -160,9 +156,15 @@ public class MainActivity extends AppCompatActivity {
                             SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
                             sharedPrefs.edit().putBoolean(Constants.SP_LOGIN_TAG, true).apply();
                             sharedPrefs.edit().putString(Constants.SP_JWT_TAG, response.body().getValidarEmpleado().getUsuario().getJwt()).apply();
-                            Intent intent = new Intent(MainActivity.this,CarteraFolios.class);
-                            startActivity(intent);
-                            finish();
+
+                            BarcoDBMethods barcoDBMethods = new BarcoDBMethods(getApplicationContext());
+                            if(barcoDBMethods.readBarcos(null,null).size() == 0) {
+                                descargaCatalogos();
+                            }else {
+                                Intent intent = new Intent(MainActivity.this, CarteraFolios.class);
+                                startActivity(intent);
+                                finish();
+                            }
                         }catch (Exception e){
                             Utils.message(getApplicationContext(),"No se pudieron guardar los datos del usuario: " + e.getMessage());
                             e.printStackTrace();
@@ -196,12 +198,15 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             BarcoDBMethods barcoDBMethods = new BarcoDBMethods(getApplicationContext());
                             if(response.body().getCatalogos().getCatalogosData().getListBarcos() != null){
-                                for(CatalogoBarco catalogoBarco:response.body().getCatalogos().getCatalogosData().getListBarcos()){
+                                for(Barco catalogoBarco:response.body().getCatalogos().getCatalogosData().getListBarcos()){
                                     barcoDBMethods.createBarco(catalogoBarco);
                                 }
                             }
                             progressDialog.dismiss();
                             Utils.message(getApplicationContext(),"Catálogos descargados");
+                            Intent intent = new Intent(MainActivity.this, CarteraFolios.class);
+                            startActivity(intent);
+                            finish();
                         }catch (Exception e){
                             progressDialog.dismiss();
                             Utils.message(getApplicationContext(),"Error al guardar los catálogos: " + e.getMessage());

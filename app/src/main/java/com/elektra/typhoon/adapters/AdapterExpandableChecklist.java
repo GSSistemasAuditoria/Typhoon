@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.Rubro;
+import com.elektra.typhoon.objetos.response.RubroData;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ import java.util.List;
  */
 public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
 
-    private List<Rubro> listRubros;
+    private List<RubroData> listRubros;
     private Activity activity;
     private int rubroPosition;
     private AdapterRecycleViewPreguntas adapterRecycleViewPreguntasTemp;
@@ -37,7 +38,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         return adapterRecycleViewPreguntasTemp;
     }
 
-    public List<Rubro> getListRubros() {
+    public List<RubroData> getListRubros() {
         return listRubros;
     }
 
@@ -45,7 +46,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         return rubroPosition;
     }
 
-    public AdapterExpandableChecklist(List<Rubro> listRubros, Activity activity,TextView textViewCumplen,TextView textViewNoCumplen){
+    public AdapterExpandableChecklist(List<RubroData> listRubros, Activity activity,TextView textViewCumplen,TextView textViewNoCumplen){
         this.listRubros = listRubros;
         this.activity = activity;
         this.textViewCumplen = textViewCumplen;
@@ -89,7 +90,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
 
     @Override
     public View getGroupView(int i, boolean b, View view, ViewGroup viewGroup) {
-        Rubro rubro = listRubros.get(i);
+        RubroData rubro = listRubros.get(i);
         if (view == null) {
             LayoutInflater layoutInflater = (LayoutInflater) activity.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -98,7 +99,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
 
         TextView textViewTituloEncabezado = (TextView) view.findViewById(R.id.textViewTituloHeader);
         ImageView imageView = (ImageView) view.findViewById(R.id.imageViewIconoGrupo);
-        textViewTituloEncabezado.setText("Rubro " + i);
+        textViewTituloEncabezado.setText(rubro.getNombre());
 
         rubroPosition = i;
 
@@ -113,7 +114,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
 
     @Override
     public View getChildView(int i, int i1, boolean b, View view, ViewGroup viewGroup) {
-        Rubro rubro = listRubros.get(i);
+        RubroData rubro = listRubros.get(i);
         if (view == null) {
             LayoutInflater layoutInflater = (LayoutInflater) activity.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -127,7 +128,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         RecyclerView recyclerViewPreguntas = (RecyclerView) view.findViewById(R.id.recyclerViewPreguntas);
 
         //textViewTituloRubro.setText("Rubro " + i);
-        AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntas(),activity,i,
+        AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntasTemp(),activity,i,
                 textViewCumplen,textViewNoCumplen,this);
         recyclerViewPreguntas.setAdapter(adapterRecycleViewPreguntas);
         LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
@@ -145,8 +146,8 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
     public void contarPreguntasCumplen(){
         int cumple = 0;
         int noCumple = 0;
-        for(Rubro rubro:listRubros){
-            for(Pregunta pregunta:rubro.getListPreguntas()){
+        for(RubroData rubro:listRubros){
+            for(Pregunta pregunta:rubro.getListPreguntasTemp()){
                 if(pregunta.isCumple()){
                     cumple++;
                 }else{

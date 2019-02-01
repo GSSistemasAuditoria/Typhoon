@@ -22,7 +22,7 @@ public class Barco {
     @Expose
     private String nombre;
 
-    private List<Rubro> listRubros;
+    //private List<Rubro> listRubros;
 
     public int getIdBarco() {
         return idBarco;
@@ -49,11 +49,11 @@ public class Barco {
         this.nombre = nombre;
     }
 
-    public List<Rubro> getListRubros() {
+    /*public List<Rubro> getListRubros() {
         return listRubros;
     }
 
     public void setListRubros(List<Rubro> listRubros) {
         this.listRubros = listRubros;
-    }
+    }//*/
 }

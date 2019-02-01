@@ -25,11 +25,12 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/textViewPregunta"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:textColor="@color/azul"
-                android:text="Existen sku's (nuevos o de línea) sin exhibir para su venta con espacio disponible en tienda. (Siempre que se tengan más de 2 huecos en toda la tienda)"/>
+                />
 
             <RadioGroup
                 android:id="@+id/myRadioGroup"

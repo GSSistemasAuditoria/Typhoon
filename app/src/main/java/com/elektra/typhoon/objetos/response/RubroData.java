@@ -28,10 +28,12 @@ public class RubroData {
 
     @SerializedName("Preguntas")
     @Expose
-    private List<PreguntaData> listPreguntas;//*/
+    private List<PreguntaData> listPreguntas;
 
     private int idChecklist;
     private int idRevision;
+    private List<Pregunta> listPreguntasTemp;
+    private List<RespuestaData> listRespuestas;
 
     public int getEstatus() {
         return estatus;
@@ -79,5 +81,21 @@ public class RubroData {
 
     public void setIdRevision(int idRevision) {
         this.idRevision = idRevision;
+    }
+
+    public List<Pregunta> getListPreguntasTemp() {
+        return listPreguntasTemp;
+    }
+
+    public void setListPreguntasTemp(List<Pregunta> listPreguntasTemp) {
+        this.listPreguntasTemp = listPreguntasTemp;
+    }
+
+    public List<RespuestaData> getListRespuestas() {
+        return listRespuestas;
+    }
+
+    public void setListRespuestas(List<RespuestaData> listRespuestas) {
+        this.listRespuestas = listRespuestas;
     }
 }

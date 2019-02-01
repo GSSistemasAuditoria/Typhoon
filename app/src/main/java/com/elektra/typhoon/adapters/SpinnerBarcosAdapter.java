@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.objetos.response.Barco;
+import com.elektra.typhoon.objetos.response.CatalogoBarco;
 
 import java.util.List;
 
@@ -20,14 +21,14 @@ import java.util.List;
  * Empresa: Elektra
  * Area: Auditoria Sistemas y Monitoreo de Alarmas
  */
-public class SpinnerBarcosAdapter extends ArrayAdapter<Barco> {
+public class SpinnerBarcosAdapter extends ArrayAdapter<CatalogoBarco> {
 
     private Context context;
-    private List<Barco> listItems;
+    private List<CatalogoBarco> listItems;
     private int idResource;
     private LayoutInflater inflater;
 
-    public SpinnerBarcosAdapter(@NonNull Context context, int resource, List<Barco> barcos) {
+    public SpinnerBarcosAdapter(@NonNull Context context, int resource, List<CatalogoBarco> barcos) {
         super(context, resource, barcos);
         this.context = context;
         this.listItems = barcos;
@@ -51,7 +52,7 @@ public class SpinnerBarcosAdapter extends ArrayAdapter<Barco> {
         view = inflater.inflate(idResource, parent, false);
         TextView textViewItem = (TextView) view.findViewById(R.id.textViewSpinnerItem);
 
-        Barco barco = listItems.get(position);
+        CatalogoBarco barco = listItems.get(position);
         textViewItem.setText(barco.getNombre());
 
         return view;

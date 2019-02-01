@@ -22,6 +22,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.elektra.typhoon.R;
+import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.utils.Utils;
@@ -60,6 +61,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         public ImageView imageViewAgregaEvidencia;
         public HorizontalScrollView horizontalScrollView;
         public RadioGroup radioGroup;
+        public TextView textViewPregunta;
 
         public MyViewHolder(View view) {
             super(view);
@@ -71,6 +73,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             horizontalScrollView = (HorizontalScrollView) view.findViewById(R.id.horizontalScrollView);
             radioGroup = (RadioGroup) view.findViewById(R.id.myRadioGroup);
             imageViewAgregaEvidencia = (ImageView) view.findViewById(R.id.imageViewAgregaEvidencias);
+            textViewPregunta = (TextView) view.findViewById(R.id.textViewPregunta);
             //view.setOnClickListener(this);
         }
 
@@ -105,6 +108,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         holder.linearLayout.setVisibility(View.GONE);
         holder.radioGroup.setEnabled(false);
         pregunta.setRadioGroup(holder.radioGroup);
+        holder.textViewPregunta.setText(pregunta.getDescripcion());
         holder.textViewAddEvidencias.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -201,11 +205,12 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         }
     }
 
-    private ImageView insertEvidencia(Bitmap bitmap,int id,int numPregunta){
+    private ImageView insertEvidencia(Bitmap bitmap,String id,int numPregunta){
         ImageView iv = new ImageView(activity.getApplicationContext());
         iv.setImageBitmap(bitmap);
-        iv.setId(id);
-        iv.setContentDescription("" + numPregunta);
+        //iv.setId(id);
+        //iv.setContentDescription("" + numPregunta);
+        iv.setContentDescription(id + "," + numPregunta);
         iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(87,
                 87);
@@ -215,18 +220,31 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Utils.message(activity,"Abrir imagen" + view.getId());
                 try {
-                    int identificador = view.getId();
-                    int numeroPregunta = Integer.parseInt(view.getContentDescription().toString());
+                    //int identificador = view.getId();
+                    //int numeroPregunta = Integer.parseInt(view.getContentDescription().toString());
+                    String[] temp = view.getContentDescription().toString().split(",");
+                    String identificador = temp[0];
+                    int numeroPregunta = Integer.parseInt(temp[1]);
                     //Bitmap bitmap = listPreguntas.get(numeroPregunta).getListEvidencias().get(identificador - 1).getOriginalBitmap();
                     Bitmap bitmap = null;
-                    for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()){
+                    Pregunta pregunta = listPreguntas.get(numeroPregunta);
+                    Evidencia evidencia = new EvidenciasDBMethods(activity).readEvidencia("WHERE ID_EVIDENCIA = ? AND ID_REVISION = ? " +
+                            "AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?",
+                            new String[]{String.valueOf(identificador),String.valueOf(pregunta.getIdRevision()),
+                                    String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdRubro()),
+                                    String.valueOf(pregunta.getIdPregunta()),String.valueOf(pregunta.getIdBarco())});
+                    /*for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()){
                         if(evidencia.getIdEvidencia() == identificador){
                             bitmap = evidencia.getOriginalBitmap();
                         }
+                    }//*/
+                    if(evidencia != null) {
+                        bitmap = evidencia.getOriginalBitmap();
+                        mostrarDocumento(view, identificador, numeroPregunta, activity, bitmap);
+                    }else{
+                        Utils.message(activity,"No se pudo cargar la imagen");
                     }
-                    mostrarDocumento(view,identificador,numeroPregunta,activity, bitmap);
                 }catch (Exception e){
                     Utils.message(activity,"Error al cargar imagen");
                     e.printStackTrace();
@@ -241,7 +259,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         return listPreguntas.size();
     }
 
-    private void mostrarDocumento(final View viewImagen, final int identificador, final int numeroPregunta, final Activity activity, Bitmap documento){
+    private void mostrarDocumento(final View viewImagen, final String identificador, final int numeroPregunta, final Activity activity, Bitmap documento){
         LayoutInflater inflater = LayoutInflater.from(activity);
         View dialogLayout = inflater.inflate(R.layout.mostrar_documento_layout, null, false);
 
@@ -258,7 +276,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         Button buttonBorrar = (Button) dialogLayout.findViewById(R.id.buttonBorrar);
 
         for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
-            if(evidencia.getIdEvidencia() == identificador) {
+            if(evidencia.getIdEvidencia().equals(identificador)) {
                 if(evidencia.getIdEstatus() == 1){
                     buttonCumple.setBackground(drawableCumpleVerde);
                     buttonNoCumple.setBackground(drawableNoCumpleGris);
@@ -295,7 +313,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             @Override
             public void onClick(View view) {
                 for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
-                    if(evidencia.getIdEvidencia() == identificador) {
+                    if(evidencia.getIdEvidencia().equals(identificador)) {
                         evidencia.setIdEstatus(1);
                     }
                 }
@@ -318,7 +336,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             @Override
             public void onClick(View view) {
                 for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
-                    if(evidencia.getIdEvidencia() == identificador) {
+                    if(evidencia.getIdEvidencia().equals(identificador)) {
                         evidencia.setIdEstatus(0);
                     }
                 }
@@ -341,8 +359,17 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             @Override
             public void onClick(View view) {
                 for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()){
-                    if(evidencia.getIdEvidencia() == (identificador)){
+                    if(evidencia.getIdEvidencia().equals(identificador)){
                         listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
+                        new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
+                                "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?",new String[]{
+                                identificador,
+                                String.valueOf(evidencia.getIdRevision()),
+                                        String.valueOf(evidencia.getIdChecklist()),
+                                String.valueOf(evidencia.getIdRubro()),
+                                        String.valueOf(evidencia.getIdPregunta()),
+                                        String.valueOf(evidencia.getIdBarco())
+                        });
                         break;
                     }
                 }

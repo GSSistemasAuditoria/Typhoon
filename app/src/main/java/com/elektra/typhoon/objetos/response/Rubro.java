@@ -14,50 +14,32 @@ import java.util.List;
  */
 public class Rubro {
 
-    @SerializedName("ID_REVISION")
+    @SerializedName("ESTATUS")
     @Expose
-    private int idRevision;
-
-    @SerializedName("ID_CHECKLIST")
-    @Expose
-    private int idChecklist;
-
-    @SerializedName("ID_BARCO")
-    @Expose
-    private int id_barco;
+    private int estatus;
 
     @SerializedName("ID_RUBRO")
     @Expose
     private int idRubro;
 
-    @SerializedName("CALIFICACION")
+    @SerializedName("NOMBRE")
     @Expose
-    private int calificacion;
+    private String nombre;
 
-    private List<Pregunta> listPreguntas;
+    @SerializedName("Preguntas")
+    @Expose
+    private List<PreguntaData> listPreguntas;
 
-    public int getIdRevision() {
-        return idRevision;
+    private int idChecklist;
+    private int idRevision;
+    private List<RespuestaData> listRespuestas;
+
+    public int getEstatus() {
+        return estatus;
     }
 
-    public void setIdRevision(int idRevision) {
-        this.idRevision = idRevision;
-    }
-
-    public int getIdChecklist() {
-        return idChecklist;
-    }
-
-    public void setIdChecklist(int idChecklist) {
-        this.idChecklist = idChecklist;
-    }
-
-    public int getId_barco() {
-        return id_barco;
-    }
-
-    public void setId_barco(int id_barco) {
-        this.id_barco = id_barco;
+    public void setEstatus(int estatus) {
+        this.estatus = estatus;
     }
 
     public int getIdRubro() {
@@ -68,19 +50,43 @@ public class Rubro {
         this.idRubro = idRubro;
     }
 
-    public int getCalificacion() {
-        return calificacion;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setCalificacion(int calificacion) {
-        this.calificacion = calificacion;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
-    public List<Pregunta> getListPreguntas() {
+    public List<PreguntaData> getListPreguntas() {
         return listPreguntas;
     }
 
-    public void setListPreguntas(List<Pregunta> listPreguntas) {
+    public void setListPreguntas(List<PreguntaData> listPreguntas) {
         this.listPreguntas = listPreguntas;
+    }
+
+    public int getIdChecklist() {
+        return idChecklist;
+    }
+
+    public void setIdChecklist(int idChecklist) {
+        this.idChecklist = idChecklist;
+    }
+
+    public int getIdRevision() {
+        return idRevision;
+    }
+
+    public void setIdRevision(int idRevision) {
+        this.idRevision = idRevision;
+    }
+
+    public List<RespuestaData> getListRespuestas() {
+        return listRespuestas;
+    }
+
+    public void setListRespuestas(List<RespuestaData> listRespuestas) {
+        this.listRespuestas = listRespuestas;
     }
 }

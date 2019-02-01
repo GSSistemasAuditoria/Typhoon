@@ -33,7 +33,7 @@ public class BarcoDBMethods {
             "ID_BARCO INTEGER PRIMARY KEY, " +
             "NOMBRE TEXT)";
 
-    public void createBarco(CatalogoBarco barco){
+    public void createBarco(Barco barco){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ContentValues values = new ContentValues();
         values.put("ID_BARCO",barco.getIdBarco());
@@ -65,7 +65,7 @@ public class BarcoDBMethods {
         return listBarco;
     }
 
-    public Barco readBarco(String condition, String[] args){
+    /*public Barco readBarco(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         Barco barco = null;
         String query = "SELECT ID_BARCO,NOMBRE FROM " + TP_CAT_BARCO;
@@ -85,7 +85,7 @@ public class BarcoDBMethods {
         cursor.close();
         db.close();
         return barco;
-    }
+    }//*/
 
     public void updateBarco(ContentValues values,String condition,String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);

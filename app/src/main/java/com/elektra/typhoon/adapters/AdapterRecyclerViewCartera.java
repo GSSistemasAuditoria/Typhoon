@@ -26,6 +26,7 @@ import com.elektra.typhoon.objetos.response.FolioRevision;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.PreguntaData;
 import com.elektra.typhoon.objetos.response.RespuestaData;
+import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
 import com.elektra.typhoon.objetos.response.SincronizacionResponse;
 import com.elektra.typhoon.service.ApiInterface;
@@ -178,7 +179,7 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
                                     checklistData.setIdRevision(idRevision);
                                     checklistDBMethods.createChecklist(checklistData);
                                     if (checklistData.getListRubros() != null) {
-                                        for (RubroData rubroData : checklistData.getListRubros()) {
+                                        for (Rubro rubroData : checklistData.getListRubros()) {
                                             rubroData.setIdRevision(idRevision);
                                             rubroData.setIdChecklist(checklistData.getIdChecklist());
                                             checklistDBMethods.createRubro(rubroData);
@@ -196,7 +197,7 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
                                     for (RespuestaData respuestaData : response.body().getSincronizacion().getSincronizacionResponseData().getListRespuestas()) {
                                         checklistDBMethods.createRespuesta(respuestaData);
                                     }
-                                }
+                                }//*/
                             }
                             progressDialog.dismiss();
                             Utils.message(context,"Sincronizado correctamente");

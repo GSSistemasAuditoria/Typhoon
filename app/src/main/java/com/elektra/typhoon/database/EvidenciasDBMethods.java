@@ -7,7 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.objetos.response.Evidencia;
+import com.elektra.typhoon.utils.Utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,11 +31,19 @@ public class EvidenciasDBMethods {
     public static final String TP_TRAN_CL_EVIDENCIA = "TP_TRAN_CL_EVIDENCIA";
 
     public static String QUERY_CREATE_TABLE_TP_TRAN_CL_EVIDENCIA = "CREATE TABLE " + TP_TRAN_CL_EVIDENCIA + " (" +
-        "ID_EVIDENCIA INTEGER PRIMARY KEY, " +
-	    "NOMBRE TEXT, " +
-	    "CONTENIDO TEXT, " +
-	    "ID_ESTATUS INTEGER, " +
-	    "ID_ETAPA INTEGER)";
+            "ID_REVISION INTEGER, " +
+            "ID_CHECKLIST INTEGER, " +
+            "ID_RUBRO INTEGER, " +
+            "ID_PREGUNTA INTEGER, " +
+            "ID_EVIDENCIA TEXT, " +
+	        "ID_REGISTRO INTEGER, " +
+            "ID_BARCO INTEGER, " +
+            "NOMBRE TEXT, " +
+	        "CONTENIDO TEXT, " +
+            "CONTENIDO_PREVIEW TEXT, " +
+	        "ID_ESTATUS INTEGER, " +
+	        "ID_ETAPA INTEGER, " +
+            "PRIMARY KEY (ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_EVIDENCIA))";
 
     public void createEvidencia(Evidencia evidencia){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
@@ -41,16 +51,23 @@ public class EvidenciasDBMethods {
         values.put("ID_EVIDENCIA",evidencia.getIdEvidencia());
         values.put("NOMBRE",evidencia.getNombre());
         values.put("CONTENIDO",evidencia.getContenido());
+        values.put("CONTENIDO_PREVIEW",evidencia.getContenidoPreview());
         values.put("ID_ESTATUS",evidencia.getIdEstatus());
         values.put("ID_ETAPA",evidencia.getIdEtapa());
+        values.put("ID_REVISION",evidencia.getIdRevision());
+        values.put("ID_CHECKLIST",evidencia.getIdChecklist());
+        values.put("ID_RUBRO",evidencia.getIdRubro());
+        values.put("ID_PREGUNTA",evidencia.getIdPregunta());
+        values.put("ID_REGISTRO",evidencia.getIdRegistro());
+        values.put("ID_BARCO",evidencia.getIdBarco());
         db.insertWithOnConflict(TP_TRAN_CL_EVIDENCIA, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
 
-    public List<Evidencia> readEvidencias(String condition, String[] args){
+    public List<Evidencia> readEvidencias(String condition, String[] args) throws IOException {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<Evidencia> listEvidencia = new ArrayList<>();
-        String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA FROM " + TP_TRAN_CL_EVIDENCIA;
+        String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO FROM " + TP_TRAN_CL_EVIDENCIA;
         if(condition != null){
             query = query + " " + condition;
         }
@@ -59,11 +76,18 @@ public class EvidenciasDBMethods {
             if(cursor.moveToFirst()){
                 do{
                     Evidencia evidencia = new Evidencia();
-                    evidencia.setIdEvidencia(cursor.getInt(0));
+                    evidencia.setIdEvidencia(cursor.getString(0));
                     evidencia.setNombre(cursor.getString(1));
-                    evidencia.setContenido(cursor.getString(2));
+                    //evidencia.setContenido(cursor.getString(2));
+                    evidencia.setSmallBitmap(Utils.base64ToBitmap(cursor.getString(2)));
                     evidencia.setIdEstatus(cursor.getInt(3));
                     evidencia.setIdEtapa(cursor.getInt(4));
+                    evidencia.setIdRevision(cursor.getInt(5));
+                    evidencia.setIdChecklist(cursor.getInt(6));
+                    evidencia.setIdRubro(cursor.getInt(7));
+                    evidencia.setIdPregunta(cursor.getInt(8));
+                    evidencia.setIdRegistro(cursor.getInt(9));
+                    evidencia.setIdBarco(cursor.getInt(10));
                     listEvidencia.add(evidencia);
                 }while(cursor.moveToNext());
             }
@@ -73,10 +97,10 @@ public class EvidenciasDBMethods {
         return listEvidencia;
     }
 
-    public Evidencia readEvidencia(String condition, String[] args){
+    public Evidencia readEvidencia(String condition, String[] args) throws IOException {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         Evidencia evidencia = null;
-        String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA FROM " + TP_TRAN_CL_EVIDENCIA;
+        String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO FROM " + TP_TRAN_CL_EVIDENCIA;
         if(condition != null){
             query = query + " " + condition;
         }
@@ -85,11 +109,19 @@ public class EvidenciasDBMethods {
             if(cursor.moveToFirst()){
                 do{
                     evidencia = new Evidencia();
-                    evidencia.setIdEvidencia(cursor.getInt(0));
+                    evidencia.setIdEvidencia(cursor.getString(0));
                     evidencia.setNombre(cursor.getString(1));
-                    evidencia.setContenido(cursor.getString(2));
+                    evidencia.setOriginalBitmap(Utils.base64ToBitmap(cursor.getString(2)));
+                    //evidencia.setContenidoPreview(cursor.getString(2));
+                    //evidencia.setSmallBitmap(Utils.base64ToBitmap(cursor.getString(2)));
                     evidencia.setIdEstatus(cursor.getInt(3));
                     evidencia.setIdEtapa(cursor.getInt(4));
+                    evidencia.setIdRevision(cursor.getInt(5));
+                    evidencia.setIdChecklist(cursor.getInt(6));
+                    evidencia.setIdRubro(cursor.getInt(7));
+                    evidencia.setIdPregunta(cursor.getInt(8));
+                    evidencia.setIdRegistro(cursor.getInt(9));
+                    evidencia.setIdBarco(cursor.getInt(10));
                 }while(cursor.moveToNext());
             }
         }
