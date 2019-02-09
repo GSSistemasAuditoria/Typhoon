@@ -16,12 +16,16 @@ import com.elektra.typhoon.R;
 import com.elektra.typhoon.carteraFolios.CarteraFolios;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.BarcoDBMethods;
+import com.elektra.typhoon.database.CatalogosDBMethods;
 import com.elektra.typhoon.database.TyphoonDataBase;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.objetos.response.Barco;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
+import com.elektra.typhoon.objetos.response.EstatusEvidencia;
+import com.elektra.typhoon.objetos.response.EtapaEvidencia;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
+import com.elektra.typhoon.objetos.response.TipoRespuesta;
 import com.elektra.typhoon.registro.NuevoRegistro;
 import com.elektra.typhoon.registro.RestablecerContrasena;
 import com.elektra.typhoon.service.ApiInterface;
@@ -62,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
         editTextContrasena = (EditText)findViewById(R.id.editTextContrasena);
         entrar = (Button) findViewById(R.id.buttonEntrar);
         registro = (Button)findViewById(R.id.buttonRegistro);
+
+        float scale = getResources().getConfiguration().fontScale;
+        System.out.println("Escala del texto: " + scale);
 
         SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
         if (sharedPrefs.contains(Constants.SP_LOGIN_TAG)) {
@@ -159,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
 
                             BarcoDBMethods barcoDBMethods = new BarcoDBMethods(getApplicationContext());
                             if(barcoDBMethods.readBarcos(null,null).size() == 0) {
-                                descargaCatalogos();
+                                Utils.descargaCatalogos(MainActivity.this,1);
                             }else {
                                 Intent intent = new Intent(MainActivity.this, CarteraFolios.class);
                                 startActivity(intent);
@@ -184,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void descargaCatalogos(){
+    /*private void descargaCatalogos(){
 
         final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this,"Descargando catálogos...");
 
@@ -197,9 +204,29 @@ public class MainActivity extends AppCompatActivity {
                     if(response.body().getCatalogos().getExito()){
                         try {
                             BarcoDBMethods barcoDBMethods = new BarcoDBMethods(getApplicationContext());
+                            CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(getApplicationContext());
                             if(response.body().getCatalogos().getCatalogosData().getListBarcos() != null){
+                                barcoDBMethods.deleteBarco();
                                 for(Barco catalogoBarco:response.body().getCatalogos().getCatalogosData().getListBarcos()){
                                     barcoDBMethods.createBarco(catalogoBarco);
+                                }
+                            }
+                            if(response.body().getCatalogos().getCatalogosData().getListEstatusEvidencia() != null){
+                                catalogosDBMethods.deleteEstatusEvidencia();
+                                for(EstatusEvidencia estatusEvidencia:response.body().getCatalogos().getCatalogosData().getListEstatusEvidencia()){
+                                    catalogosDBMethods.createEstatusEvidencia(estatusEvidencia);
+                                }
+                            }
+                            if(response.body().getCatalogos().getCatalogosData().getListEtapasEvidencia() != null){
+                                catalogosDBMethods.deleteEtapaEvidencia();
+                                for(EtapaEvidencia etapaEvidencia:response.body().getCatalogos().getCatalogosData().getListEtapasEvidencia()){
+                                    catalogosDBMethods.createEtapaEvidencia(etapaEvidencia);
+                                }
+                            }
+                            if(response.body().getCatalogos().getCatalogosData().getListTiposRespuesta() != null){
+                                catalogosDBMethods.deleteTipoRespuesta();
+                                for(TipoRespuesta tipoRespuesta:response.body().getCatalogos().getCatalogosData().getListTiposRespuesta()){
+                                    catalogosDBMethods.createTipoRespuesta(tipoRespuesta);
                                 }
                             }
                             progressDialog.dismiss();
@@ -227,5 +254,5 @@ public class MainActivity extends AppCompatActivity {
                 Utils.message(MainActivity.this, Constants.MSG_ERR_CONN);
             }
         });
-    }
+    }//*/
 }

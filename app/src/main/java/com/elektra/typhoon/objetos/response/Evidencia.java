@@ -34,13 +34,17 @@ public class Evidencia {
     @Expose
 	private int idEtapa;
 
+    @SerializedName("ID_REGISTRO")
+    @Expose
+    private int idRegistro;
+
     private Bitmap smallBitmap;
     private Bitmap originalBitmap;
     private int idRevision;
     private int idChecklist;
     private int idRubro;
     private int idPregunta;
-    private int idRegistro;
+    //private int idRegistro;
     private String contenidoPreview;
     private int idBarco;
 

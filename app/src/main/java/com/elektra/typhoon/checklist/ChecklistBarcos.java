@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,6 +41,7 @@ import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
 import com.elektra.typhoon.utils.Utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +74,7 @@ public class ChecklistBarcos extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.checklist_layout);
 
-        folio = getIntent().getIntExtra(Constants.INTENT_FOLIO_TAG,0);
+        folio = getIntent().getIntExtra(Constants.INTENT_FOLIO_TAG, 0);
         fechaInicio = getIntent().getStringExtra(Constants.INTENT_FECHA_INICIO_TAG);
         fechaFin = getIntent().getStringExtra(Constants.INTENT_FECHA_FIN_TAG);
 
@@ -91,15 +93,15 @@ public class ChecklistBarcos extends AppCompatActivity{
         textViewFechaInicio.setText(fechaSinHoras(fechaInicio));
         textViewFechaFin.setText(fechaSinHoras(fechaFin));//*/
 
-        listCatalogoBarcos = new BarcoDBMethods(this).readBarcos(null,null);
+        listCatalogoBarcos = new BarcoDBMethods(this).readBarcos(null, null);
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(this);
         EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(this);
 
-        List<ChecklistData> listChecklist = checklistDBMethods.readChecklists("WHERE ID_REVISION = ?",new String[]{String.valueOf(folio)});
+        List<ChecklistData> listChecklist = checklistDBMethods.readChecklists("WHERE ID_REVISION = ?", new String[]{String.valueOf(folio)});
 
-        if(listChecklist.size() != 0) {
+        if (listChecklist.size() != 0) {
             ChecklistData checklistData = listChecklist.get(0);
-            for(CatalogoBarco catalogoBarco:listCatalogoBarcos) {
+            for (CatalogoBarco catalogoBarco : listCatalogoBarcos) {
                 List<RubroData> listRubros = checklistDBMethods.readRubro("WHERE ID_REVISION = ? AND ID_CHECKLIST = ?",
                         new String[]{String.valueOf(checklistData.getIdRevision()), String.valueOf(checklistData.getIdChecklist())});
                 for (RubroData rubroData : listRubros) {
@@ -110,23 +112,23 @@ public class ChecklistBarcos extends AppCompatActivity{
                     rubroData.setListPreguntasTemp(listPreguntas);
 
                     List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta("WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_BARCO = ?"
-                            ,new String[]{String.valueOf(rubroData.getIdRevision()),String.valueOf(rubroData.getIdChecklist()),
-                                    String.valueOf(rubroData.getIdRubro()),String.valueOf(catalogoBarco.getIdBarco())});
+                            , new String[]{String.valueOf(rubroData.getIdRevision()), String.valueOf(rubroData.getIdChecklist()),
+                                    String.valueOf(rubroData.getIdRubro()), String.valueOf(catalogoBarco.getIdBarco())});
 
                     rubroData.setListRespuestas(listRespuestas);
 
                     try {
                         for (Pregunta pregunta : listPreguntas) {
                             List<Evidencia> listEvidencias = evidenciasDBMethods.readEvidencias("" +
-                                    "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?",
-                                    new String[]{String.valueOf(pregunta.getIdRevision()),String.valueOf(pregunta.getIdChecklist()),
-                                            String.valueOf(pregunta.getIdRubro()),String.valueOf(pregunta.getIdPregunta()),
-                                    String.valueOf(catalogoBarco.getIdBarco())});
+                                            "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?",
+                                    new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
+                                            String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),
+                                            String.valueOf(catalogoBarco.getIdBarco())},false);
                             pregunta.setListEvidencias(listEvidencias);
                             pregunta.setIdBarco(catalogoBarco.getIdBarco());
                         }
-                    }catch (Exception e){
-
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
                 catalogoBarco.setListRubros(listRubros);
@@ -134,96 +136,14 @@ public class ChecklistBarcos extends AppCompatActivity{
             System.out.println();
         }
 
-        /*CropImage.activity()
-                .setGuidelines(CropImageView.Guidelines.ON)
-                .start(this);//*/
-
-        /*listBarcos = new ArrayList<>();
-        listBarcos.add(new Barco(1,"Far Sentinel"));
-        listBarcos.add(new Barco(2,"Barco 1"));
-        listBarcos.add(new Barco(3,"Barco 2"));
-
-        for(Barco barco:listBarcos){
-            List<Rubro> listRubros2 = new ArrayList<>();
-            listRubros2.add(new Rubro());
-            listRubros2.add(new Rubro());
-            listRubros2.add(new Rubro());
-            listRubros2.add(new Rubro());
-
-            for(Rubro rubro:listRubros2){
-                rubro.setListPreguntas(getPreguntas());
-            }
-            barco.setListRubros(listRubros2);
-        }//*/
-
-        /*List<Rubro> listRubros2 = new ArrayList<>();
-        listRubros2.add(new Rubro());
-        listRubros2.add(new Rubro());
-        listRubros2.add(new Rubro());
-        listRubros2.add(new Rubro());
-
-        for(Rubro rubro:listRubros2){
-            rubro.setListPreguntas(getPreguntas());
-        }
-
-        int numeroPreguntas = 0;
-        for(Rubro rubro:listRubros2){
-            if(rubro.getListPreguntas() != null) {
-                numeroPreguntas += rubro.getListPreguntas().size();
-            }
-        }
-
-        textViewValorTotal.setText(String.valueOf(numeroPreguntas));
-        textViewNoCumplenValor.setText(String.valueOf(numeroPreguntas));
-
-        adapterExpandableChecklist = new AdapterExpandableChecklist(listRubros2,ChecklistBarcos.this,
-                textViewCumplenValor,textViewNoCumplenValor);
-        expandableListView.setAdapter(adapterExpandableChecklist);//*/
-
-        SpinnerBarcosAdapter spinnerBarcosAdapter = new SpinnerBarcosAdapter(ChecklistBarcos.this,R.layout.item_spinner_layout,listCatalogoBarcos);
+        SpinnerBarcosAdapter spinnerBarcosAdapter = new SpinnerBarcosAdapter(ChecklistBarcos.this, R.layout.item_spinner_layout, listCatalogoBarcos);
         spinnerBarco.setAdapter(spinnerBarcosAdapter);
 
         spinnerBarco.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-                new CargaDatosChecklistTask(ChecklistBarcos.this,i).execute();
-
-                /*if(listBarcos.size() != 0) {
-                    Barco barco = listBarcos.get(i);
-                    String nombre = barco.getNombre();
-                    if (nombre != null) {
-                        textViewNombreBarco.setText(nombre);
-                    }
-
-                    int numeroPreguntas = 0;
-                    for(Rubro rubro:barco.getListRubros()){
-                        if(rubro.getListPreguntas() != null) {
-                            numeroPreguntas += rubro.getListPreguntas().size();
-                        }
-                    }
-
-                    textViewValorTotal.setText(String.valueOf(numeroPreguntas));
-                    textViewNoCumplenValor.setText(String.valueOf(numeroPreguntas));
-
-                    int cumple = 0;
-                    int noCumple = 0;
-                    for(Rubro rubro:listBarcos.get(i).getListRubros()){
-                        for(Pregunta pregunta:rubro.getListPreguntas()){
-                            if(pregunta.isCumple()){
-                                cumple++;
-                            }else{
-                                noCumple++;
-                            }
-                        }
-                    }
-                    textViewCumplenValor.setText(String.valueOf(cumple));
-                    textViewNoCumplenValor.setText(String.valueOf(noCumple));
-
-                    adapterExpandableChecklist = new AdapterExpandableChecklist(barco.getListRubros(),ChecklistBarcos.this,
-                            textViewCumplenValor,textViewNoCumplenValor);
-                    expandableListView.setAdapter(adapterExpandableChecklist);
-                }//*/
+                new CargaDatosChecklistTask(ChecklistBarcos.this, i).execute();
             }
 
             @Override
@@ -231,6 +151,8 @@ public class ChecklistBarcos extends AppCompatActivity{
 
             }
         });
+
+        //actualizarValores(spinnerBarco.getSelectedItemPosition());
     }
 
     private String fechaSinHoras(String fecha){
@@ -255,67 +177,195 @@ public class ChecklistBarcos extends AppCompatActivity{
 
         if (resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            Bitmap bitmap = extras.getParcelable("data");
-            Bitmap scaledBitmap = Utils.resizeImageBitmap(bitmap);
-            String base64 = null;
-            String base64Preview = null;
-            int rubro = adapterExpandableChecklist.getRubroPosition();
-            int idrubro = adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().getIdRubro();
-            try {
-                base64 = Utils.bitmapToBase64(bitmap);
-                base64Preview = Utils.bitmapToBase64(scaledBitmap);
-                RespuestaData datosRespuesta = null;
-                for(RespuestaData respuestaData:adapterExpandableChecklist.getListRubros().get(idrubro).getListRespuestas()) {
-                    if(respuestaData.getIdPregunta() == adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).getIdPregunta()){
-                        datosRespuesta = respuestaData;
-                        break;
+            if(extras != null) {
+                Bitmap bitmap = extras.getParcelable("data");
+                Bitmap scaledBitmap = Utils.resizeImageBitmap(bitmap);
+                String base64 = null;
+                String base64Preview = null;
+                int rubro = adapterExpandableChecklist.getRubroPosition();
+                int idrubro = adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().getIdRubro();
+                try {
+                    base64 = Utils.bitmapToBase64(bitmap);
+                    base64Preview = Utils.bitmapToBase64(scaledBitmap);
+                    RespuestaData datosRespuesta = null;
+                    for (RespuestaData respuestaData : adapterExpandableChecklist.getListRubros().get(idrubro).getListRespuestas()) {
+                        if (respuestaData.getIdPregunta() == adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).getIdPregunta()) {
+                            datosRespuesta = respuestaData;
+                            break;
+                        }
                     }
-                }
 
-                Evidencia evidencia = new Evidencia();
+                    Evidencia evidencia = new Evidencia();
 
-                if(datosRespuesta != null){
-                    evidencia.setIdRegistro(datosRespuesta.getIdRegistro());
-                    evidencia.setIdPregunta(datosRespuesta.getIdPregunta());
-                    evidencia.setIdRubro(datosRespuesta.getIdRubro());
-                    evidencia.setIdChecklist(datosRespuesta.getIdChecklist());
-                    evidencia.setIdRevision(datosRespuesta.getIdRevision());
-                    //evidencia.setIdEstatus();
-                    evidencia.setIdEtapa(1);
-                    evidencia.setContenido(base64);
-                    evidencia.setContenidoPreview(base64Preview);
-                    evidencia.setNombre(Utils.getDate("yyyyMMddHHmmss") + ".png");
-                    evidencia.setIdEvidencia(UUID.randomUUID().toString());
-                    CatalogoBarco barco = (CatalogoBarco) spinnerBarco.getSelectedItem();
-                    evidencia.setIdBarco(barco.getIdBarco());
+                    if (datosRespuesta != null) {
+                        evidencia.setIdRegistro(datosRespuesta.getIdRegistro());
+                        evidencia.setIdPregunta(datosRespuesta.getIdPregunta());
+                        evidencia.setIdRubro(datosRespuesta.getIdRubro());
+                        evidencia.setIdChecklist(datosRespuesta.getIdChecklist());
+                        evidencia.setIdRevision(datosRespuesta.getIdRevision());
+                        evidencia.setIdEstatus(1);
+                        evidencia.setIdEtapa(1);
+                        evidencia.setContenido(base64);
+                        evidencia.setContenidoPreview(base64Preview);
+                        evidencia.setNombre(Utils.getDate("yyyyMMddHHmmss") + ".png");
+                        evidencia.setIdEvidencia(UUID.randomUUID().toString());
+                        CatalogoBarco barco = (CatalogoBarco) spinnerBarco.getSelectedItem();
+                        evidencia.setIdBarco(barco.getIdBarco());
 
-                    EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(getApplicationContext());
-                    evidenciasDBMethods.createEvidencia(evidencia);
+                        EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(getApplicationContext());
+                        evidenciasDBMethods.createEvidencia(evidencia);
 
-                    evidencia.setContenido(null);
+                        evidencia.setContenido(null);
 
-                    if(adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).getListEvidencias() != null) {
+                        if (adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).getListEvidencias() != null) {
                         /*adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).
                                 getListEvidencias().add(new Evidencia(scaledBitmap,bitmap,getNewIdEvidencia(
                                 adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().
                                         get(requestCode).getListEvidencias())));//*/
-                        evidencia.setSmallBitmap(scaledBitmap);
-                        adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).
-                                getListEvidencias().add(evidencia);
-                        adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
-                    }else{
-                        List<Evidencia> listEvidencias = new ArrayList<>();
-                        //listEvidencias.add(new Evidencia(scaledBitmap,bitmap,1));
-                        evidencia.setSmallBitmap(scaledBitmap);
-                        listEvidencias.add(evidencia);
-                        adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).setListEvidencias(listEvidencias);
-                        adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
+                            evidencia.setSmallBitmap(scaledBitmap);
+                            adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).
+                                    getListEvidencias().add(evidencia);
+                            adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
+                        } else {
+                            List<Evidencia> listEvidencias = new ArrayList<>();
+                            //listEvidencias.add(new Evidencia(scaledBitmap,bitmap,1));
+                            evidencia.setSmallBitmap(scaledBitmap);
+                            listEvidencias.add(evidencia);
+                            adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).setListEvidencias(listEvidencias);
+                            adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
+                        }
+                        System.out.println();
                     }
-                    System.out.println();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Utils.message(getApplicationContext(), "No se pudo guardar la imagen: " + e.getMessage());
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Utils.message(getApplicationContext(),"No se pudo guardar la imagen: " + e.getMessage());
+            }else{
+                Uri uri = data.getData();
+                String path = Utils.getRealPathFromURI(ChecklistBarcos.this,uri);
+                //String path2 = Utils.getPathFromUri(ChecklistBarcos.this,uri);
+                int idrubro = adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().getIdRubro();
+                if(path.contains("pdf")) {
+                    try {
+                        String base64 = Utils.fileToBase64(ChecklistBarcos.this, uri);
+                        RespuestaData datosRespuesta = null;
+                        for (RespuestaData respuestaData : adapterExpandableChecklist.getListRubros().get(idrubro).getListRespuestas()) {
+                            if (respuestaData.getIdPregunta() == adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).getIdPregunta()) {
+                                datosRespuesta = respuestaData;
+                                break;
+                            }
+                        }
+
+                        Evidencia evidencia = new Evidencia();
+
+                        if (datosRespuesta != null) {
+                            evidencia.setIdRegistro(datosRespuesta.getIdRegistro());
+                            evidencia.setIdPregunta(datosRespuesta.getIdPregunta());
+                            evidencia.setIdRubro(datosRespuesta.getIdRubro());
+                            evidencia.setIdChecklist(datosRespuesta.getIdChecklist());
+                            evidencia.setIdRevision(datosRespuesta.getIdRevision());
+                            evidencia.setIdEstatus(1);
+                            evidencia.setIdEtapa(1);
+                            evidencia.setContenido(base64);
+                            //evidencia.setContenidoPreview(base64Preview);
+                            //evidencia.setNombre(Utils.getDate("yyyyMMddHHmmss") + ".png");
+                            evidencia.setNombre(path);
+                            evidencia.setIdEvidencia(UUID.randomUUID().toString());
+                            CatalogoBarco barco = (CatalogoBarco) spinnerBarco.getSelectedItem();
+                            evidencia.setIdBarco(barco.getIdBarco());
+
+                            EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(getApplicationContext());
+                            evidenciasDBMethods.createEvidencia(evidencia);
+
+                            evidencia.setContenido(null);
+
+                            if (adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).getListEvidencias() != null) {
+                        /*adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).
+                                getListEvidencias().add(new Evidencia(scaledBitmap,bitmap,getNewIdEvidencia(
+                                adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().
+                                        get(requestCode).getListEvidencias())));//*/
+                                //evidencia.setSmallBitmap(scaledBitmap);
+                                adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).
+                                        getListEvidencias().add(evidencia);
+                                adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
+                            } else {
+                                List<Evidencia> listEvidencias = new ArrayList<>();
+                                //listEvidencias.add(new Evidencia(scaledBitmap,bitmap,1));
+                                //evidencia.setSmallBitmap(scaledBitmap);
+                                listEvidencias.add(evidencia);
+                                adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).setListEvidencias(listEvidencias);
+                                adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
+                            }
+                            System.out.println();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }else{
+                    Bitmap bitmap = null;
+                    try {
+                        bitmap = Utils.getBitmap(getApplicationContext(),uri);
+                        Bitmap scaledBitmap = Utils.resizeImageBitmap(bitmap);
+                        String base64 = null;
+                        String base64Preview = null;
+                        base64 = Utils.bitmapToBase64(bitmap,path);
+                        base64Preview = Utils.bitmapToBase64(scaledBitmap);
+                        RespuestaData datosRespuesta = null;
+                        for (RespuestaData respuestaData : adapterExpandableChecklist.getListRubros().get(idrubro).getListRespuestas()) {
+                            if (respuestaData.getIdPregunta() == adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).getIdPregunta()) {
+                                datosRespuesta = respuestaData;
+                                break;
+                            }
+                        }
+
+                        Evidencia evidencia = new Evidencia();
+
+                        if (datosRespuesta != null) {
+                            evidencia.setIdRegistro(datosRespuesta.getIdRegistro());
+                            evidencia.setIdPregunta(datosRespuesta.getIdPregunta());
+                            evidencia.setIdRubro(datosRespuesta.getIdRubro());
+                            evidencia.setIdChecklist(datosRespuesta.getIdChecklist());
+                            evidencia.setIdRevision(datosRespuesta.getIdRevision());
+                            //evidencia.setIdEstatus();
+                            evidencia.setIdEtapa(1);
+                            evidencia.setContenido(base64);
+                            evidencia.setContenidoPreview(base64Preview);
+                            evidencia.setNombre(path);
+                            evidencia.setIdEvidencia(UUID.randomUUID().toString());
+                            CatalogoBarco barco = (CatalogoBarco) spinnerBarco.getSelectedItem();
+                            evidencia.setIdBarco(barco.getIdBarco());
+
+                            EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(getApplicationContext());
+                            evidenciasDBMethods.createEvidencia(evidencia);
+
+                            evidencia.setContenido(null);
+
+                            if (adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).getListEvidencias() != null) {
+                        /*adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).
+                                getListEvidencias().add(new Evidencia(scaledBitmap,bitmap,getNewIdEvidencia(
+                                adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().
+                                        get(requestCode).getListEvidencias())));//*/
+                                evidencia.setSmallBitmap(scaledBitmap);
+                                adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).
+                                        getListEvidencias().add(evidencia);
+                                adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
+                            } else {
+                                List<Evidencia> listEvidencias = new ArrayList<>();
+                                //listEvidencias.add(new Evidencia(scaledBitmap,bitmap,1));
+                                evidencia.setSmallBitmap(scaledBitmap);
+                                listEvidencias.add(evidencia);
+                                adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).setListEvidencias(listEvidencias);
+                                adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
+                            }
+                            System.out.println();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Utils.message(getApplicationContext(), "No se pudo guardar la imagen: " + e.getMessage());
+                    }
+                }
+
+                System.out.println();
             }
             //bitmap.recycle();
             //scaledBitmap.recycle();
@@ -352,37 +402,24 @@ public class ChecklistBarcos extends AppCompatActivity{
 
         protected void onPreExecute() {
             statusDialog = Utils.typhoonLoader(context,"Cargando datos...");
-            /*statusDialog.setMessage("cargando datos");
-            statusDialog.setCancelable(false);
-            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP ||
-                    Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1) {
-                statusDialog.setIndeterminate(true);
-                Drawable drawable = new ProgressBar(context).getIndeterminateDrawable().mutate();
-                drawable.setColorFilter(ContextCompat.getColor(context, R.color.verde),
-                        PorterDuff.Mode.SRC_IN);
-                statusDialog.setIndeterminateDrawable(drawable);
-            }else{
-                statusDialog.setIndeterminate(false);
-            }
-            statusDialog.show();//*/
         }
 
         @Override
         protected String doInBackground(String... strings) {
             //publishProgress("Cargando datos");
 
-            try {
+            /*try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
+            }//*/
 
             return "OK";
         }
 
         @Override
         protected void onPostExecute(String result) {
-            statusDialog.dismiss();
+            //statusDialog.dismiss();
             if(!result.equals("OK")){
                 Utils.message(context,result);
             }else{
@@ -405,7 +442,7 @@ public class ChecklistBarcos extends AppCompatActivity{
                             textViewValorTotal.setText(String.valueOf(numeroPreguntas));
                             textViewNoCumplenValor.setText(String.valueOf(numeroPreguntas));
 
-                            int cumple = 0;
+                            /*int cumple = 0;
                             int noCumple = 0;
                             for (RubroData rubro : listCatalogoBarcos.get(position).getListRubros()) {
                                 for (Pregunta pregunta : rubro.getListPreguntasTemp()) {
@@ -417,21 +454,77 @@ public class ChecklistBarcos extends AppCompatActivity{
                                 }
                             }
                             textViewCumplenValor.setText(String.valueOf(cumple));
-                            textViewNoCumplenValor.setText(String.valueOf(noCumple));
+                            textViewNoCumplenValor.setText(String.valueOf(noCumple));//*/
+
+                            actualizarValores(position);
 
                             adapterExpandableChecklist = new AdapterExpandableChecklist(barco.getListRubros(), ChecklistBarcos.this,
                                     textViewCumplenValor, textViewNoCumplenValor);
                             expandableListView.setAdapter(adapterExpandableChecklist);
+                            statusDialog.dismiss();
                         }else{
+                            statusDialog.dismiss();
                             Utils.message(context,"No se ha descargado el checklist");
                         }
                     }else{
+                        statusDialog.dismiss();
                         Utils.message(context,"No se ha descargado el catálogo de barcos");
                     }
                 }catch (Exception e){
+                    statusDialog.dismiss();
                     Utils.message(context,"No se pudieron cargar los datos: " + e.getMessage());
                 }
             }
+        }
+    }
+
+    /*private void actualizarValores(int position){
+        int cumple = 0;
+        int noCumple = 0;
+        if(listCatalogoBarcos.size() != 0) {
+            for (RubroData rubro : listCatalogoBarcos.get(position).getListRubros()) {
+                for (Pregunta pregunta : rubro.getListPreguntasTemp()) {
+                    if (pregunta.isCumple()) {
+                        cumple++;
+                    } else {
+                        noCumple++;
+                    }
+                }
+            }
+            textViewCumplenValor.setText(String.valueOf(cumple));
+            textViewNoCumplenValor.setText(String.valueOf(noCumple));
+        }
+    }//*/
+
+    private void actualizarValores(int position){
+        int cumple = 0;
+        int noCumple = 0;
+        if(listCatalogoBarcos.size() != 0) {
+            for (RubroData rubro : listCatalogoBarcos.get(position).getListRubros()) {
+                for (Pregunta pregunta : rubro.getListPreguntasTemp()) {
+                    //if (pregunta.isCumple()) {
+                    if (aplicaPregunta(pregunta.getListEvidencias())) {
+                        cumple++;
+                    } else {
+                        noCumple++;
+                    }
+                }
+            }
+            textViewCumplenValor.setText(String.valueOf(cumple));
+            textViewNoCumplenValor.setText(String.valueOf(noCumple));
+        }
+    }//*/
+
+    private boolean aplicaPregunta(List<Evidencia> evidencias){
+        if(evidencias.size() != 0) {
+            for (Evidencia evidencia : evidencias) {
+                if ((evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 2) || (evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 1)) {
+                    return false;
+                }
+            }
+            return true;
+        }else{
+            return false;
         }
     }
 }

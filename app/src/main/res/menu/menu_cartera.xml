@@ -8,4 +8,10 @@
         android:icon="@mipmap/ic_cerrar_sesion"
         />
 
+    <item
+        android:id="@+id/actualizarCatalogos"
+        android:title="@string/actualizar_cat_logos_tag"
+        android:icon="@mipmap/ic_descarga_catalogos"
+        />
+
 </menu>

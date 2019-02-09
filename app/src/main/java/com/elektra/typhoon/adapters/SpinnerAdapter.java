@@ -54,6 +54,7 @@ public class SpinnerAdapter extends ArrayAdapter<ItemCatalogo> {
 
         ItemCatalogo itemCatalogo = listItems.get(position);
         textViewItem.setText(itemCatalogo.getDescripcion());
+        //textViewItem.setText(String.valueOf(itemCatalogo.getId()));
 
         return view;
     }

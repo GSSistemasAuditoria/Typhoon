@@ -5,11 +5,13 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -19,6 +21,7 @@ import com.elektra.typhoon.R;
 import com.elektra.typhoon.checklist.ChecklistBarcos;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.ChecklistDBMethods;
+import com.elektra.typhoon.json.SincronizacionJSON;
 import com.elektra.typhoon.objetos.request.SincronizacionData;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.response.ChecklistData;
@@ -30,8 +33,10 @@ import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
 import com.elektra.typhoon.objetos.response.SincronizacionResponse;
 import com.elektra.typhoon.service.ApiInterface;
+import com.elektra.typhoon.service.SincronizacionRequestService;
 import com.elektra.typhoon.utils.Utils;
 
+import java.io.IOException;
 import java.util.List;
 
 import retrofit2.Call;
@@ -124,7 +129,12 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
                 @Override
                 public void onClick(View view) {
                     //Utils.message(context,"Sincronizar");
-                    sincronizacion(folios.get(position).getIdRevision());
+                    try {
+                        sincronizacion(folios.get(position).getIdRevision());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Utils.message(context,"Error al sincronizar: " + e.getMessage());
+                    }
                 }
             });
         }else if(holder instanceof HeaderViewHolder){
@@ -153,16 +163,20 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
         return false;
     }
 
-    private void sincronizacion(final int idRevision){
+    private void sincronizacion(int idRevision) throws IOException {
 
-        final ProgressDialog progressDialog = Utils.typhoonLoader(context,"Sincronizando...");
+        sincronizacionDialog(activity,idRevision);
+
+        /*final ProgressDialog progressDialog = Utils.typhoonLoader(context,"Sincronizando...");
 
         ApiInterface mApiService = Utils.getInterfaceService();
 
-        SincronizacionData sincronizacionData = new SincronizacionData();
-        sincronizacionData.setIdRevision(idRevision);
+        //SincronizacionData sincronizacionData = new SincronizacionData();
+        //sincronizacionData.setIdRevision(idRevision);
 
-        SincronizacionPost sincronizacionPost = new SincronizacionPost();
+        SincronizacionData sincronizacionData = new SincronizacionJSON().generateRequestData(context,idRevision);
+
+                SincronizacionPost sincronizacionPost = new SincronizacionPost();
         sincronizacionPost.setSincronizacionData(sincronizacionData);
 
         Call<SincronizacionResponse> mService = mApiService.sincronizacion(sincronizacionPost);
@@ -197,7 +211,7 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
                                     for (RespuestaData respuestaData : response.body().getSincronizacion().getSincronizacionResponseData().getListRespuestas()) {
                                         checklistDBMethods.createRespuesta(respuestaData);
                                     }
-                                }//*/
+                                }
                             }
                             progressDialog.dismiss();
                             Utils.message(context,"Sincronizado correctamente");
@@ -208,7 +222,7 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
                     }else{
                         progressDialog.dismiss();
                         Utils.message(context, response.body().getSincronizacion().getError());
-                    }//*/
+                    }
                 }else{
                     progressDialog.dismiss();
                     Utils.message(context,"Error al sincronizar");
@@ -219,6 +233,33 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
             public void onFailure(Call<SincronizacionResponse> call, Throwable t) {
                 progressDialog.dismiss();
                 Utils.message(context, Constants.MSG_ERR_CONN);
+            }
+        });//*/
+    }
+
+    private void sincronizacionDialog(final Activity activity,final int idRevision){
+        LayoutInflater li = LayoutInflater.from(activity);
+        LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_sincronizacion_layout, null);
+
+        TextView textViewCancelar = (TextView) layoutDialog.findViewById(R.id.buttonCancelar);
+        TextView textViewSincronizar = (TextView) layoutDialog.findViewById(R.id.buttonSincronizar);
+
+        final AlertDialog dialog = new AlertDialog.Builder(activity)
+                .setView(layoutDialog)
+                .show();
+
+        textViewCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        textViewSincronizar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new SincronizacionRequestService(activity,activity,idRevision).execute();
+                dialog.dismiss();
             }
         });
     }

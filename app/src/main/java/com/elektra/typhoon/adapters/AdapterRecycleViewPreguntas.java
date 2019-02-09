@@ -1,9 +1,11 @@
 package com.elektra.typhoon.adapters;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -13,19 +15,26 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.elektra.typhoon.R;
+import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
+import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.Pregunta;
+import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.utils.Utils;
+import com.github.barteksc.pdfviewer.PDFView;
 
 import java.util.List;
 
@@ -116,8 +125,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
                 //Utils.openCamera(activity);
 
-                Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                activity.startActivityForResult(captureIntent, position);//*/
+                //Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                //activity.startActivityForResult(captureIntent, position);//*/
+
+                mostrarPopupEvidencias(holder.textViewAddEvidencias,position);
+
                 //idPregunta = position;
                 /*CropImage.activity()
                         .setGuidelines(CropImageView.Guidelines.ON)
@@ -132,8 +144,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
                 //Utils.openCamera(activity);
 
-                Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                activity.startActivityForResult(captureIntent, position);//*/
+                //Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                //activity.startActivityForResult(captureIntent, position);//*/
+
+                mostrarPopupEvidencias(holder.imageViewAgregaEvidencia,position);
+
                 //idPregunta = position;
                 /*CropImage.activity()
                         .setGuidelines(CropImageView.Guidelines.ON)
@@ -148,8 +163,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
                 //Utils.openCamera(activity);
 
-                Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                activity.startActivityForResult(captureIntent, position);//*/
+                //Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                //activity.startActivityForResult(captureIntent, position);//*/
+
+                mostrarPopupEvidencias(holder.imageViewAddEvidencia,position);
+
                 //idPregunta = position;
 
                 /*CropImage.activity()
@@ -160,13 +178,19 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
         if(pregunta.getListEvidencias() != null){
             if(pregunta.getListEvidencias().size() != 0) {
+
+                int childs = holder.linearLayoutEvidencias.getChildCount();
+                if(childs > 1){
+                    holder.linearLayoutEvidencias.removeViews(1,childs - 1);
+                }
+
                 holder.radioGroup.check(R.id.opcion2);
                 holder.linearLayout.setVisibility(View.VISIBLE);
                 holder.linearLayoutAddEvidencias.setVisibility(View.GONE);
                 for (Evidencia evidencia : pregunta.getListEvidencias()) {
-                    if (evidencia.getSmallBitmap() != null) {
+                    //if (evidencia.getSmallBitmap() != null) {
                         holder.linearLayoutEvidencias.addView(insertEvidencia(evidencia.getSmallBitmap(), evidencia.getIdEvidencia(), position), 1);
-                    }
+                    //}
                 }
                 holder.horizontalScrollView.postDelayed(new Runnable() {
                     @Override
@@ -205,9 +229,13 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         }
     }
 
-    private ImageView insertEvidencia(Bitmap bitmap,String id,int numPregunta){
+    /*private ImageView insertEvidencia(Bitmap bitmap,String id,int numPregunta){
         ImageView iv = new ImageView(activity.getApplicationContext());
-        iv.setImageBitmap(bitmap);
+        if(bitmap != null) {
+            iv.setImageBitmap(bitmap);
+        }else{
+            iv.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_pdf_image));
+        }
         //iv.setId(id);
         //iv.setContentDescription("" + numPregunta);
         iv.setContentDescription(id + "," + numPregunta);
@@ -234,14 +262,9 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                             new String[]{String.valueOf(identificador),String.valueOf(pregunta.getIdRevision()),
                                     String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdRubro()),
                                     String.valueOf(pregunta.getIdPregunta()),String.valueOf(pregunta.getIdBarco())});
-                    /*for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()){
-                        if(evidencia.getIdEvidencia() == identificador){
-                            bitmap = evidencia.getOriginalBitmap();
-                        }
-                    }//*/
                     if(evidencia != null) {
                         bitmap = evidencia.getOriginalBitmap();
-                        mostrarDocumento(view, identificador, numeroPregunta, activity, bitmap);
+                        mostrarDocumento(view, identificador, numeroPregunta, activity, bitmap,evidencia.getContenido());
                     }else{
                         Utils.message(activity,"No se pudo cargar la imagen");
                     }
@@ -252,6 +275,85 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             }
         });
         return iv;
+    }//*/
+
+    private RelativeLayout insertEvidencia(Bitmap bitmap, String id, int numPregunta){
+
+        LayoutInflater inflater = LayoutInflater.from(activity);
+        RelativeLayout relativeLayout = (RelativeLayout) inflater.inflate(R.layout.image_item_layout, null, false);
+
+        //ImageView iv = new ImageView(activity.getApplicationContext());
+        ImageView iv = (ImageView) relativeLayout.findViewById(R.id.imageViewPreview);
+
+        Pregunta pregunta = listPreguntas.get(numPregunta);
+        Evidencia evidenciaTemp = null;
+        for(Evidencia evidencia:listPreguntas.get(numPregunta).getListEvidencias()){
+            if(evidencia.getIdEvidencia().equals(id)){
+                evidenciaTemp = evidencia;
+                break;
+            }
+        }
+
+        if(evidenciaTemp != null){
+            if(evidenciaTemp.getIdEtapa() != 1 && evidenciaTemp.getIdEstatus() == 1){
+                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
+            }else if(evidenciaTemp.getIdEtapa() == 1 && evidenciaTemp.getIdEstatus() == 2){
+                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
+            }else{
+                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.gris));
+            }
+        }
+
+        if(bitmap != null) {
+            iv.setImageBitmap(bitmap);
+        }else{
+            iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.pdf_icon));
+        }
+        //iv.setId(id);
+        //iv.setContentDescription("" + numPregunta);
+        iv.setContentDescription(id + "," + numPregunta);
+        //iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.gravity = Gravity.CENTER_VERTICAL;
+        lp.setMarginStart(5);
+        //iv.setLayoutParams(lp);
+        relativeLayout.setLayoutParams(lp);
+        iv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    //int identificador = view.getId();
+                    //int numeroPregunta = Integer.parseInt(view.getContentDescription().toString());
+                    String[] temp = view.getContentDescription().toString().split(",");
+                    String identificador = temp[0];
+                    int numeroPregunta = Integer.parseInt(temp[1]);
+                    //Bitmap bitmap = listPreguntas.get(numeroPregunta).getListEvidencias().get(identificador - 1).getOriginalBitmap();
+                    Bitmap bitmap = null;
+                    Pregunta pregunta = listPreguntas.get(numeroPregunta);
+                    Evidencia evidencia = new EvidenciasDBMethods(activity).readEvidencia("WHERE ID_EVIDENCIA = ? AND ID_REVISION = ? " +
+                                    "AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?",
+                            new String[]{String.valueOf(identificador),String.valueOf(pregunta.getIdRevision()),
+                                    String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdRubro()),
+                                    String.valueOf(pregunta.getIdPregunta()),String.valueOf(pregunta.getIdBarco())});
+                    /*for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()){
+                        if(evidencia.getIdEvidencia() == identificador){
+                            bitmap = evidencia.getOriginalBitmap();
+                        }
+                    }//*/
+                    if(evidencia != null) {
+                        bitmap = evidencia.getOriginalBitmap();
+                        mostrarDocumento(view, identificador, numeroPregunta, activity, bitmap,evidencia.getContenido());
+                    }else{
+                        Utils.message(activity,"No se pudo cargar la imagen");
+                    }
+                }catch (Exception e){
+                    Utils.message(activity,"Error al cargar imagen");
+                    e.printStackTrace();
+                }
+            }
+        });
+        return relativeLayout;
     }
 
     @Override
@@ -259,12 +361,23 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         return listPreguntas.size();
     }
 
-    private void mostrarDocumento(final View viewImagen, final String identificador, final int numeroPregunta, final Activity activity, Bitmap documento){
+    private void mostrarDocumento(final View viewImagen, final String identificador, final int numeroPregunta, final Activity activity, Bitmap documento,String documentoPDF){
         LayoutInflater inflater = LayoutInflater.from(activity);
-        View dialogLayout = inflater.inflate(R.layout.mostrar_documento_layout, null, false);
 
-        ImageView imageViewDocumento = (ImageView) dialogLayout.findViewById(R.id.imageViewDocumento);
-        imageViewDocumento.setImageBitmap(documento);
+        View dialogLayout = null;
+        UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(activity);
+        final ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario(null,null);
+
+        if(documento != null) {
+            dialogLayout = inflater.inflate(R.layout.mostrar_documento_layout, null, false);
+            ImageView imageViewDocumento = (ImageView) dialogLayout.findViewById(R.id.imageViewDocumento);
+            imageViewDocumento.setImageBitmap(documento);
+        }else{
+            dialogLayout = inflater.inflate(R.layout.mostrar_documento_pdf_layout, null, false);
+            PDFView pdfViewDocumento = (PDFView) dialogLayout.findViewById(R.id.pdfViewDocumento);
+            byte[] pdf = Utils.base64ToFile(documentoPDF);
+            pdfViewDocumento.fromBytes(pdf).load();
+        }
 
         final Drawable drawableCumpleVerde = activity.getDrawable(R.mipmap.ic_cumple_verde);
         final Drawable drawableNoCumpleRojo = activity.getDrawable(R.mipmap.ic_nocumple_rojo);
@@ -274,25 +387,38 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         final Button buttonCumple = (Button) dialogLayout.findViewById(R.id.buttonCumple);
         final Button buttonNoCumple = (Button) dialogLayout.findViewById(R.id.buttonNoCumple);
         Button buttonBorrar = (Button) dialogLayout.findViewById(R.id.buttonBorrar);
+        final TextView textViewNombreDocumento = (TextView) dialogLayout.findViewById(R.id.textViewNombreDocumento);
+
+        if(usuario != null){
+            if(usuario.getIdrol() == 1){
+                buttonNoCumple.setVisibility(View.GONE);
+            }
+        }
 
         for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
             if(evidencia.getIdEvidencia().equals(identificador)) {
-                if(evidencia.getIdEstatus() == 1){
+                //if(evidencia.getIdEstatus() == 1){
+                if(evidencia.getIdEtapa() != 1 && evidencia.getIdEstatus() == 1){
                     buttonCumple.setBackground(drawableCumpleVerde);
                     buttonNoCumple.setBackground(drawableNoCumpleGris);
-                }else{
+                }else if(evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 2){
                     buttonCumple.setBackground(drawableCumpleGris);
                     buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                }else{
+                    buttonCumple.setBackground(drawableCumpleGris);
+                    buttonNoCumple.setBackground(drawableNoCumpleGris);
                 }
+                textViewNombreDocumento.setText(evidencia.getNombre());
+                break;
             }
         }
 
         final AlertDialog alertDialog = new AlertDialog.Builder(activity)
                 .setView(dialogLayout)
-                .setPositiveButton("Cerrar", null)
+                //.setPositiveButton("Cerrar", null)
                 .create();
 
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+        /*alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
 
             @Override
             public void onShow(DialogInterface dialog) {
@@ -306,107 +432,242 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     }
                 });
             }
-        });
+        });//*/
         alertDialog.show();
 
         buttonCumple.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Evidencia evidenciaTemp = null;
                 for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
                     if(evidencia.getIdEvidencia().equals(identificador)) {
                         evidencia.setIdEstatus(1);
+                        if(usuario.getIdrol() == 1) {
+                            //evidencia.setIdEtapa(getEtapaValidado(evidencia.getIdEtapa()));
+                            evidencia.setIdEtapa(2);
+                        }
+                        try {
+                            ContentValues contentValues = new ContentValues();
+                            //contentValues.put("ID_ETAPA", getEtapaValidado(evidencia.getIdEtapa()));
+                            if(usuario.getIdrol() == 1) {
+                                contentValues.put("ID_ETAPA", 2);
+                            }
+                            contentValues.put("ID_ESTATUS",1);
+                            new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
+                                    "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                                            "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
+                                    new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
+                                            String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
+                                            String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
+                                            String.valueOf(evidencia.getIdBarco())});
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        evidenciaTemp = evidencia;
+                        break;
                     }
                 }
                 Utils.message(activity,"Validada");
                 if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
                     listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
+                    updateRespuesta(evidenciaTemp,2);
                     listPreguntas.get(numeroPregunta).setCumple(true);
                 }else{
                     listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
+                    updateRespuesta(evidenciaTemp,3);
                     listPreguntas.get(numeroPregunta).setCumple(false);
                 }
                 adapterExpandableChecklist.contarPreguntasCumplen();
                 buttonCumple.setBackground(drawableCumpleVerde);
                 buttonNoCumple.setBackground(drawableNoCumpleGris);
                 alertDialog.dismiss();
+                notifyDataSetChanged();
             }
         });
 
         buttonNoCumple.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Evidencia evidenciaTemp = null;
                 for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
                     if(evidencia.getIdEvidencia().equals(identificador)) {
-                        evidencia.setIdEstatus(0);
+                        evidencia.setIdEstatus(2);
+                        evidencia.setIdEtapa(1);
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put("ID_ETAPA",1);
+                        contentValues.put("ID_ESTATUS",2);
+                        try {
+                            new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
+                                    "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                                            "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
+                                    new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
+                                            String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
+                                            String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
+                                            String.valueOf(evidencia.getIdBarco())});
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        evidenciaTemp = evidencia;
+                        break;
                     }
                 }
                 Utils.message(activity,"Rechazada");
                 if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
                     listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
+                    updateRespuesta(evidenciaTemp,2);
                     listPreguntas.get(numeroPregunta).setCumple(true);
                 }else{
                     listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
+                    updateRespuesta(evidenciaTemp,3);
                     listPreguntas.get(numeroPregunta).setCumple(false);
                 }
                 adapterExpandableChecklist.contarPreguntasCumplen();
                 buttonCumple.setBackground(drawableCumpleGris);
                 buttonNoCumple.setBackground(drawableNoCumpleRojo);
                 alertDialog.dismiss();
+                notifyDataSetChanged();
             }
         });
 
         buttonBorrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()){
-                    if(evidencia.getIdEvidencia().equals(identificador)){
-                        listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
-                        new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
-                                "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?",new String[]{
-                                identificador,
-                                String.valueOf(evidencia.getIdRevision()),
-                                        String.valueOf(evidencia.getIdChecklist()),
-                                String.valueOf(evidencia.getIdRubro()),
-                                        String.valueOf(evidencia.getIdPregunta()),
-                                        String.valueOf(evidencia.getIdBarco())
-                        });
-                        break;
-                    }
-                }
-                LinearLayout linearLayoutParent = (LinearLayout) viewImagen.getParent();
-                linearLayoutParent.removeView(viewImagen);
-                Utils.message(activity,"Evidencia borrada");
-                if(listPreguntas.get(numeroPregunta).getListEvidencias() != null) {
-                    if(listPreguntas.get(numeroPregunta).getListEvidencias().size() != 0) {
-                        if (validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())) {
-                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
-                            listPreguntas.get(numeroPregunta).setCumple(true);
-                        } else {
-                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
-                            listPreguntas.get(numeroPregunta).setCumple(false);
+                try {
+                    Evidencia evidenciaTemp = null;
+                    for (Evidencia evidencia : listPreguntas.get(numeroPregunta).getListEvidencias()) {
+                        if (evidencia.getIdEvidencia().equals(identificador)) {
+                            listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
+                            new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
+                                    "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
+                                    identificador,
+                                    String.valueOf(evidencia.getIdRevision()),
+                                    String.valueOf(evidencia.getIdChecklist()),
+                                    String.valueOf(evidencia.getIdRubro()),
+                                    String.valueOf(evidencia.getIdPregunta()),
+                                    String.valueOf(evidencia.getIdBarco())
+                            });
+                            evidenciaTemp = evidencia;
+                            break;
                         }
-                        adapterExpandableChecklist.contarPreguntasCumplen();
-                    }else{
+                    }
+                    LinearLayout linearLayoutParent = (LinearLayout) viewImagen.getParent().getParent();
+                    //linearLayoutParent.removeView(viewImagen.getParent());
+                    Utils.message(activity, "Evidencia borrada");
+                    if (listPreguntas.get(numeroPregunta).getListEvidencias() != null) {
+                        if (listPreguntas.get(numeroPregunta).getListEvidencias().size() != 0) {
+                            if (validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())) {
+                                listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
+                                updateRespuesta(evidenciaTemp,2);
+                                listPreguntas.get(numeroPregunta).setCumple(true);
+                            } else {
+                                listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
+                                updateRespuesta(evidenciaTemp,3);
+                                listPreguntas.get(numeroPregunta).setCumple(false);
+                            }
+                            adapterExpandableChecklist.contarPreguntasCumplen();
+                        } else {
+                            listPreguntas.get(numeroPregunta).getRadioGroup().clearCheck();
+                            updateRespuesta(evidenciaTemp,3);
+                            listPreguntas.get(numeroPregunta).setCumple(false);
+                            adapterExpandableChecklist.contarPreguntasCumplen();
+                        }
+                    } else {
                         listPreguntas.get(numeroPregunta).getRadioGroup().clearCheck();
+                        updateRespuesta(evidenciaTemp,3);
                         listPreguntas.get(numeroPregunta).setCumple(false);
                         adapterExpandableChecklist.contarPreguntasCumplen();
                     }
-                }else{
-                    listPreguntas.get(numeroPregunta).getRadioGroup().clearCheck();
-                    listPreguntas.get(numeroPregunta).setCumple(false);
-                    adapterExpandableChecklist.contarPreguntasCumplen();
+                    notifyDataSetChanged();
+                    alertDialog.dismiss();
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
-                alertDialog.dismiss();
             }
         });
     }
 
+    private void updateRespuesta(Evidencia evidencia,int idRespuesta){
+        if(evidencia != null) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put("ID_RESPUESTA", idRespuesta);
+            new ChecklistDBMethods(activity).updateRespuesta(contentValues, "ID_REVISION = ? AND " +
+                            "ID_CHECKLIST = ? AND ID_PREGUNTA = ? AND ID_RUBRO = ? AND ID_BARCO = ? AND ID_REGISTRO = ?",
+                    new String[]{String.valueOf(evidencia.getIdRevision()), String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdPregunta()),
+                            String.valueOf(evidencia.getIdRubro()), String.valueOf(evidencia.getIdBarco()), String.valueOf(evidencia.getIdRegistro())});
+        }
+    }
+
+    private int getEtapaValidado(int etapa){
+        switch (etapa){
+            case 1:
+                return 2;
+            case 2:
+                return 3;
+            case 3:
+                return 4;
+                default:
+                    return 4;
+        }
+    }
+
     public boolean validaEvidencias(List<Evidencia> listEvidencias){
         for(Evidencia ev:listEvidencias){
-            if(ev.getIdEstatus() == 0){
+            //if(ev.getIdEstatus() == 2){
+            if(ev.getIdEtapa() == 1){
                 return false;
             }
         }
         return true;
+    }
+
+    private void mostrarPopupEvidencias(View anchorView,final int position) {
+        final PopupWindow popup = new PopupWindow(activity);
+        View layout = activity.getLayoutInflater().inflate(R.layout.popup_evidencias_layout, null);
+        popup.setContentView(layout);
+        // Set content width and height
+
+        Button buttonCamera = (Button) layout.findViewById(R.id.buttonCamera);
+        Button buttonFiles = (Button) layout.findViewById(R.id.buttonFiles);
+
+        buttonCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                activity.startActivityForResult(captureIntent, position);//*/
+                popup.dismiss();
+            }
+        });
+
+        buttonFiles.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                seleccionarArchivo(position);
+                popup.dismiss();
+            }
+        });
+
+
+        popup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+        popup.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
+        // Closes the popup window when touch outside of it - when looses focus
+        popup.setOutsideTouchable(true);
+        popup.setFocusable(true);
+        popup.setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.drawable_editext));
+        // Show anchored to button
+        //popup.setBackgroundDrawable(new BitmapDrawable());
+        popup.showAsDropDown(anchorView);
+    }
+
+    public void seleccionarArchivo(int position) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+        /*String[] mimetypes={"image/png","image/jpg","image/jpeg", //imagen
+                "application/pdf"};//*/
+        String[] mimetypes={"application/pdf"}; //pdf*/
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_MIME_TYPES,mimetypes);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        activity.startActivityForResult(intent.createChooser(intent, "Selecciona el archivo"),position);
+        //activity.startActivity(intent.createChooser(intent, "Selecciona el archivo"));
     }
 }

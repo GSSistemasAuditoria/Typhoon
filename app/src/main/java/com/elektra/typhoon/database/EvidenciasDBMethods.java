@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.objetos.response.Evidencia;
@@ -51,7 +52,20 @@ public class EvidenciasDBMethods {
         values.put("ID_EVIDENCIA",evidencia.getIdEvidencia());
         values.put("NOMBRE",evidencia.getNombre());
         values.put("CONTENIDO",evidencia.getContenido());
-        values.put("CONTENIDO_PREVIEW",evidencia.getContenidoPreview());
+        if(evidencia.getContenidoPreview() == null){
+            try {
+                if(!evidencia.getNombre().contains("pdf")) {
+                    Bitmap bitmap = Utils.base64ToBitmap(evidencia.getContenido());
+                    Bitmap bitmapResize = Utils.resizeImageBitmap(bitmap);
+                    String base64 = Utils.bitmapToBase64(bitmapResize);
+                    values.put("CONTENIDO_PREVIEW", base64);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else {
+            values.put("CONTENIDO_PREVIEW", evidencia.getContenidoPreview());
+        }
         values.put("ID_ESTATUS",evidencia.getIdEstatus());
         values.put("ID_ETAPA",evidencia.getIdEtapa());
         values.put("ID_REVISION",evidencia.getIdRevision());
@@ -64,10 +78,10 @@ public class EvidenciasDBMethods {
         db.close();
     }
 
-    public List<Evidencia> readEvidencias(String condition, String[] args) throws IOException {
+    public List<Evidencia> readEvidencias(String condition, String[] args,boolean flagJson) throws IOException {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<Evidencia> listEvidencia = new ArrayList<>();
-        String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO FROM " + TP_TRAN_CL_EVIDENCIA;
+        String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO FROM " + TP_TRAN_CL_EVIDENCIA;
         if(condition != null){
             query = query + " " + condition;
         }
@@ -79,7 +93,13 @@ public class EvidenciasDBMethods {
                     evidencia.setIdEvidencia(cursor.getString(0));
                     evidencia.setNombre(cursor.getString(1));
                     //evidencia.setContenido(cursor.getString(2));
-                    evidencia.setSmallBitmap(Utils.base64ToBitmap(cursor.getString(2)));
+                    if(!flagJson) {
+                        if (!evidencia.getNombre().contains("pdf")) {
+                            evidencia.setSmallBitmap(Utils.base64ToBitmap(cursor.getString(2)));
+                        }
+                    }else{
+                        evidencia.setContenido(cursor.getString(11));
+                    }
                     evidencia.setIdEstatus(cursor.getInt(3));
                     evidencia.setIdEtapa(cursor.getInt(4));
                     evidencia.setIdRevision(cursor.getInt(5));
@@ -111,7 +131,10 @@ public class EvidenciasDBMethods {
                     evidencia = new Evidencia();
                     evidencia.setIdEvidencia(cursor.getString(0));
                     evidencia.setNombre(cursor.getString(1));
-                    evidencia.setOriginalBitmap(Utils.base64ToBitmap(cursor.getString(2)));
+                    if(!evidencia.getNombre().contains("pdf")) {
+                        evidencia.setOriginalBitmap(Utils.base64ToBitmap(cursor.getString(2)));
+                    }
+                    evidencia.setContenido(cursor.getString(2));
                     //evidencia.setContenidoPreview(cursor.getString(2));
                     //evidencia.setSmallBitmap(Utils.base64ToBitmap(cursor.getString(2)));
                     evidencia.setIdEstatus(cursor.getInt(3));

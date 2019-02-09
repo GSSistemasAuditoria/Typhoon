@@ -287,4 +287,10 @@ public class ChecklistDBMethods {
         db.close();
         return listRespuestas;
     }
+
+    public void updateRespuesta(ContentValues values,String condition,String[] args){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        db.update(TP_TRAN_CL_RESPUESTA,values,condition,args);
+        db.close();
+    }
 }

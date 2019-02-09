@@ -37,6 +37,9 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(EvidenciasDBMethods.QUERY_CREATE_TABLE_TP_TRAN_CL_EVIDENCIA);
         sqLiteDatabase.execSQL(FoliosDBMethods.QUERY_CREATE_TABLE_TP_TRAN_REVISION);
         sqLiteDatabase.execSQL(UsuarioDBMethods.QUERY_CREATE_TABLE_TP_CAT_USUARIO);
+        sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_CL_ESTATUS_EVIDENCIA);
+        sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_CL_ETAPA_EVIDENCIA);
+        sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_CL_RESPUESTA);
     }
 
     @Override

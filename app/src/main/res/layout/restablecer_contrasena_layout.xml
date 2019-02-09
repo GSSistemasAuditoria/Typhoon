@@ -113,7 +113,7 @@
     <Button
         android:id="@+id/buttonEnviar"
         android:layout_width="0dp"
-        app:layout_constraintWidth_percent="0.4"
+        app:layout_constraintWidth_percent="0.8"
         android:layout_height="0dp"
         app:layout_constraintHeight_percent="0.07"
         android:background="@drawable/drawable_button"
@@ -121,6 +121,7 @@
         android:textAllCaps="false"
         android:text="@string/enviar"
         android:textColor="@color/blanco"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline5"/>

@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.constraint.ConstraintLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.ContextThemeWrapper;
@@ -14,6 +16,7 @@ import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.view.menu.MenuPopupHelper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.elektra.typhoon.R;
@@ -28,6 +32,7 @@ import com.elektra.typhoon.adapters.AdapterRecyclerViewCartera;
 import com.elektra.typhoon.adapters.SpinnerAdapter;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.FoliosDBMethods;
+import com.elektra.typhoon.json.SincronizacionJSON;
 import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.ItemCatalogo;
 import com.elektra.typhoon.objetos.request.SincronizacionData;
@@ -48,6 +53,7 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -80,6 +86,7 @@ public class CarteraFolios extends AppCompatActivity {
         final Spinner spinnerMes = (Spinner) findViewById(R.id.spinnerMes);
 
         Button buttonBuscar = (Button) findViewById(R.id.buttonBuscar);
+        Button buttonLimpiarFiltro = (Button) findViewById(R.id.buttonLimpiarFiltro);
         final EditText editTextBuscar = (EditText) findViewById(R.id.editTextBuscar);
 
         final ImageView imageViewMenuCartera = (ImageView) findViewById(R.id.imageViewMenuCartera);
@@ -94,20 +101,20 @@ public class CarteraFolios extends AppCompatActivity {
         listItemsAnio.add(new ItemCatalogo(2016,"2016"));
 
         listItemsMes.add(new ItemCatalogo(-1,"Mes"));
-        listItemsMes.add(new ItemCatalogo(1,"Enero"));
-        listItemsMes.add(new ItemCatalogo(2,"Febrero"));
-        listItemsMes.add(new ItemCatalogo(3,"Marzo"));
-        listItemsMes.add(new ItemCatalogo(4,"Abril"));
-        listItemsMes.add(new ItemCatalogo(5,"Mayo"));
-        listItemsMes.add(new ItemCatalogo(6,"Junio"));
-        listItemsMes.add(new ItemCatalogo(7,"Julio"));
-        listItemsMes.add(new ItemCatalogo(8,"Agosto"));
-        listItemsMes.add(new ItemCatalogo(9,"Septiembre"));
-        listItemsMes.add(new ItemCatalogo(10,"Octubre"));
-        listItemsMes.add(new ItemCatalogo(11,"Noviembre"));
-        listItemsMes.add(new ItemCatalogo(12,"Diciembre"));
+        listItemsMes.add(new ItemCatalogo(1,"1"));
+        listItemsMes.add(new ItemCatalogo(2,"2"));
+        listItemsMes.add(new ItemCatalogo(3,"3"));
+        listItemsMes.add(new ItemCatalogo(4,"4"));
+        listItemsMes.add(new ItemCatalogo(5,"5"));
+        listItemsMes.add(new ItemCatalogo(6,"6"));
+        listItemsMes.add(new ItemCatalogo(7,"7"));
+        listItemsMes.add(new ItemCatalogo(8,"8"));
+        listItemsMes.add(new ItemCatalogo(9,"9"));
+        listItemsMes.add(new ItemCatalogo(10,"10"));
+        listItemsMes.add(new ItemCatalogo(11,"11"));
+        listItemsMes.add(new ItemCatalogo(12,"12"));
 
-        SpinnerAdapter spinnerAdapterAnio = new SpinnerAdapter(CarteraFolios.this,R.layout.item_spinner_layout,listItemsAnio);
+        final SpinnerAdapter spinnerAdapterAnio = new SpinnerAdapter(CarteraFolios.this,R.layout.item_spinner_layout,listItemsAnio);
         spinnerAnio.setAdapter(spinnerAdapterAnio);
 
         SpinnerAdapter spinnerAdapterMes = new SpinnerAdapter(CarteraFolios.this,R.layout.item_spinner_layout,listItemsMes);
@@ -142,6 +149,22 @@ public class CarteraFolios extends AppCompatActivity {
             }
         });
 
+        buttonLimpiarFiltro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                List<FolioRevision> listFolios = new FoliosDBMethods(getApplicationContext()).readFolios(null,null);
+                if(listFolios.size() == 0) {
+                    obtenerFolios(-1, -1, -1);
+                }else{
+                    adapterRecyclerViewCartera = new AdapterRecyclerViewCartera(CarteraFolios.this,CarteraFolios.this,listFolios);
+                    recyclerView.setAdapter(adapterRecyclerViewCartera);
+                }
+                editTextBuscar.setText("");
+                spinnerAnio.setSelection(0);
+                spinnerMes.setSelection(0);
+            }
+        });
+
         List<FolioRevision> listFolios = new FoliosDBMethods(getApplicationContext()).readFolios(null,null);
         if(listFolios.size() == 0) {
             obtenerFolios(-1, -1, -1);
@@ -171,6 +194,8 @@ public class CarteraFolios extends AppCompatActivity {
                             Intent intent = new Intent(CarteraFolios.this, MainActivity.class);
                             startActivity(intent);
                             finish();
+                        }else if(item.getItemId() == R.id.actualizarCatalogos){
+                            Utils.descargaCatalogos(CarteraFolios.this,2);
                         }
                         return true;
                     }
@@ -183,7 +208,7 @@ public class CarteraFolios extends AppCompatActivity {
             }
         });
 
-        //sincronizacion(2);
+        //sincronizacionDialog();
     }
 
     @Override

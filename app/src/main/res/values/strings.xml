@@ -12,7 +12,7 @@
     <string name="bienvenido">Bienvenido</string>
     <string name="confirmarcontrasena">Confirmar contraseña</string>
     <string name="usuarioExterno"><u>¿Eres usuario externo?</u></string>
-    <string name="restablecerContrasena">Restablecer contraseña</string>
+    <string name="restablecerContrasena">Recuperar contraseña</string>
     <string name="folios">Folios</string>
     <string name="enviar">Enviar</string>
     <string name="iniciarSesion">Iniciar sesión</string>
@@ -31,4 +31,9 @@
     <string name="buscar_tag">Buscar</string>
     <string name="agregar_evidencias_tag">Agregar evidencias</string>
     <string name="cerrar_sesion_menu">Cerrar sesión</string>
+    <string name="usuario_externo_tag">Usuario externo</string>
+    <string name="actualizar_cat_logos_tag">Actualizar catálogos</string>
+    <string name="sincronizar_tag">¿Desea sincronizar este checklist?</string>
+    <string name="cancelar_tag">Cancelar</string>
+    <string name="sincronizar_button_tag">Sincronizar</string>
 </resources>

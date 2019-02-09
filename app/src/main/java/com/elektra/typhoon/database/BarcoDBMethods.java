@@ -87,15 +87,9 @@ public class BarcoDBMethods {
         return barco;
     }//*/
 
-    public void updateBarco(ContentValues values,String condition,String[] args){
+    public void deleteBarco(){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
-        db.update(TP_CAT_BARCO,values,condition,args);
-        db.close();
-    }
-
-    public void deleteBarco(String condition,String[] args){
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
-        db.delete(TP_CAT_BARCO, condition,args);
+        db.execSQL("delete from "+ TP_CAT_BARCO);
         db.close();
     }
 

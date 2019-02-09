@@ -50,7 +50,7 @@
             <Spinner
                 android:id="@+id/spinnerAnio"
                 android:layout_width="0dp"
-                android:layout_weight="2"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="3dp"
                 style="@style/spinner_style"/>
@@ -58,7 +58,7 @@
             <Spinner
                 android:id="@+id/spinnerMes"
                 android:layout_width="0dp"
-                android:layout_weight="2"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="3dp"
                 style="@style/spinner_style"/>
@@ -82,6 +82,7 @@
                 android:layout_height="match_parent"
                 android:orientation="horizontal"
                 android:padding="7dp"
+                android:layout_marginEnd="3dp"
                 android:background="@drawable/drawable_button">
 
                 <Button
@@ -90,6 +91,24 @@
                     android:layout_height="20dp"
                     android:textColor="@color/blanco"
                     android:background="@drawable/ic_search"
+                    android:textAllCaps="false"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:padding="7dp"
+                android:background="@drawable/drawable_button_azul">
+
+                <Button
+                    android:id="@+id/buttonLimpiarFiltro"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:textColor="@color/blanco"
+                    android:background="@drawable/ic_clear"
                     android:textAllCaps="false"
                     />
 

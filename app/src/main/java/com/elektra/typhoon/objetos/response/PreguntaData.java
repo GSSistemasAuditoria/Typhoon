@@ -36,6 +36,10 @@ public class PreguntaData {
     @Expose
     private int idTipoRespuesta;
 
+    @SerializedName("Evidencias")
+    @Expose
+    private List<Evidencia> listEvidencias;
+
     private int idRevision;
     private int idChecklist;
 
@@ -93,5 +97,13 @@ public class PreguntaData {
 
     public void setIdChecklist(int idChecklist) {
         this.idChecklist = idChecklist;
+    }
+
+    public List<Evidencia> getListEvidencias() {
+        return listEvidencias;
+    }
+
+    public void setListEvidencias(List<Evidencia> listEvidencias) {
+        this.listEvidencias = listEvidencias;
     }
 }
