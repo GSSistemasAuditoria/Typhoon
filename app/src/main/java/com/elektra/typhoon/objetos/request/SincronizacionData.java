@@ -24,6 +24,10 @@ public class SincronizacionData {
     @Expose
     private int estatus;//*/
 
+    @SerializedName("ES_MOVIL")
+    @Expose
+    private boolean esMovil;
+
     @SerializedName("REVISION_FCH_MOD")
     @Expose
     private String revisionFechaMod;
@@ -74,5 +78,13 @@ public class SincronizacionData {
 
     public void setRevisionFechaMod(String revisionFechaMod) {
         this.revisionFechaMod = revisionFechaMod;
+    }
+
+    public boolean isEsMovil() {
+        return esMovil;
+    }
+
+    public void setEsMovil(boolean esMovil) {
+        this.esMovil = esMovil;
     }
 }

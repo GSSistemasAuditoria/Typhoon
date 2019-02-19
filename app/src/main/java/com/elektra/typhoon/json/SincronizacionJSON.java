@@ -1,11 +1,14 @@
 package com.elektra.typhoon.json;
 
+import android.app.Activity;
 import android.content.Context;
 
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.FoliosDBMethods;
+import com.elektra.typhoon.database.UsuarioDBMethods;
+import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.objetos.Folio;
 import com.elektra.typhoon.objetos.request.EvidenciaData;
 import com.elektra.typhoon.objetos.request.SincronizacionData;
@@ -15,6 +18,7 @@ import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.FolioRevision;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.PreguntaData;
+import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
@@ -33,10 +37,12 @@ import java.util.List;
  */
 public class SincronizacionJSON {
 
-    public SincronizacionData generateRequestData(Context context,int folio) throws IOException {
+    public SincronizacionData generateRequestData(Activity activity, Context context, int folio) throws IOException {
         SincronizacionData sincronizacionData = new SincronizacionData();
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(context);
         EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(context);
+        UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(context);
+        ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario(null,null);
         FolioRevision folioRevision = new FoliosDBMethods(context).readFolio("WHERE ID_REVISION = ?",new String[]{String.valueOf(folio)});
         List<ChecklistData> listChecklist = checklistDBMethods.readChecklists("WHERE ID_REVISION = ?", new String[]{String.valueOf(folio)});
 
@@ -65,10 +71,26 @@ public class SincronizacionJSON {
                     preguntaData.setIdPregunta(pregunta.getIdPregunta());
                     preguntaData.setIdRubro(pregunta.getIdRubro());
                     preguntaData.setIdTipoRespuesta(pregunta.getIdTipoRespuesta());
-                    List<Evidencia> listEvidencias = evidenciasDBMethods.readEvidencias("" +
-                                    "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ?",
+                    //String idRol = "2";
+                    List<Evidencia> listEvidencias = null;
+                    if(usuario.getIdrol() == 1){
+                        //idRol = "2";
+                        listEvidencias = evidenciasDBMethods.readEvidencias("" +
+                                        "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_ETAPA = 2",
+                                new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
+                                        String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta())},true);
+                    }if(usuario.getIdrol() == 2){
+                        //idRol = "3";
+                        listEvidencias = evidenciasDBMethods.readEvidencias("" +
+                                        "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_ETAPA != 2",
+                                new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
+                                        String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta())},true);
+                    }
+                    /*listEvidencias = evidenciasDBMethods.readEvidencias("" +
+                                    "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_ETAPA = ?" +
+                                    " AND ID_ESTATUS != 2",
                             new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
-                                    String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta())},true);
+                                    String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),idRol},true);//*/
                     preguntaData.setListEvidencias(listEvidencias);
                     listPreguntasPost.add(preguntaData);
                 }
@@ -80,6 +102,7 @@ public class SincronizacionJSON {
 
             sincronizacionData.setIdRevision(folio);
             sincronizacionData.setEstatus(folioRevision.getEstatus());
+            sincronizacionData.setEsMovil(true);
             List<ChecklistData> listChecklists = new ArrayList<>();
             listChecklists.add(checklistData);
             sincronizacionData.setListChecklist(listChecklists);

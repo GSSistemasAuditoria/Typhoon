@@ -3,15 +3,22 @@ package com.elektra.typhoon.service;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 
+import com.elektra.typhoon.checklist.ChecklistBarcos;
+import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
+import com.elektra.typhoon.database.FoliosDBMethods;
+import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.json.SincronizacionJSON;
+import com.elektra.typhoon.objetos.Folio;
 import com.elektra.typhoon.objetos.request.SincronizacionData;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.response.ChecklistData;
 import com.elektra.typhoon.objetos.response.Evidencia;
+import com.elektra.typhoon.objetos.response.FolioRevision;
 import com.elektra.typhoon.objetos.response.PreguntaData;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.Rubro;
@@ -57,7 +64,8 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
 
         SincronizacionData sincronizacionData = null;
         try {
-            sincronizacionData = new SincronizacionJSON().generateRequestData(context,idRevision);
+            FolioRevision folio = new FoliosDBMethods(context).readFolio("WHERE ID_REVISION = ?",new String[]{String.valueOf(idRevision)});
+            sincronizacionData = new SincronizacionJSON().generateRequestData(activity,context,idRevision);
             SincronizacionPost sincronizacionPost = new SincronizacionPost();
             sincronizacionPost.setSincronizacionData(sincronizacionData);
 
@@ -106,6 +114,11 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                             }
                         }
                         progressDialog.dismiss();
+                        Intent intent = new Intent(activity, ChecklistBarcos.class);
+                        intent.putExtra(Constants.INTENT_FOLIO_TAG,folio.getIdRevision());
+                        intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG,folio.getFechaInicio());
+                        intent.putExtra(Constants.INTENT_FECHA_FIN_TAG,folio.getFechaFin());
+                        activity.startActivity(intent);
                         return "Sincronizado correctamente";
                     }catch (Exception e){
                         progressDialog.dismiss();
@@ -119,7 +132,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 progressDialog.dismiss();
                 return "Error al sincronizar";
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return "Error al sincronizar: " + e.getMessage();
         }

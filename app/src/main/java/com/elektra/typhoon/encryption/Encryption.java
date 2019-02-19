@@ -2,6 +2,8 @@ package com.elektra.typhoon.encryption;
 
 import android.util.Base64;
 
+import com.elektra.typhoon.utils.Utils;
+
 import java.security.Key;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -36,15 +38,18 @@ public class Encryption {
 
     public String encryptAES(String cleartext){
         byte[] encrypted = new byte[0];
+        String encryptedText = "";
         try {
             Cipher cipher = Cipher.getInstance(cI);
             SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes(), alg);
             IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes());
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivParameterSpec);
-            encrypted = cipher.doFinal(cleartext.getBytes());;
+            encrypted = cipher.doFinal(cleartext.getBytes());
+            encryptedText = new String(Base64.encode(encrypted,Base64.DEFAULT)).trim();
         }catch (Exception e){
+            e.printStackTrace();
         }
-        return new String(Base64.encode(encrypted,Base64.DEFAULT));
+        return encryptedText;
     }
 
     public String decryptAES(String encrypted){

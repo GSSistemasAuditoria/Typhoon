@@ -10,7 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/gris"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="605dp">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbarCartera"
@@ -33,13 +35,63 @@
                     android:id="@+id/imageViewMenuCartera"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:src="@mipmap/ic_menu_options"
+                    android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_alignParentEnd="true"/>
+                    android:src="@mipmap/ic_menu_options" />
 
             </RelativeLayout>
 
         </android.support.v7.widget.Toolbar>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:background="@color/azul">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="5dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="13dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@mipmap/ic_user_tp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/blanco"
+                    android:textSize="12sp"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/bienvenido_tag"/>
+
+                <TextView
+                    android:id="@+id/textViewNombreUsuario"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/blanco"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="5dp"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/blanco"
+                    android:textSize="12sp"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/simbolo_exclamacion_tag"/>
+
+            </LinearLayout>
+
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -49,68 +101,66 @@
 
             <Spinner
                 android:id="@+id/spinnerAnio"
+                style="@style/spinner_style"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="3dp"
-                style="@style/spinner_style"/>
+                android:layout_weight="1" />
 
             <Spinner
                 android:id="@+id/spinnerMes"
+                style="@style/spinner_style"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="3dp"
-                style="@style/spinner_style"/>
+                android:layout_weight="1" />
 
             <EditText
                 android:id="@+id/editTextBuscar"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:background="@drawable/drawable_editext_busqueda"
-                android:hint="@string/buscar_folio_hint"
                 android:ems="10"
+                android:hint="@string/buscar_folio_hint"
                 android:inputType="number"
                 android:padding="5dp"
-                android:textSize="14sp"
-                android:layout_marginEnd="3dp"
-                android:textColor="@color/grisObscuro" />
+                android:textColor="@color/grisObscuro"
+                android:textSize="14sp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:padding="7dp"
                 android:layout_marginEnd="3dp"
-                android:background="@drawable/drawable_button">
+                android:background="@drawable/drawable_button"
+                android:orientation="horizontal"
+                android:padding="7dp">
 
                 <Button
                     android:id="@+id/buttonBuscar"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:textColor="@color/blanco"
                     android:background="@drawable/ic_search"
                     android:textAllCaps="false"
-                    />
+                    android:textColor="@color/blanco" />
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:background="@drawable/drawable_button_azul"
                 android:orientation="horizontal"
-                android:padding="7dp"
-                android:background="@drawable/drawable_button_azul">
+                android:padding="7dp">
 
                 <Button
                     android:id="@+id/buttonLimpiarFiltro"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:textColor="@color/blanco"
                     android:background="@drawable/ic_clear"
                     android:textAllCaps="false"
-                    />
+                    android:textColor="@color/blanco" />
 
             </LinearLayout>
 

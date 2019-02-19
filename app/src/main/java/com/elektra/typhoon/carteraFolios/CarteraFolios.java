@@ -26,18 +26,21 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.adapters.AdapterRecyclerViewCartera;
 import com.elektra.typhoon.adapters.SpinnerAdapter;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.FoliosDBMethods;
+import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.json.SincronizacionJSON;
 import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.ItemCatalogo;
 import com.elektra.typhoon.objetos.request.SincronizacionData;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.response.FolioRevision;
+import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.SincronizacionResponse;
 import com.elektra.typhoon.service.ApiInterface;
 import com.elektra.typhoon.objetos.request.CarteraData;
@@ -88,6 +91,13 @@ public class CarteraFolios extends AppCompatActivity {
         Button buttonBuscar = (Button) findViewById(R.id.buttonBuscar);
         Button buttonLimpiarFiltro = (Button) findViewById(R.id.buttonLimpiarFiltro);
         final EditText editTextBuscar = (EditText) findViewById(R.id.editTextBuscar);
+        TextView textViewNombreUsuario = (TextView) findViewById(R.id.textViewNombreUsuario);
+
+        UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(this);
+        ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario(null,null);
+        if(usuario != null){
+            textViewNombreUsuario.setText(usuario.getNombre());
+        }
 
         final ImageView imageViewMenuCartera = (ImageView) findViewById(R.id.imageViewMenuCartera);
 

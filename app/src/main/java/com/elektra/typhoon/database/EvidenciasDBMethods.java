@@ -44,6 +44,8 @@ public class EvidenciasDBMethods {
             "CONTENIDO_PREVIEW TEXT, " +
 	        "ID_ESTATUS INTEGER, " +
 	        "ID_ETAPA INTEGER, " +
+            "LATITUDE REAL, " +
+            "LONGITUDE REAL, " +
             "PRIMARY KEY (ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_EVIDENCIA))";
 
     public void createEvidencia(Evidencia evidencia){
@@ -74,14 +76,18 @@ public class EvidenciasDBMethods {
         values.put("ID_PREGUNTA",evidencia.getIdPregunta());
         values.put("ID_REGISTRO",evidencia.getIdRegistro());
         values.put("ID_BARCO",evidencia.getIdBarco());
+        values.put("LATITUDE",evidencia.getLatitude());
+        values.put("LONGITUDE",evidencia.getLongitude());
         db.insertWithOnConflict(TP_TRAN_CL_EVIDENCIA, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
 
     public List<Evidencia> readEvidencias(String condition, String[] args,boolean flagJson) throws IOException {
+        CursorWindowFixer.fix();
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<Evidencia> listEvidencia = new ArrayList<>();
-        String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO FROM " + TP_TRAN_CL_EVIDENCIA;
+        String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
+                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE FROM " + TP_TRAN_CL_EVIDENCIA;
         if(condition != null){
             query = query + " " + condition;
         }
@@ -108,6 +114,8 @@ public class EvidenciasDBMethods {
                     evidencia.setIdPregunta(cursor.getInt(8));
                     evidencia.setIdRegistro(cursor.getInt(9));
                     evidencia.setIdBarco(cursor.getInt(10));
+                    evidencia.setLatitude(cursor.getDouble(12));
+                    evidencia.setLongitude(cursor.getDouble(13));
                     listEvidencia.add(evidencia);
                 }while(cursor.moveToNext());
             }
@@ -118,9 +126,11 @@ public class EvidenciasDBMethods {
     }
 
     public Evidencia readEvidencia(String condition, String[] args) throws IOException {
+        CursorWindowFixer.fix();
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         Evidencia evidencia = null;
-        String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO FROM " + TP_TRAN_CL_EVIDENCIA;
+        String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
+                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,LATITUDE,LONGITUDE FROM " + TP_TRAN_CL_EVIDENCIA;
         if(condition != null){
             query = query + " " + condition;
         }
@@ -145,6 +155,8 @@ public class EvidenciasDBMethods {
                     evidencia.setIdPregunta(cursor.getInt(8));
                     evidencia.setIdRegistro(cursor.getInt(9));
                     evidencia.setIdBarco(cursor.getInt(10));
+                    evidencia.setLatitude(cursor.getDouble(11));
+                    evidencia.setLongitude(cursor.getDouble(12));
                 }while(cursor.moveToNext());
             }
         }

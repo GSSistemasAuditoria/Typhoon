@@ -15,6 +15,7 @@ import com.elektra.typhoon.R;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
+import com.elektra.typhoon.utils.Utils;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
     private AdapterRecycleViewPreguntas adapterRecycleViewPreguntasTemp;
     private TextView textViewCumplen;
     private TextView textViewNoCumplen;
+    private String fechaFolio;
 
     public AdapterRecycleViewPreguntas getAdapterRecycleViewPreguntasTemp() {
         return adapterRecycleViewPreguntasTemp;
@@ -46,11 +48,12 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         return rubroPosition;
     }
 
-    public AdapterExpandableChecklist(List<RubroData> listRubros, Activity activity,TextView textViewCumplen,TextView textViewNoCumplen){
+    public AdapterExpandableChecklist(List<RubroData> listRubros, Activity activity,TextView textViewCumplen,TextView textViewNoCumplen,String fechaFolio){
         this.listRubros = listRubros;
         this.activity = activity;
         this.textViewCumplen = textViewCumplen;
         this.textViewNoCumplen = textViewNoCumplen;
+        this.fechaFolio = fechaFolio;
     }
 
     @Override
@@ -129,7 +132,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
 
         //textViewTituloRubro.setText("Rubro " + i);
         AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntasTemp(),activity,i,
-                textViewCumplen,textViewNoCumplen,this);
+                textViewCumplen,textViewNoCumplen,this,fechaFolio);
         recyclerViewPreguntas.setAdapter(adapterRecycleViewPreguntas);
         LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
         recyclerViewPreguntas.setLayoutManager(layoutManager);
@@ -148,9 +151,14 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         int noCumple = 0;
         for(RubroData rubro:listRubros){
             for(Pregunta pregunta:rubro.getListPreguntasTemp()){
-                if(pregunta.isCumple()){
+                /*if(pregunta.isCumple()){
                     cumple++;
                 }else{
+                    noCumple++;
+                }//*/
+                if (Utils.aplicaPregunta(activity,pregunta.getListEvidencias())) {
+                    cumple++;
+                } else {
                     noCumple++;
                 }
             }

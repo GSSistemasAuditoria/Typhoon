@@ -93,6 +93,7 @@
                 android:background="@color/gris"/>
 
             <RelativeLayout
+                android:id="@+id/relativeLayoutSincronizar"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:background="@drawable/drawable_back_folio_blanco"

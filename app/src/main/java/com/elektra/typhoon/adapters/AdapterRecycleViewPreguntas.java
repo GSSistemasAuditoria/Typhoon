@@ -1,5 +1,6 @@
 package com.elektra.typhoon.adapters;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -26,7 +27,9 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.elektra.typhoon.R;
+import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
@@ -36,6 +39,7 @@ import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.utils.Utils;
 import com.github.barteksc.pdfviewer.PDFView;
 
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -54,6 +58,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     private TextView textViewCumplen;
     private TextView textViewNoCumplen;
     private AdapterExpandableChecklist adapterExpandableChecklist;
+    private String fechaFolio;
 
     public int getIdRubro() {
         return idRubro;
@@ -93,13 +98,14 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     }
 
     public AdapterRecycleViewPreguntas(List<Pregunta> listPreguntas,Activity activity,int idRubro,TextView textViewCumplen,
-                                       TextView textViewNoCumplen,AdapterExpandableChecklist adapterExpandableChecklist){
+                                       TextView textViewNoCumplen,AdapterExpandableChecklist adapterExpandableChecklist,String fechaFolio){
         this.activity = activity;
         this.listPreguntas = listPreguntas;
         this.idRubro = idRubro;
         this.textViewCumplen = textViewCumplen;
         this.textViewNoCumplen = textViewNoCumplen;
         this.adapterExpandableChecklist = adapterExpandableChecklist;
+        this.fechaFolio = fechaFolio;
     }
 
     @NonNull
@@ -114,65 +120,40 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     public void onBindViewHolder(@NonNull final AdapterRecycleViewPreguntas.MyViewHolder holder, final int position) {
         //acciones
         Pregunta pregunta = listPreguntas.get(position);
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario(null,null);
         holder.linearLayout.setVisibility(View.GONE);
         holder.radioGroup.setEnabled(false);
         pregunta.setRadioGroup(holder.radioGroup);
         holder.textViewPregunta.setText(pregunta.getDescripcion());
+
+        if(usuario.getIdrol() == 1){
+            holder.imageViewAddEvidencia.setVisibility(View.VISIBLE);
+            holder.imageViewAgregaEvidencia.setVisibility(View.VISIBLE);
+            holder.textViewAddEvidencias.setVisibility(View.VISIBLE);
+        }else{
+            holder.imageViewAddEvidencia.setVisibility(View.GONE);
+            holder.imageViewAgregaEvidencia.setVisibility(View.GONE);
+            holder.textViewAddEvidencias.setVisibility(View.GONE);
+        }
+
         holder.textViewAddEvidencias.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //holder.linearLayout.setVisibility(View.VISIBLE);
-
-                //Utils.openCamera(activity);
-
-                //Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                //activity.startActivityForResult(captureIntent, position);//*/
-
                 mostrarPopupEvidencias(holder.textViewAddEvidencias,position);
-
-                //idPregunta = position;
-                /*CropImage.activity()
-                        .setGuidelines(CropImageView.Guidelines.ON)
-                        .start(activity);//*/
             }
         });
 
         holder.imageViewAgregaEvidencia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //holder.linearLayout.setVisibility(View.VISIBLE);
-
-                //Utils.openCamera(activity);
-
-                //Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                //activity.startActivityForResult(captureIntent, position);//*/
-
                 mostrarPopupEvidencias(holder.imageViewAgregaEvidencia,position);
-
-                //idPregunta = position;
-                /*CropImage.activity()
-                        .setGuidelines(CropImageView.Guidelines.ON)
-                        .start(activity);//*/
             }
         });
 
         holder.imageViewAddEvidencia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //holder.linearLayout.setVisibility(View.VISIBLE);
-
-                //Utils.openCamera(activity);
-
-                //Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                //activity.startActivityForResult(captureIntent, position);//*/
-
                 mostrarPopupEvidencias(holder.imageViewAddEvidencia,position);
-
-                //idPregunta = position;
-
-                /*CropImage.activity()
-                        .setGuidelines(CropImageView.Guidelines.ON)
-                        .start(activity);//*/
             }
         });
 
@@ -189,7 +170,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 holder.linearLayoutAddEvidencias.setVisibility(View.GONE);
                 for (Evidencia evidencia : pregunta.getListEvidencias()) {
                     //if (evidencia.getSmallBitmap() != null) {
-                        holder.linearLayoutEvidencias.addView(insertEvidencia(evidencia.getSmallBitmap(), evidencia.getIdEvidencia(), position), 1);
+                    holder.linearLayoutEvidencias.addView(insertEvidencia(evidencia.getSmallBitmap(), evidencia.getIdEvidencia(), position), 1);
                     //}
                 }
                 holder.horizontalScrollView.postDelayed(new Runnable() {
@@ -227,6 +208,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 }
             }
         }
+        reiniciaRadioGroup(holder.radioGroup,pregunta.getListEvidencias());
     }
 
     /*private ImageView insertEvidencia(Bitmap bitmap,String id,int numPregunta){
@@ -279,6 +261,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
     private RelativeLayout insertEvidencia(Bitmap bitmap, String id, int numPregunta){
 
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario(null,null);
+
         LayoutInflater inflater = LayoutInflater.from(activity);
         RelativeLayout relativeLayout = (RelativeLayout) inflater.inflate(R.layout.image_item_layout, null, false);
 
@@ -295,12 +279,22 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         }
 
         if(evidenciaTemp != null){
-            if(evidenciaTemp.getIdEtapa() != 1 && evidenciaTemp.getIdEstatus() == 1){
-                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
-            }else if(evidenciaTemp.getIdEtapa() == 1 && evidenciaTemp.getIdEstatus() == 2){
-                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
-            }else{
-                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.gris));
+            if(usuario.getIdrol() == 1) {
+                if ((evidenciaTemp.getIdEtapa() == 2 || evidenciaTemp.getIdEtapa() == 3) && evidenciaTemp.getIdEstatus() == 1) {
+                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
+                } else if (evidenciaTemp.getIdEtapa() == 1 && evidenciaTemp.getIdEstatus() == 3) {
+                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
+                } else {
+                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.gris));
+                }
+            }else if(usuario.getIdrol() == 2) {
+                if (evidenciaTemp.getIdEtapa() == 3 && evidenciaTemp.getIdEstatus() == 1) {
+                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
+                } else if (evidenciaTemp.getIdEtapa() == 1 && evidenciaTemp.getIdEstatus() == 3) {
+                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
+                } else {
+                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.gris));
+                }
             }
         }
 
@@ -361,7 +355,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         return listPreguntas.size();
     }
 
-    private void mostrarDocumento(final View viewImagen, final String identificador, final int numeroPregunta, final Activity activity, Bitmap documento,String documentoPDF){
+    private void mostrarDocumento(final View viewImagen, final String identificador, final int numeroPregunta, final Activity activity, final Bitmap documento, String documentoPDF){
         LayoutInflater inflater = LayoutInflater.from(activity);
 
         View dialogLayout = null;
@@ -370,8 +364,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
         if(documento != null) {
             dialogLayout = inflater.inflate(R.layout.mostrar_documento_layout, null, false);
-            ImageView imageViewDocumento = (ImageView) dialogLayout.findViewById(R.id.imageViewDocumento);
-            imageViewDocumento.setImageBitmap(documento);
+            final ImageView imageViewDocumento = (ImageView) dialogLayout.findViewById(R.id.imageViewDocumento);
+            //imageViewDocumento.setImageBitmap(documento);
+            /*Glide.with(activity).load(Utils.resizeImageBitmap(documento,
+                    documento.getWidth()/2,documento.getHeight()/2)).into(imageViewDocumento);//*/
+            Glide.with(activity).load(documento).into(imageViewDocumento);
         }else{
             dialogLayout = inflater.inflate(R.layout.mostrar_documento_pdf_layout, null, false);
             PDFView pdfViewDocumento = (PDFView) dialogLayout.findViewById(R.id.pdfViewDocumento);
@@ -398,15 +395,28 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
             if(evidencia.getIdEvidencia().equals(identificador)) {
                 //if(evidencia.getIdEstatus() == 1){
-                if(evidencia.getIdEtapa() != 1 && evidencia.getIdEstatus() == 1){
-                    buttonCumple.setBackground(drawableCumpleVerde);
-                    buttonNoCumple.setBackground(drawableNoCumpleGris);
-                }else if(evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 2){
-                    buttonCumple.setBackground(drawableCumpleGris);
-                    buttonNoCumple.setBackground(drawableNoCumpleRojo);
-                }else{
-                    buttonCumple.setBackground(drawableCumpleGris);
-                    buttonNoCumple.setBackground(drawableNoCumpleGris);
+                if(usuario.getIdrol() == 1) {
+                    if (evidencia.getIdEtapa() == 2 && evidencia.getIdEstatus() == 1) {
+                        buttonCumple.setBackground(drawableCumpleVerde);
+                        buttonNoCumple.setBackground(drawableNoCumpleGris);
+                    } else if (evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 3) {
+                        buttonCumple.setBackground(drawableCumpleGris);
+                        buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                    } else {
+                        buttonCumple.setBackground(drawableCumpleGris);
+                        buttonNoCumple.setBackground(drawableNoCumpleGris);
+                    }
+                }else if(usuario.getIdrol() == 2) {
+                    if (evidencia.getIdEtapa() == 3 && evidencia.getIdEstatus() == 1) {
+                        buttonCumple.setBackground(drawableCumpleVerde);
+                        buttonNoCumple.setBackground(drawableNoCumpleGris);
+                    } else if (evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 3) {
+                        buttonCumple.setBackground(drawableCumpleGris);
+                        buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                    } else {
+                        buttonCumple.setBackground(drawableCumpleGris);
+                        buttonNoCumple.setBackground(drawableNoCumpleGris);
+                    }
                 }
                 textViewNombreDocumento.setText(evidencia.getNombre());
                 break;
@@ -445,12 +455,16 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         if(usuario.getIdrol() == 1) {
                             //evidencia.setIdEtapa(getEtapaValidado(evidencia.getIdEtapa()));
                             evidencia.setIdEtapa(2);
+                        }else if(usuario.getIdrol() == 2) {
+                            evidencia.setIdEtapa(3);
                         }
                         try {
                             ContentValues contentValues = new ContentValues();
                             //contentValues.put("ID_ETAPA", getEtapaValidado(evidencia.getIdEtapa()));
                             if(usuario.getIdrol() == 1) {
                                 contentValues.put("ID_ETAPA", 2);
+                            }else if(usuario.getIdrol() == 2) {
+                                contentValues.put("ID_ETAPA", 3);
                             }
                             contentValues.put("ID_ESTATUS",1);
                             new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
@@ -491,11 +505,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 Evidencia evidenciaTemp = null;
                 for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
                     if(evidencia.getIdEvidencia().equals(identificador)) {
-                        evidencia.setIdEstatus(2);
+                        evidencia.setIdEstatus(3);
                         evidencia.setIdEtapa(1);
                         ContentValues contentValues = new ContentValues();
                         contentValues.put("ID_ETAPA",1);
-                        contentValues.put("ID_ESTATUS",2);
+                        contentValues.put("ID_ESTATUS",3);
                         try {
                             new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
                                     "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
@@ -536,17 +550,39 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     Evidencia evidenciaTemp = null;
                     for (Evidencia evidencia : listPreguntas.get(numeroPregunta).getListEvidencias()) {
                         if (evidencia.getIdEvidencia().equals(identificador)) {
-                            listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
-                            new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
-                                    "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
-                                    identificador,
-                                    String.valueOf(evidencia.getIdRevision()),
-                                    String.valueOf(evidencia.getIdChecklist()),
-                                    String.valueOf(evidencia.getIdRubro()),
-                                    String.valueOf(evidencia.getIdPregunta()),
-                                    String.valueOf(evidencia.getIdBarco())
-                            });
                             evidenciaTemp = evidencia;
+                            if(usuario.getIdrol()==1) {
+                                new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
+                                        "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
+                                        identificador,
+                                        String.valueOf(evidencia.getIdRevision()),
+                                        String.valueOf(evidencia.getIdChecklist()),
+                                        String.valueOf(evidencia.getIdRubro()),
+                                        String.valueOf(evidencia.getIdPregunta()),
+                                        String.valueOf(evidencia.getIdBarco())
+                                });
+                            }else{
+                                //borrado lógico
+                                evidencia.setIdEstatus(2);
+                                evidencia.setIdEtapa(usuario.getIdrol());
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put("ID_ETAPA",usuario.getIdrol());
+                                contentValues.put("ID_ESTATUS",2);
+                                String base64 = null;
+                                contentValues.put("CONTENIDO",base64);
+                                try {
+                                    new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
+                                            "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                                                    "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
+                                            new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
+                                                    String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
+                                                    String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
+                                                    String.valueOf(evidencia.getIdBarco())});
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                }
+                            }
+                            listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
                             break;
                         }
                     }
@@ -605,19 +641,59 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 return 3;
             case 3:
                 return 4;
-                default:
-                    return 4;
+            default:
+                return 4;
         }
     }
 
     public boolean validaEvidencias(List<Evidencia> listEvidencias){
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario(null,null);
         for(Evidencia ev:listEvidencias){
             //if(ev.getIdEstatus() == 2){
-            if(ev.getIdEtapa() == 1){
-                return false;
+            if(usuario.getIdrol() == 1) {
+                if (ev.getIdEtapa() == 2 && ev.getIdEstatus() == 1) {
+
+                }else{
+                    return false;
+                }
+            }else if(usuario.getIdrol() == 2) {
+                if (ev.getIdEtapa() == 3 && ev.getIdEstatus() == 1) {
+
+                }else{
+                    return false;
+                }
             }
         }
         return true;
+    }
+
+    public void reiniciaRadioGroup(RadioGroup radioGroup,List<Evidencia> listEvidencias){
+        boolean flag = true;
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario(null,null);
+        if(usuario.getIdrol() == 2) {
+            for (Evidencia ev : listEvidencias) {
+                if (ev.getIdEtapa() == 2 && ev.getIdEstatus() == 1) {
+
+                }else{
+                    flag = false;
+                }
+            }
+            if (flag) {
+                radioGroup.clearCheck();
+            }
+
+            boolean flag2 = true;
+            for (Evidencia ev : listEvidencias) {
+                if (ev.getIdEtapa() == 1 && ev.getIdEstatus() == 1) {
+
+                }else{
+                    flag2 = false;
+                }
+            }
+            if (flag2) {
+                radioGroup.clearCheck();
+            }
+        }
     }
 
     private void mostrarPopupEvidencias(View anchorView,final int position) {
@@ -632,8 +708,43 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         buttonCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                /*Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 activity.startActivityForResult(captureIntent, position);//*/
+
+                /*if(Utils.checkPermission(activity, Manifest.permission.CAMERA,102)){
+                    if(Utils.checkPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE,101)) {
+                        if(Utils.checkPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION,103)) {
+                            Utils.openCamera(activity, position);
+                        }else{
+                            Utils.message(activity,"Se requiere permiso para acceso a la ubicación");
+                        }
+                    }else{
+                        Utils.message(activity,"Se requiere permiso para lectura de archivos");
+                    }
+                }else{
+                    Utils.message(activity,"Se requiere permiso para utilizar la cámara");
+                }//*/
+
+                /*Calendar calendarActual = Utils.getCalendarDate(Utils.getDate(Constants.DATE_FORMAT_FULL));
+                Calendar calendarFolio = Utils.getCalendarDate(fechaFolio);
+                if(calendarActual != null && calendarFolio != null){
+                    int mesActual = calendarActual.get(Calendar.MONTH) + 1;
+                    int anioActual = calendarActual.get(Calendar.YEAR);
+                    int mesFolio = calendarFolio.get(Calendar.MONTH) + 1;
+                    int anioFolio = calendarFolio.get(Calendar.YEAR);
+                    if((mesActual == mesFolio) && (anioActual == anioFolio)){
+                        if(Utils.checkPermission(activity)){
+                            Utils.openCamera(activity, position);
+                        }
+                    }else{
+                        Utils.message(activity,"No se pueden agregar evidencias ya que la fecha de revisión no corresponde al mes actual");
+                    }
+                }//*/
+
+                if(Utils.checkPermission(activity)){
+                    Utils.openCamera(activity, position);
+                }
+
                 popup.dismiss();
             }
         });
@@ -641,11 +752,27 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         buttonFiles.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                seleccionarArchivo(position);
+                /*if(Utils.checkPermission(activity, Manifest.permission.CAMERA,102)){
+                    if(Utils.checkPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE,101)) {
+                        if(Utils.checkPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION,103)) {
+                            seleccionarArchivo(position);
+                        }else{
+                            Utils.message(activity,"Se requiere permiso para acceso a la ubicación");
+                        }
+                    }else{
+                        Utils.message(activity,"Se requiere permiso para lectura de archivos");
+                    }
+                }else{
+                    Utils.message(activity,"Se requiere permiso para utilizar la cámara");
+                }//*/
+
+                if(Utils.checkPermission(activity)){
+                    seleccionarArchivo(position);
+                }
+
                 popup.dismiss();
             }
         });
-
 
         popup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
         popup.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
@@ -661,9 +788,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     public void seleccionarArchivo(int position) {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
-        /*String[] mimetypes={"image/png","image/jpg","image/jpeg", //imagen
-                "application/pdf"};//*/
-        String[] mimetypes={"application/pdf"}; //pdf*/
+        String[] mimetypes={"image/png","image/jpg","image/jpeg", "application/pdf"};//*/
+        //String[] mimetypes={"application/pdf"}; //pdf*/
         intent.setType("*/*");
         intent.putExtra(Intent.EXTRA_MIME_TYPES,mimetypes);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);

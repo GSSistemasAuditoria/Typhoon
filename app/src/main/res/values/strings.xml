@@ -36,4 +36,7 @@
     <string name="sincronizar_tag">¿Desea sincronizar este checklist?</string>
     <string name="cancelar_tag">Cancelar</string>
     <string name="sincronizar_button_tag">Sincronizar</string>
+    <string name="aceptar_tag">Aceptar</string>
+    <string name="bienvenido_tag">¡Bienvenido</string>
+    <string name="simbolo_exclamacion_tag">!</string>
 </resources>

@@ -1,9 +1,14 @@
 package com.elektra.typhoon.login;
 
+import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +16,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.carteraFolios.CarteraFolios;
@@ -19,6 +26,8 @@ import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.CatalogosDBMethods;
 import com.elektra.typhoon.database.TyphoonDataBase;
 import com.elektra.typhoon.database.UsuarioDBMethods;
+import com.elektra.typhoon.encryption.Encryption;
+import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.objetos.response.Barco;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
@@ -36,6 +45,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import com.elektra.typhoon.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Proyecto: TYPHOON
@@ -76,12 +88,15 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), CarteraFolios.class);
                 startActivity(intent);
                 finish();
+            }else{
+                Utils.checkPermission(this);
             }
         } else {
             SharedPreferences.Editor ed;
             ed = sharedPrefs.edit();
             ed.putBoolean(Constants.SP_LOGIN_TAG, false);
             ed.commit();
+            Utils.checkPermission(this);
         }//*/
 
         entrar.setOnClickListener(new View.OnClickListener() {
@@ -114,10 +129,31 @@ public class MainActivity extends AppCompatActivity {
                 registrarse = layoutDialog.findViewById(R.id.buttonRegistrarse);
                 restablecerContrasena = layoutDialog.findViewById(R.id.buttonRestablecerContrasena);
 
+                RelativeLayout relativeLayoutRegistrarse = (RelativeLayout) layoutDialog.findViewById(R.id.relativeLayoutRegistrarse);
+                RelativeLayout relativeLayoutRecuperar = (RelativeLayout) layoutDialog.findViewById(R.id.relativeLayoutRecuperar);
+
+                relativeLayoutRegistrarse.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(MainActivity.this, NuevoRegistro.class);
+                        startActivity(intent);
+                        dialog.dismiss();
+                    }
+                });
+
                 registrarse.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(MainActivity.this, NuevoRegistro.class);
+                        startActivity(intent);
+                        dialog.dismiss();
+                    }
+                });
+
+                relativeLayoutRecuperar.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(MainActivity.this, RestablecerContrasena.class);
                         startActivity(intent);
                         dialog.dismiss();
                     }
@@ -135,6 +171,19 @@ public class MainActivity extends AppCompatActivity {
         });
 
         TyphoonDataBase typhoonDataBase = new TyphoonDataBase(getApplicationContext());
+
+        /*if(Utils.checkPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE,101)){
+
+        }
+
+        if(Utils.checkPermission(this, Manifest.permission.CAMERA,102)){
+
+        }
+
+        if(Utils.checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION,103)){
+
+        }//*/
+        //checkAndRequestPermissions();
     }
 
     private ApiInterface getInterfaceService() {
@@ -151,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this,"Iniciando sesión...");
 
         ApiInterface mApiService = this.getInterfaceService();
-        Call<ResponseLogin> mService = mApiService.authenticate(usuario, contrasena);
+        Call<ResponseLogin> mService = mApiService.authenticate(usuario, new Encryption().encryptAES(contrasena));
         mService.enqueue(new Callback<ResponseLogin>() {
             @Override
             public void onResponse(Call<ResponseLogin> call, Response<ResponseLogin> response) {
@@ -191,68 +240,102 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /*private void descargaCatalogos(){
+    private  boolean checkAndRequestPermissions() {
+        int storagePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int locationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
 
-        final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this,"Descargando catálogos...");
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        if (locationPermission != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if (storagePermission != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (cameraPermission != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.CAMERA);
+        }
 
-        ApiInterface mApiService = this.getInterfaceService();
-        Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon();
-        mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
-            @Override
-            public void onResponse(Call<CatalogosTyphoonResponse> call, Response<CatalogosTyphoonResponse> response) {
-                if(response.body() != null) {
-                    if(response.body().getCatalogos().getExito()){
-                        try {
-                            BarcoDBMethods barcoDBMethods = new BarcoDBMethods(getApplicationContext());
-                            CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(getApplicationContext());
-                            if(response.body().getCatalogos().getCatalogosData().getListBarcos() != null){
-                                barcoDBMethods.deleteBarco();
-                                for(Barco catalogoBarco:response.body().getCatalogos().getCatalogosData().getListBarcos()){
-                                    barcoDBMethods.createBarco(catalogoBarco);
-                                }
-                            }
-                            if(response.body().getCatalogos().getCatalogosData().getListEstatusEvidencia() != null){
-                                catalogosDBMethods.deleteEstatusEvidencia();
-                                for(EstatusEvidencia estatusEvidencia:response.body().getCatalogos().getCatalogosData().getListEstatusEvidencia()){
-                                    catalogosDBMethods.createEstatusEvidencia(estatusEvidencia);
-                                }
-                            }
-                            if(response.body().getCatalogos().getCatalogosData().getListEtapasEvidencia() != null){
-                                catalogosDBMethods.deleteEtapaEvidencia();
-                                for(EtapaEvidencia etapaEvidencia:response.body().getCatalogos().getCatalogosData().getListEtapasEvidencia()){
-                                    catalogosDBMethods.createEtapaEvidencia(etapaEvidencia);
-                                }
-                            }
-                            if(response.body().getCatalogos().getCatalogosData().getListTiposRespuesta() != null){
-                                catalogosDBMethods.deleteTipoRespuesta();
-                                for(TipoRespuesta tipoRespuesta:response.body().getCatalogos().getCatalogosData().getListTiposRespuesta()){
-                                    catalogosDBMethods.createTipoRespuesta(tipoRespuesta);
-                                }
-                            }
-                            progressDialog.dismiss();
-                            Utils.message(getApplicationContext(),"Catálogos descargados");
-                            Intent intent = new Intent(MainActivity.this, CarteraFolios.class);
-                            startActivity(intent);
-                            finish();
-                        }catch (Exception e){
-                            progressDialog.dismiss();
-                            Utils.message(getApplicationContext(),"Error al guardar los catálogos: " + e.getMessage());
-                            e.printStackTrace();
-                        }
-                    }else{
-                        progressDialog.dismiss();
-                        Utils.message(getApplicationContext(), response.body().getCatalogos().getError());
-                    }
-                }else{
-                    progressDialog.dismiss();
-                    Utils.message(getApplicationContext(),"Error al descargar catálogos");
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]),200);
+            return false;
+        }
+        return true;
+    }
+
+    /*public void checkPermission(){
+        if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)
+                + ContextCompat.checkSelfPermission(
+                this,Manifest.permission.ACCESS_FINE_LOCATION)
+                + ContextCompat.checkSelfPermission(
+                this,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED){
+
+            // Do something, when permissions not granted
+            if(ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,Manifest.permission.CAMERA)
+                    || ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,Manifest.permission.ACCESS_FINE_LOCATION)
+                    || ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                // If we should give explanation of requested permissions
+
+                // Show an alert dialog here with request explanation
+
+                LayoutInflater li = LayoutInflater.from(this);
+                LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.permission_layout, null);
+
+                Button buttonAceptar = (Button) layoutDialog.findViewById(R.id.buttonAceptar);
+                LinearLayout linearLayoutCamera = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCameraPermission);
+                LinearLayout linearLayoutLocation = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutLocationPermission);
+                LinearLayout linearLayoutStorage = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutStoragePermission);
+
+                if(Utils.checkPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE,101)){
+                    linearLayoutStorage.setVisibility(View.GONE);
                 }
+
+                if(Utils.checkPermission(this, Manifest.permission.CAMERA,102)){
+                    linearLayoutCamera.setVisibility(View.GONE);
+                }
+
+                if(Utils.checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION,103)){
+                    linearLayoutLocation.setVisibility(View.GONE);
+                }
+
+                final AlertDialog builder = new AlertDialog.Builder(this)
+                .setView(layoutDialog)
+                .show();
+
+                buttonAceptar.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ActivityCompat.requestPermissions(
+                                MainActivity.this,
+                                new String[]{
+                                        Manifest.permission.CAMERA,
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                },
+                                200
+                        );
+                        builder.dismiss();
+                    }
+                });
+            }else{
+                // Directly request for required permissions, without explanation
+                ActivityCompat.requestPermissions(
+                        MainActivity.this,
+                        new String[]{
+                                Manifest.permission.CAMERA,
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        },
+                        200
+                );
             }
-            @Override
-            public void onFailure(Call<CatalogosTyphoonResponse> call, Throwable t) {
-                progressDialog.dismiss();
-                Utils.message(MainActivity.this, Constants.MSG_ERR_CONN);
-            }
-        });
+        }else {
+            // Do something, when permissions are already granted
+
+        }
     }//*/
 }

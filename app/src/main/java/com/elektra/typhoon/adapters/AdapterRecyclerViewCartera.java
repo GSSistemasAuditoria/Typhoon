@@ -64,6 +64,7 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
         public TextView textViewFecha;
         public TextView textViewDescripcion;
         public ImageView imageViewSincronizar;
+        public RelativeLayout relativeLayoutSincronizar;
 
         public ItemViewHolder(View v) {
             super(v);
@@ -71,6 +72,7 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
             textViewFecha = v.findViewById(R.id.textViewFecha);
             textViewDescripcion = v.findViewById(R.id.textViewDescripcion);
             imageViewSincronizar = v.findViewById(R.id.imageViewSincronizar);
+            relativeLayoutSincronizar = v.findViewById(R.id.relativeLayoutSincronizar);
             v.setOnClickListener(this);
         }
 
@@ -126,6 +128,18 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
             ((ItemViewHolder)holder).textViewFecha.setText(Utils.getDateMonth(folios.get(position).getFechaInicio()));
             ((ItemViewHolder)holder).textViewDescripcion.setText(folios.get(position).getNombre());
             ((ItemViewHolder)holder).imageViewSincronizar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //Utils.message(context,"Sincronizar");
+                    try {
+                        sincronizacion(folios.get(position).getIdRevision());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Utils.message(context,"Error al sincronizar: " + e.getMessage());
+                    }
+                }
+            });
+            ((ItemViewHolder)holder).relativeLayoutSincronizar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     //Utils.message(context,"Sincronizar");
@@ -243,6 +257,8 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
 
         TextView textViewCancelar = (TextView) layoutDialog.findViewById(R.id.buttonCancelar);
         TextView textViewSincronizar = (TextView) layoutDialog.findViewById(R.id.buttonSincronizar);
+        LinearLayout linearLayoutCancelar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCancelar);
+        LinearLayout linearLayoutSincronizar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutSincronizar);
 
         final AlertDialog dialog = new AlertDialog.Builder(activity)
                 .setView(layoutDialog)
@@ -255,7 +271,22 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
             }
         });
 
+        linearLayoutCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
         textViewSincronizar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new SincronizacionRequestService(activity,activity,idRevision).execute();
+                dialog.dismiss();
+            }
+        });
+
+        linearLayoutSincronizar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 new SincronizacionRequestService(activity,activity,idRevision).execute();

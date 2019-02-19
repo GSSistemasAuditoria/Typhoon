@@ -38,6 +38,14 @@ public class Evidencia {
     @Expose
     private int idRegistro;
 
+    @SerializedName("LATITUD")
+    @Expose
+    private double latitude;
+
+    @SerializedName("LONGITUD")
+    @Expose
+    private double longitude;
+
     private Bitmap smallBitmap;
     private Bitmap originalBitmap;
     private int idRevision;
@@ -172,5 +180,21 @@ public class Evidencia {
 
     public void setIdBarco(int idBarco) {
         this.idBarco = idBarco;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }
