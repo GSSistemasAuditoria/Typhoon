@@ -57,10 +57,14 @@ public class EvidenciasDBMethods {
         if(evidencia.getContenidoPreview() == null){
             try {
                 if(!evidencia.getNombre().contains("pdf")) {
-                    Bitmap bitmap = Utils.base64ToBitmap(evidencia.getContenido());
-                    Bitmap bitmapResize = Utils.resizeImageBitmap(bitmap);
-                    String base64 = Utils.bitmapToBase64(bitmapResize);
-                    values.put("CONTENIDO_PREVIEW", base64);
+                    if(evidencia.getContenido() != null) {
+                        if(!evidencia.getContenido().equals("")) {
+                            Bitmap bitmap = Utils.base64ToBitmap(evidencia.getContenido());
+                            Bitmap bitmapResize = Utils.resizeImageBitmap(bitmap);
+                            String base64 = Utils.bitmapToBase64(bitmapResize);
+                            values.put("CONTENIDO_PREVIEW", base64);
+                        }
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();

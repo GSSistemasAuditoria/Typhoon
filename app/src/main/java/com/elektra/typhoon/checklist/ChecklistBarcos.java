@@ -30,6 +30,7 @@ import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.FoliosDBMethods;
+import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.objetos.response.Barco;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
@@ -37,6 +38,7 @@ import com.elektra.typhoon.objetos.response.ChecklistData;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.PreguntaData;
+import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
@@ -97,6 +99,9 @@ public class ChecklistBarcos extends AppCompatActivity{
         listCatalogoBarcos = new BarcoDBMethods(this).readBarcos(null, null);
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(this);
         EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(this);
+        UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(this);
+
+        ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario(null,null);
 
         List<ChecklistData> listChecklist = checklistDBMethods.readChecklists("WHERE ID_REVISION = ?", new String[]{String.valueOf(folio)});
 

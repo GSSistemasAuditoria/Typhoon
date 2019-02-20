@@ -122,6 +122,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                         return "Sincronizado correctamente";
                     }catch (Exception e){
                         progressDialog.dismiss();
+                        e.printStackTrace();
                         return "Error al guardar datos: " + e.getMessage();
                     }
                 }else{

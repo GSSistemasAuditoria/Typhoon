@@ -79,12 +79,13 @@ public class SincronizacionJSON {
                                         "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_ETAPA = 2",
                                 new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
                                         String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta())},true);
-                    }if(usuario.getIdrol() == 2){
-                        //idRol = "3";
+                    //}if(usuario.getIdrol() == 2){
+                    }else {
+                        String idRol = String.valueOf(usuario.getIdrol() + 1);
                         listEvidencias = evidenciasDBMethods.readEvidencias("" +
-                                        "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_ETAPA != 2",
+                                        "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND (ID_ETAPA = 1 OR ID_ETAPA = ?)",
                                 new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
-                                        String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta())},true);
+                                        String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),idRol},true);
                     }
                     /*listEvidencias = evidenciasDBMethods.readEvidencias("" +
                                     "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_ETAPA = ?" +

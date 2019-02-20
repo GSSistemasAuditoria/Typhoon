@@ -547,13 +547,14 @@ public class Utils {
         if(evidencias.size() != 0) {
             for (Evidencia evidencia : evidencias) {
                 if(usuario.getIdrol() == 1){
-                    if(evidencia.getIdEtapa() == 2 && evidencia.getIdEstatus() == 1){
+                    if(evidencia.getIdEtapa() != 1 && evidencia.getIdEstatus() == 1){
 
                     }else{
                         return false;
                     }
-                }else if(usuario.getIdrol() == 2){
-                    if(evidencia.getIdEtapa() == 3 && evidencia.getIdEstatus() == 1){
+                //}else if(usuario.getIdrol() == 2){
+                }else {
+                    if(evidencia.getIdEtapa() > usuario.getIdrol() && evidencia.getIdEstatus() == 1){
 
                     }else{
                         return false;

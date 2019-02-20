@@ -280,15 +280,18 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
         if(evidenciaTemp != null){
             if(usuario.getIdrol() == 1) {
-                if ((evidenciaTemp.getIdEtapa() == 2 || evidenciaTemp.getIdEtapa() == 3) && evidenciaTemp.getIdEstatus() == 1) {
+                //if ((evidenciaTemp.getIdEtapa() == 2 || evidenciaTemp.getIdEtapa() == 3) && evidenciaTemp.getIdEstatus() == 1) {
+                if (evidenciaTemp.getIdEtapa() != 1 && evidenciaTemp.getIdEstatus() == 1) {
                     relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
                 } else if (evidenciaTemp.getIdEtapa() == 1 && evidenciaTemp.getIdEstatus() == 3) {
                     relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
                 } else {
                     relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.gris));
                 }
-            }else if(usuario.getIdrol() == 2) {
-                if (evidenciaTemp.getIdEtapa() == 3 && evidenciaTemp.getIdEstatus() == 1) {
+            //}else if(usuario.getIdrol() == 2) {
+            }else {
+                //if (evidenciaTemp.getIdEtapa() == 3 && evidenciaTemp.getIdEstatus() == 1) {
+                if (evidenciaTemp.getIdEtapa() > usuario.getIdrol() && evidenciaTemp.getIdEstatus() == 1) {
                     relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
                 } else if (evidenciaTemp.getIdEtapa() == 1 && evidenciaTemp.getIdEstatus() == 3) {
                     relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
@@ -389,6 +392,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         if(usuario != null){
             if(usuario.getIdrol() == 1){
                 buttonNoCumple.setVisibility(View.GONE);
+            }else{
+                buttonBorrar.setVisibility(View.GONE);
             }
         }
 
@@ -396,23 +401,33 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             if(evidencia.getIdEvidencia().equals(identificador)) {
                 //if(evidencia.getIdEstatus() == 1){
                 if(usuario.getIdrol() == 1) {
-                    if (evidencia.getIdEtapa() == 2 && evidencia.getIdEstatus() == 1) {
+                    if (evidencia.getIdEtapa() != 1 && evidencia.getIdEstatus() == 1) {
                         buttonCumple.setBackground(drawableCumpleVerde);
                         buttonNoCumple.setBackground(drawableNoCumpleGris);
+                        buttonCumple.setVisibility(View.GONE);
+                        buttonBorrar.setVisibility(View.GONE);
                     } else if (evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 3) {
                         buttonCumple.setBackground(drawableCumpleGris);
                         buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                        buttonCumple.setVisibility(View.GONE);
                     } else {
                         buttonCumple.setBackground(drawableCumpleGris);
                         buttonNoCumple.setBackground(drawableNoCumpleGris);
                     }
-                }else if(usuario.getIdrol() == 2) {
-                    if (evidencia.getIdEtapa() == 3 && evidencia.getIdEstatus() == 1) {
+                    //}else if(usuario.getIdrol() == 2) {
+                }else{
+                    if (evidencia.getIdEtapa() > usuario.getIdrol() && evidencia.getIdEstatus() == 1) {
                         buttonCumple.setBackground(drawableCumpleVerde);
                         buttonNoCumple.setBackground(drawableNoCumpleGris);
+                        buttonBorrar.setVisibility(View.GONE);
+                        buttonCumple.setVisibility(View.GONE);
+                        buttonNoCumple.setVisibility(View.GONE);
                     } else if (evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 3) {
                         buttonCumple.setBackground(drawableCumpleGris);
                         buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                        buttonBorrar.setVisibility(View.GONE);
+                        buttonCumple.setVisibility(View.GONE);
+                        buttonNoCumple.setVisibility(View.GONE);
                     } else {
                         buttonCumple.setBackground(drawableCumpleGris);
                         buttonNoCumple.setBackground(drawableNoCumpleGris);
@@ -455,16 +470,19 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         if(usuario.getIdrol() == 1) {
                             //evidencia.setIdEtapa(getEtapaValidado(evidencia.getIdEtapa()));
                             evidencia.setIdEtapa(2);
-                        }else if(usuario.getIdrol() == 2) {
-                            evidencia.setIdEtapa(3);
+                        //}else if(usuario.getIdrol() == 2) {
+                        }else {
+                            evidencia.setIdEtapa(usuario.getIdrol() + 1);
                         }
                         try {
                             ContentValues contentValues = new ContentValues();
                             //contentValues.put("ID_ETAPA", getEtapaValidado(evidencia.getIdEtapa()));
                             if(usuario.getIdrol() == 1) {
                                 contentValues.put("ID_ETAPA", 2);
-                            }else if(usuario.getIdrol() == 2) {
-                                contentValues.put("ID_ETAPA", 3);
+                            //}else if(usuario.getIdrol() == 2) {
+                            }else {
+                                //contentValues.put("ID_ETAPA", 3);
+                                contentValues.put("ID_ETAPA", usuario.getIdrol() + 1);
                             }
                             contentValues.put("ID_ESTATUS",1);
                             new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
@@ -552,37 +570,41 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         if (evidencia.getIdEvidencia().equals(identificador)) {
                             evidenciaTemp = evidencia;
                             if(usuario.getIdrol()==1) {
-                                new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
-                                        "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
-                                        identificador,
-                                        String.valueOf(evidencia.getIdRevision()),
-                                        String.valueOf(evidencia.getIdChecklist()),
-                                        String.valueOf(evidencia.getIdRubro()),
-                                        String.valueOf(evidencia.getIdPregunta()),
-                                        String.valueOf(evidencia.getIdBarco())
-                                });
-                            }else{
-                                //borrado lógico
-                                evidencia.setIdEstatus(2);
-                                evidencia.setIdEtapa(usuario.getIdrol());
-                                ContentValues contentValues = new ContentValues();
-                                contentValues.put("ID_ETAPA",usuario.getIdrol());
-                                contentValues.put("ID_ESTATUS",2);
-                                String base64 = null;
-                                contentValues.put("CONTENIDO",base64);
-                                try {
-                                    new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
-                                            "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
-                                                    "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
-                                            new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
-                                                    String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
-                                                    String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
-                                                    String.valueOf(evidencia.getIdBarco())});
-                                }catch (Exception e){
-                                    e.printStackTrace();
+                                //si esta rechazada la evidencia
+                                if(evidencia.getIdEstatus() == 3){
+                                    //borrado lógico
+                                    evidencia.setIdEstatus(2);
+                                    evidencia.setIdEtapa(usuario.getIdrol() + 1);
+                                    ContentValues contentValues = new ContentValues();
+                                    contentValues.put("ID_ETAPA",usuario.getIdrol() + 1);
+                                    contentValues.put("ID_ESTATUS",2);
+                                    String base64 = null;
+                                    contentValues.put("CONTENIDO",base64);
+                                    try {
+                                        new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
+                                                "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                                                        "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
+                                                new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
+                                                        String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
+                                                        String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
+                                                        String.valueOf(evidencia.getIdBarco())});
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                    }
+                                }else{
+                                    //borrado físico
+                                    new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
+                                            "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
+                                            identificador,
+                                            String.valueOf(evidencia.getIdRevision()),
+                                            String.valueOf(evidencia.getIdChecklist()),
+                                            String.valueOf(evidencia.getIdRubro()),
+                                            String.valueOf(evidencia.getIdPregunta()),
+                                            String.valueOf(evidencia.getIdBarco())
+                                    });
                                 }
+                                listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
                             }
-                            listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
                             break;
                         }
                     }
@@ -651,13 +673,14 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         for(Evidencia ev:listEvidencias){
             //if(ev.getIdEstatus() == 2){
             if(usuario.getIdrol() == 1) {
-                if (ev.getIdEtapa() == 2 && ev.getIdEstatus() == 1) {
+                if (ev.getIdEtapa() != 1 && ev.getIdEstatus() == 1) {
 
                 }else{
                     return false;
                 }
-            }else if(usuario.getIdrol() == 2) {
-                if (ev.getIdEtapa() == 3 && ev.getIdEstatus() == 1) {
+            //}else if(usuario.getIdrol() == 2) {
+            }else {
+                if (ev.getIdEtapa() > usuario.getIdrol() && ev.getIdEstatus() == 1) {
 
                 }else{
                     return false;
@@ -670,9 +693,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     public void reiniciaRadioGroup(RadioGroup radioGroup,List<Evidencia> listEvidencias){
         boolean flag = true;
         ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario(null,null);
-        if(usuario.getIdrol() == 2) {
+        //if(usuario.getIdrol() == 2) {
+        if(usuario.getIdrol() != 1) {
             for (Evidencia ev : listEvidencias) {
-                if (ev.getIdEtapa() == 2 && ev.getIdEstatus() == 1) {
+                //if (ev.getIdEtapa() == 2 && ev.getIdEstatus() == 1) {
+                if (ev.getIdEtapa() == usuario.getIdrol() && ev.getIdEstatus() == 1) {
 
                 }else{
                     flag = false;
