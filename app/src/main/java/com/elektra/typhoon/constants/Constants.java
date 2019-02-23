@@ -12,8 +12,8 @@ import android.os.Environment;
 public class Constants {
 
     //url del servicio
-    //public static String URL_PUBLIC = "http://10.89.69.112/TyphoonService/TyphoonService.svc/";
-    public static String URL_PUBLIC = "http://www.auditoriags.com/TyphoonService/TyphoonService.svc/";
+    public static String URL_PUBLIC = "http://10.89.69.112/TyphoonService/TyphoonService.svc/";
+    //public static String URL_PUBLIC = "http://www.auditoriags.com/TyphoonService/TyphoonService.svc/";
 
     //**********************************************************************************************
     public static String DB_NAME = "TyphoonDB";
@@ -33,6 +33,7 @@ public class Constants {
     public final static String INTENT_FOLIO_TAG = "folio";
     public final static String INTENT_FECHA_INICIO_TAG = "fechaInicio";
     public final static String INTENT_FECHA_FIN_TAG = "fechaFin";
+    public final static String INTENT_ESTATUS_TAG = "estatus";
 
     public final static String SP_LOGIN_TAG = "login";
     public final static String SP_JWT_TAG = "jwt";

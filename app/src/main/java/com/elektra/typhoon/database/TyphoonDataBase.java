@@ -40,6 +40,24 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_CL_ESTATUS_EVIDENCIA);
         sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_CL_ETAPA_EVIDENCIA);
         sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_CL_RESPUESTA);
+        sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_ESTATUS_REVISION);
+    }
+
+    public void deleteAll(){
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("delete from " + BarcoDBMethods.TP_CAT_BARCO);
+        db.execSQL("delete from " + ChecklistDBMethods.TP_CAT_CHEKLIST);
+        db.execSQL("delete from " + ChecklistDBMethods.TP_CAT_CL_PREGUNTA);
+        db.execSQL("delete from " + ChecklistDBMethods.TP_CAT_CL_RUBRO);
+        db.execSQL("delete from " + ChecklistDBMethods.TP_TRAN_CL_RESPUESTA);
+        db.execSQL("delete from " + EvidenciasDBMethods.TP_TRAN_CL_EVIDENCIA);
+        db.execSQL("delete from " + FoliosDBMethods.TP_TRAN_REVISION);
+        db.execSQL("delete from " + UsuarioDBMethods.TP_CAT_USUARIO);
+        db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_CL_ESTATUS_EVIDENCIA);
+        db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_CL_ETAPA_EVIDENCIA);
+        db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_CL_RESPUESTA);
+        db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_ESTATUS_REVISION);
+        db.close();
     }
 
     @Override

@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.objetos.response.EstatusEvidencia;
+import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.EtapaEvidencia;
 import com.elektra.typhoon.objetos.response.TipoRespuesta;
 
@@ -31,6 +32,7 @@ public class CatalogosDBMethods {
     public static final String TP_CAT_CL_ESTATUS_EVIDENCIA = "TP_CAT_CL_ESTATUS_EVIDENCIA";
     public static final String TP_CAT_CL_ETAPA_EVIDENCIA = "TP_CAT_CL_ETAPA_EVIDENCIA";
     public static final String TP_CAT_CL_RESPUESTA = "TP_CAT_CL_RESPUESTA";
+    public static final String TP_CAT_ESTATUS_REVISION = "TP_CAT_ESTATUS_REVISION";
 
     public static String QUERY_CREATE_TABLE_TP_CAT_CL_ESTATUS_EVIDENCIA = "CREATE TABLE " + TP_CAT_CL_ESTATUS_EVIDENCIA + " (" +
             "ID_ESTATUS INTEGER PRIMARY KEY, " +
@@ -165,6 +167,53 @@ public class CatalogosDBMethods {
     public void deleteTipoRespuesta(){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         db.execSQL("delete from "+ TP_CAT_CL_RESPUESTA);
+        db.close();
+    }
+
+    //**********************************************************************************************
+
+    public static String QUERY_CREATE_TABLE_ESTATUS_REVISION = "CREATE TABLE " + TP_CAT_ESTATUS_REVISION + " (" +
+            "ID_ESTATUS INTEGER PRIMARY KEY, " +
+            "DESCRIPCION TEXT, " +
+            "SRC TEXT)";
+
+    public void createEstatusRevision(EstatusRevision estatusRevision){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        ContentValues values = new ContentValues();
+        values.put("ID_ESTATUS",estatusRevision.getIdEstatus());
+        values.put("DESCRIPCION",estatusRevision.getDescripcion());
+        values.put("SRC",estatusRevision.getImagen());
+        db.insertWithOnConflict(TP_CAT_ESTATUS_REVISION, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        db.close();
+    }
+
+    public List<EstatusRevision> readEstatusRevision(String condition, String[] args){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        List<EstatusRevision> listEstatusRevision = new ArrayList<>();
+        String query = "SELECT ID_ESTATUS,DESCRIPCION,SRC FROM " + TP_CAT_ESTATUS_REVISION;
+        if(condition != null){
+            query = query + " " + condition;
+        }
+        Cursor cursor = db.rawQuery(query,args);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    EstatusRevision estatusRevision = new EstatusRevision();
+                    estatusRevision.setIdEstatus(cursor.getInt(0));
+                    estatusRevision.setDescripcion(cursor.getString(1));
+                    estatusRevision.setImagen(cursor.getString(2));
+                    listEstatusRevision.add(estatusRevision);
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return listEstatusRevision;
+    }
+
+    public void deleteEstatusRevision(){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        db.execSQL("delete from "+ TP_CAT_ESTATUS_REVISION);
         db.close();
     }
 }

@@ -53,7 +53,14 @@
                 android:id="@+id/buttonBorrar"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@mipmap/ic_borrar" />
+                android:background="@mipmap/ic_borrar"
+                android:layout_marginEnd="15dp"/>
+
+            <Button
+                android:id="@+id/buttonHistorico"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@mipmap/ic_historico" />
 
         </LinearLayout>
 

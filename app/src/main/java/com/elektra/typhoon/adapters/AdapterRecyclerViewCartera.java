@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -20,11 +21,13 @@ import com.bumptech.glide.Glide;
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.checklist.ChecklistBarcos;
 import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.database.CatalogosDBMethods;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.json.SincronizacionJSON;
 import com.elektra.typhoon.objetos.request.SincronizacionData;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.response.ChecklistData;
+import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.FolioRevision;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.PreguntaData;
@@ -65,6 +68,7 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
         public TextView textViewDescripcion;
         public ImageView imageViewSincronizar;
         public RelativeLayout relativeLayoutSincronizar;
+        public ImageView imageViewEstatus;
 
         public ItemViewHolder(View v) {
             super(v);
@@ -73,6 +77,7 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
             textViewDescripcion = v.findViewById(R.id.textViewDescripcion);
             imageViewSincronizar = v.findViewById(R.id.imageViewSincronizar);
             relativeLayoutSincronizar = v.findViewById(R.id.relativeLayoutSincronizar);
+            imageViewEstatus = v.findViewById(R.id.imageViewEstatus);
             v.setOnClickListener(this);
         }
 
@@ -83,6 +88,7 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
             intent.putExtra(Constants.INTENT_FOLIO_TAG,folioRevision.getIdRevision());
             intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG,folioRevision.getFechaInicio());
             intent.putExtra(Constants.INTENT_FECHA_FIN_TAG,folioRevision.getFechaFin());
+            intent.putExtra(Constants.INTENT_ESTATUS_TAG,folioRevision.getEstatus());
             activity.startActivity(intent);
         }
     }
@@ -118,12 +124,39 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
         return null;
     }
 
+    private Drawable getEstatusImagen(int estatus){
+        List<EstatusRevision> listEstatusRevision = new CatalogosDBMethods(activity).readEstatusRevision("WHERE ID_ESTATUS = ?",new String[]{String.valueOf(estatus)});
+        if(listEstatusRevision.size() != 0){
+            String imagen = listEstatusRevision.get(0).getImagen();
+            if(imagen.contains("status-1")){
+                return activity.getResources().getDrawable(R.drawable.status_1);
+            }else if(imagen.contains("status-2")){
+                return activity.getResources().getDrawable(R.drawable.status_2);
+            }else if(imagen.contains("status-3")){
+                return activity.getResources().getDrawable(R.drawable.status_3);
+            }else if(imagen.contains("status-4")){
+                return activity.getResources().getDrawable(R.drawable.status_4);
+            }else if(imagen.contains("status-5")){
+                return activity.getResources().getDrawable(R.drawable.status_5);
+            }else if(imagen.contains("status-6")){
+                return activity.getResources().getDrawable(R.drawable.status_6);
+            }else{
+                return activity.getResources().getDrawable(R.drawable.status_1);
+            }
+        }else{
+            return activity.getResources().getDrawable(R.drawable.status_1);
+        }
+    }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
         if (holder instanceof ItemViewHolder) {
             //((ItemViewHolder)holder).textViewFolio.setText("Folio:" + folios.get(position).getFolio());
             //((ItemViewHolder)holder).textViewFecha.setText(folios.get(position).getFecha());
             //((ItemViewHolder)holder).textViewDescripcion.setText(folios.get(position).getDescripcion());
+
+            ((ItemViewHolder)holder).imageViewEstatus.setImageDrawable(getEstatusImagen(folios.get(position).getEstatus()));
+
             ((ItemViewHolder)holder).textViewFolio.setText("" + folios.get(position).getIdRevision());
             ((ItemViewHolder)holder).textViewFecha.setText(Utils.getDateMonth(folios.get(position).getFechaInicio()));
             ((ItemViewHolder)holder).textViewDescripcion.setText(folios.get(position).getNombre());

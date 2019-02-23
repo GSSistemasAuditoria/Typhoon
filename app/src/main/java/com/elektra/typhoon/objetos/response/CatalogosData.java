@@ -30,6 +30,10 @@ public class CatalogosData {
     @Expose
     private List<TipoRespuesta> listTiposRespuesta;//*/
 
+    @SerializedName("EstatusRevision")
+    @Expose
+    private List<EstatusRevision> listEstatusRevision;
+
     public List<Barco> getListBarcos() {
         return listBarcos;
     }
@@ -61,4 +65,12 @@ public class CatalogosData {
     public void setListTiposRespuesta(List<TipoRespuesta> listTiposRespuesta) {
         this.listTiposRespuesta = listTiposRespuesta;
     }//*/
+
+    public List<EstatusRevision> getListEstatusRevision() {
+        return listEstatusRevision;
+    }
+
+    public void setListEstatusRevision(List<EstatusRevision> listEstatusRevision) {
+        this.listEstatusRevision = listEstatusRevision;
+    }
 }

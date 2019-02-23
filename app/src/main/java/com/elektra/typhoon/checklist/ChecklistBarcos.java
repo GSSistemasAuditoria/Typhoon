@@ -27,6 +27,7 @@ import com.elektra.typhoon.adapters.AdapterExpandableChecklist;
 import com.elektra.typhoon.adapters.SpinnerBarcosAdapter;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.BarcoDBMethods;
+import com.elektra.typhoon.database.CatalogosDBMethods;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.FoliosDBMethods;
@@ -34,7 +35,9 @@ import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.objetos.response.Barco;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
+import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
 import com.elektra.typhoon.objetos.response.ChecklistData;
+import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.PreguntaData;
@@ -67,6 +70,7 @@ public class ChecklistBarcos extends AppCompatActivity{
     private int folio;
     private String fechaInicio;
     private String fechaFin;
+    private int estatus;
     private TextView textViewValorTotal;
     private TextView textViewCumplenValor;
     private TextView textViewNoCumplenValor;
@@ -80,6 +84,7 @@ public class ChecklistBarcos extends AppCompatActivity{
         folio = getIntent().getIntExtra(Constants.INTENT_FOLIO_TAG, 0);
         fechaInicio = getIntent().getStringExtra(Constants.INTENT_FECHA_INICIO_TAG);
         fechaFin = getIntent().getStringExtra(Constants.INTENT_FECHA_FIN_TAG);
+        estatus = getIntent().getIntExtra(Constants.INTENT_ESTATUS_TAG,0);
 
         spinnerBarco = (Spinner) findViewById(R.id.spinnerBarcos);
         textViewNombreBarco = (TextView) findViewById(R.id.textViewNombreBarco);
@@ -91,10 +96,15 @@ public class ChecklistBarcos extends AppCompatActivity{
         TextView textViewFolio = findViewById(R.id.textViewFolio);
         TextView textViewFechaInicio = findViewById(R.id.textViewFechaInicio);
         TextView textViewFechaFin = findViewById(R.id.textViewFechaFin);
+        TextView textViewTituloChecklist = findViewById(R.id.textViewTituloChecklist);
+
+        List<EstatusRevision> listEstatusRevision = new CatalogosDBMethods(this).readEstatusRevision("WHERE ID_ESTATUS = ?",new String[]{String.valueOf(estatus)});
 
         textViewFolio.setText("" + folio);
-        textViewFechaInicio.setText(fechaSinHoras(fechaInicio));
-        textViewFechaFin.setText(fechaSinHoras(fechaFin));//*/
+        textViewFechaInicio.setText(Utils.getDateMonth(fechaInicio));
+        if(listEstatusRevision.size() != 0){
+            textViewFechaFin.setText(listEstatusRevision.get(0).getDescripcion());
+        }
 
         listCatalogoBarcos = new BarcoDBMethods(this).readBarcos(null, null);
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(this);
@@ -107,6 +117,7 @@ public class ChecklistBarcos extends AppCompatActivity{
 
         if (listChecklist.size() != 0) {
             ChecklistData checklistData = listChecklist.get(0);
+            textViewTituloChecklist.setText(checklistData.getNombre());
             for (CatalogoBarco catalogoBarco : listCatalogoBarcos) {
                 List<RubroData> listRubros = checklistDBMethods.readRubro("WHERE ID_REVISION = ? AND ID_CHECKLIST = ?",
                         new String[]{String.valueOf(checklistData.getIdRevision()), String.valueOf(checklistData.getIdChecklist())});

@@ -72,7 +72,7 @@
                 android:textColor="@color/blanco"
                 android:layout_marginEnd="3dp"
                 android:textStyle="bold"
-                android:text="@string/inicio_tag"/>
+                android:text="@string/mes_revision_tag"/>
 
             <TextView
                 android:id="@+id/textViewFechaInicio"
@@ -80,7 +80,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:padding="3dp"
-                android:text="01-01-2019"
                 android:textStyle="bold"
                 android:textColor="@color/azulClaro" />
 
@@ -90,7 +89,7 @@
                 android:textColor="@color/blanco"
                 android:layout_marginEnd="3dp"
                 android:textStyle="bold"
-                android:text="@string/fin_tag"/>
+                android:text="@string/estatus_tag"/>
 
             <TextView
                 android:id="@+id/textViewFechaFin"
@@ -99,7 +98,7 @@
                 android:textColor="@color/azulClaro"
                 android:padding="3dp"
                 android:textStyle="bold"
-                android:text="01-01-2019"/>
+                />
 
         </LinearLayout>
 
@@ -167,13 +166,25 @@
             android:padding="10dp"
             android:background="@drawable/drawable_back_checklist">
 
+            <TextView
+                android:id="@+id/textViewTituloChecklist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                android:textColor="@color/azul"
+                />
+
             <android.support.v7.widget.CardView
                 android:id="@+id/cardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 app:cardElevation="1dp"
                 app:cardCornerRadius="4dp"
+                android:layout_below="@+id/textViewTituloChecklist"
                 app:cardBackgroundColor="@color/blanco">
 
                 <RelativeLayout

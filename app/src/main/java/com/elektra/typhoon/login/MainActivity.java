@@ -1,6 +1,7 @@
 package com.elektra.typhoon.login;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.carteraFolios.CarteraFolios;
@@ -102,13 +104,26 @@ public class MainActivity extends AppCompatActivity {
         entrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ResponseLogin.Usuario usuarioDB = new UsuarioDBMethods(getApplicationContext()).readUsuario(null,null);
                 usuario = editTextUsuario.getText().toString();
                 contrasena = editTextContrasena.getText().toString();
                 if(!usuario.equals("")){
-                    if(!contrasena.equals("")){
-                        iniciarSesion(usuario,contrasena);
-                    }else{
-                        Utils.message(getApplicationContext(),"Debe introducir la contraseña");
+                    if(usuarioDB == null){
+                        if (!contrasena.equals("")) {
+                            iniciarSesion(usuario, contrasena);
+                        } else {
+                            Utils.message(getApplicationContext(), "Debe introducir la contraseña");
+                        }
+                    }else {
+                        if (usuarioDB.getCorreo().equals(usuario) || usuarioDB.getIdUsuario().equals(usuario)) {
+                            if (!contrasena.equals("")) {
+                                iniciarSesion(usuario, contrasena);
+                            } else {
+                                Utils.message(getApplicationContext(), "Debe introducir la contraseña");
+                            }
+                        } else {
+                            nuevaInstalacionDialog(usuarioDB.getNombre());
+                        }
                     }
                 }else{
                     Utils.message(getApplicationContext(),"Debe introducir id de empleado o su correo");
@@ -338,4 +353,53 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }//*/
+
+    private void nuevaInstalacionDialog(String usuario){
+        LayoutInflater li = LayoutInflater.from(MainActivity.this);
+        LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_layout, null);
+
+        TextView textViewCancelar = (TextView) layoutDialog.findViewById(R.id.buttonCancelar);
+        TextView textViewAceptar = (TextView) layoutDialog.findViewById(R.id.buttonAceptar);
+        TextView textViewTitulo = (TextView) layoutDialog.findViewById(R.id.textViewDialogTitulo);
+        LinearLayout linearLayoutCancelar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCancelar);
+        LinearLayout linearLayoutAceptar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutAceptar);
+
+        textViewTitulo.setText("La sesión iniciada corresponde a: " + usuario + ", desea iniciar sesión con otro usuario?");
+
+        final AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                .setView(layoutDialog)
+                .show();
+
+        textViewCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        linearLayoutCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        textViewAceptar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //new NuevaInstalacion(CarteraFolios.this).execute();
+                Utils.nuevaInstalacionDialog(MainActivity.this);
+                dialog.dismiss();
+            }
+        });
+
+        linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //new NuevaInstalacion(CarteraFolios.this).execute();
+                Utils.nuevaInstalacionDialog(MainActivity.this);
+                dialog.dismiss();
+            }
+        });
+    }
 }

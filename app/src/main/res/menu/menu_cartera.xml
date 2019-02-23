@@ -14,4 +14,10 @@
         android:icon="@mipmap/ic_descarga_catalogos"
         />
 
+    <item
+        android:id="@+id/nuevaInstalacion"
+        android:title="@string/nueva_instalacion_tag"
+        android:icon="@mipmap/ic_nueva_instalacion"
+        />
+
 </menu>

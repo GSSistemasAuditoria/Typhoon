@@ -39,4 +39,8 @@
     <string name="aceptar_tag">Aceptar</string>
     <string name="bienvenido_tag">¡Bienvenido</string>
     <string name="simbolo_exclamacion_tag">!</string>
+    <string name="nueva_instalacion_tag">Nueva instalación</string>
+    <string name="mes_revision_tag">Mes revisión:</string>
+    <string name="estatus_tag">Estatus:</string>
+    <string name="motivo_de_rechazo_tag">Motivo de rechazo:</string>
 </resources>

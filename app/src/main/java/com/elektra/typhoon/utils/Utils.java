@@ -43,11 +43,13 @@ import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.response.Barco;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
 import com.elektra.typhoon.objetos.response.EstatusEvidencia;
+import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.EtapaEvidencia;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.TipoRespuesta;
 import com.elektra.typhoon.service.ApiInterface;
+import com.elektra.typhoon.service.NuevaInstalacion;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -356,6 +358,12 @@ public class Utils {
                                 catalogosDBMethods.deleteTipoRespuesta();
                                 for(TipoRespuesta tipoRespuesta:response.body().getCatalogos().getCatalogosData().getListTiposRespuesta()){
                                     catalogosDBMethods.createTipoRespuesta(tipoRespuesta);
+                                }
+                            }
+                            if(response.body().getCatalogos().getCatalogosData().getListEstatusRevision() != null){
+                                catalogosDBMethods.deleteEstatusRevision();
+                                for(EstatusRevision estatusRevision:response.body().getCatalogos().getCatalogosData().getListEstatusRevision()){
+                                    catalogosDBMethods.createEstatusRevision(estatusRevision);
                                 }
                             }
                             progressDialog.dismiss();
@@ -686,5 +694,49 @@ public class Utils {
             e1.printStackTrace();
         }
         return c;
+    }
+
+    public static void nuevaInstalacionDialog(final Activity activity){
+        LayoutInflater li = LayoutInflater.from(activity);
+        LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_nueva_instalacion_layout, null);
+
+        TextView textViewCancelar = (TextView) layoutDialog.findViewById(R.id.buttonCancelar);
+        TextView textViewAceptar = (TextView) layoutDialog.findViewById(R.id.buttonAceptar);
+        LinearLayout linearLayoutCancelar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCancelar);
+        LinearLayout linearLayoutAceptar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutAceptar);
+
+        final AlertDialog dialog = new AlertDialog.Builder(activity)
+                .setView(layoutDialog)
+                .show();
+
+        textViewCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        linearLayoutCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        textViewAceptar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new NuevaInstalacion(activity).execute();
+                dialog.dismiss();
+            }
+        });
+
+        linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new NuevaInstalacion(activity).execute();
+                dialog.dismiss();
+            }
+        });
     }
 }

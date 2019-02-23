@@ -78,6 +78,8 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                             ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(context);
                             EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(context);
                             for (ChecklistData checklistData : response.body().getSincronizacion().getSincronizacionResponseData().getListChecklist()) {
+                                evidenciasDBMethods.deleteEvidencia("ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_ESTATUS != 1 AND ID_ETAPA != 1",
+                                        new String[]{String.valueOf(idRevision),String.valueOf(checklistData.getIdChecklist())});
                                 checklistData.setIdRevision(idRevision);
                                 checklistDBMethods.createChecklist(checklistData);
                                 if (checklistData.getListRubros() != null) {
@@ -101,6 +103,8 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                                         evidenciasDBMethods.createEvidencia(evidencia);
                                                         System.out.println();
                                                     }
+                                                }else{
+
                                                 }
                                             }
                                         }

@@ -2,6 +2,7 @@ package com.elektra.typhoon.carteraFolios;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -50,6 +51,8 @@ import com.elektra.typhoon.objetos.response.ResponseCartera;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import com.elektra.typhoon.service.NuevaInstalacion;
 import com.elektra.typhoon.utils.Utils;
 import com.google.gson.Gson;
 
@@ -206,6 +209,8 @@ public class CarteraFolios extends AppCompatActivity {
                             finish();
                         }else if(item.getItemId() == R.id.actualizarCatalogos){
                             Utils.descargaCatalogos(CarteraFolios.this,2);
+                        }else if(item.getItemId() == R.id.nuevaInstalacion){
+                            Utils.nuevaInstalacionDialog(CarteraFolios.this);
                         }
                         return true;
                     }
@@ -273,4 +278,48 @@ public class CarteraFolios extends AppCompatActivity {
             }
         });
     }
+
+    /*private void nuevaInstalacionDialog(final Activity activity){
+        LayoutInflater li = LayoutInflater.from(activity);
+        LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_nueva_instalacion_layout, null);
+
+        TextView textViewCancelar = (TextView) layoutDialog.findViewById(R.id.buttonCancelar);
+        TextView textViewAceptar = (TextView) layoutDialog.findViewById(R.id.buttonAceptar);
+        LinearLayout linearLayoutCancelar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCancelar);
+        LinearLayout linearLayoutAceptar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutAceptar);
+
+        final AlertDialog dialog = new AlertDialog.Builder(activity)
+                .setView(layoutDialog)
+                .show();
+
+        textViewCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        linearLayoutCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        textViewAceptar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new NuevaInstalacion(CarteraFolios.this).execute();
+                dialog.dismiss();
+            }
+        });
+
+        linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new NuevaInstalacion(CarteraFolios.this).execute();
+                dialog.dismiss();
+            }
+        });
+    }//*/
 }
