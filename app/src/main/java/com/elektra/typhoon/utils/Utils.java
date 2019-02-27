@@ -38,6 +38,7 @@ import com.elektra.typhoon.carteraFolios.CarteraFolios;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.CatalogosDBMethods;
+import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.response.Barco;
@@ -47,6 +48,7 @@ import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.EtapaEvidencia;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
+import com.elektra.typhoon.objetos.response.RolUsuario;
 import com.elektra.typhoon.objetos.response.TipoRespuesta;
 import com.elektra.typhoon.service.ApiInterface;
 import com.elektra.typhoon.service.NuevaInstalacion;
@@ -364,6 +366,12 @@ public class Utils {
                                 catalogosDBMethods.deleteEstatusRevision();
                                 for(EstatusRevision estatusRevision:response.body().getCatalogos().getCatalogosData().getListEstatusRevision()){
                                     catalogosDBMethods.createEstatusRevision(estatusRevision);
+                                }
+                            }
+                            if(response.body().getCatalogos().getCatalogosData().getListRolesUsuario() != null){
+                                catalogosDBMethods.deleteRolesUsuario();
+                                for(RolUsuario rolUsuario:response.body().getCatalogos().getCatalogosData().getListRolesUsuario()){
+                                    catalogosDBMethods.createRolUsuario(rolUsuario);
                                 }
                             }
                             progressDialog.dismiss();
@@ -738,5 +746,41 @@ public class Utils {
                 dialog.dismiss();
             }
         });
+    }
+
+    public static String getEtapa(Context context,int etapa){
+        List<EtapaEvidencia> listEtapa = new CatalogosDBMethods(context).readEtapaEvidencia("WHERE ID_ETAPA = ?",new String[]{String.valueOf(etapa)});
+        if(listEtapa.size() != 0){
+            return listEtapa.get(0).getDescripcion();
+        }else{
+            return "";
+        }
+    }
+
+    public static String getRol(Context context,int idRol){
+        List<RolUsuario> listRoles = new CatalogosDBMethods(context).readRolesUsuario("WHERE ID_ROL = ?",new String[]{String.valueOf(idRol)});
+        if(listRoles.size() != 0){
+            return listRoles.get(0).getDescripcion();
+        }else{
+            return "";
+        }
+    }
+
+    public static String getEstatusEvidencia(Context context,int idEstatus){
+        List<EstatusEvidencia> listEstatusEvidencia = new CatalogosDBMethods(context).readEstatusEvidencia("WHERE ID_ESTATUS = ?",new String[]{String.valueOf(idEstatus)});
+        if(listEstatusEvidencia.size() != 0){
+            return listEstatusEvidencia.get(0).getDescripcion();
+        }else{
+            return "";
+        }
+    }
+
+    public static String getEtapaEvidencia(Context context,int idEtapa){
+        List<EtapaEvidencia> listEtapa = new CatalogosDBMethods(context).readEtapaEvidencia("WHERE ID_ETAPA = ?",new String[]{String.valueOf(idEtapa)});
+        if(listEtapa.size() != 0){
+            return listEtapa.get(0).getDescripcion();
+        }else{
+            return "";
+        }
     }
 }

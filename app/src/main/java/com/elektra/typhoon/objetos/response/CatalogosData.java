@@ -34,6 +34,10 @@ public class CatalogosData {
     @Expose
     private List<EstatusRevision> listEstatusRevision;
 
+    @SerializedName("CatalogoRolesUsuario")
+    @Expose
+    private List<RolUsuario> listRolesUsuario;
+
     public List<Barco> getListBarcos() {
         return listBarcos;
     }
@@ -72,5 +76,13 @@ public class CatalogosData {
 
     public void setListEstatusRevision(List<EstatusRevision> listEstatusRevision) {
         this.listEstatusRevision = listEstatusRevision;
+    }
+
+    public List<RolUsuario> getListRolesUsuario() {
+        return listRolesUsuario;
+    }
+
+    public void setListRolesUsuario(List<RolUsuario> listRolesUsuario) {
+        this.listRolesUsuario = listRolesUsuario;
     }
 }

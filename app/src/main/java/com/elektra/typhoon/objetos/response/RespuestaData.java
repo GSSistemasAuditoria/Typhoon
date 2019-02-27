@@ -1,5 +1,7 @@
 package com.elektra.typhoon.objetos.response;
 
+import android.support.annotation.Nullable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -34,7 +36,7 @@ public class RespuestaData {
 
     @SerializedName("ID_RESPUESTA")
     @Expose
-    private int idRespuesta;
+    private Integer idRespuesta;
 
     @SerializedName("ID_REVISION")
     @Expose
@@ -84,11 +86,11 @@ public class RespuestaData {
         this.idRegistro = idRegistro;
     }
 
-    public int getIdRespuesta() {
+    public Integer getIdRespuesta() {
         return idRespuesta;
     }
 
-    public void setIdRespuesta(int idRespuesta) {
+    public void setIdRespuesta(Integer idRespuesta) {
         this.idRespuesta = idRespuesta;
     }
 

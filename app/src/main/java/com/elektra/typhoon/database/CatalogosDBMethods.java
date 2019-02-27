@@ -9,6 +9,7 @@ import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.objetos.response.EstatusEvidencia;
 import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.EtapaEvidencia;
+import com.elektra.typhoon.objetos.response.RolUsuario;
 import com.elektra.typhoon.objetos.response.TipoRespuesta;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class CatalogosDBMethods {
     public static final String TP_CAT_CL_ETAPA_EVIDENCIA = "TP_CAT_CL_ETAPA_EVIDENCIA";
     public static final String TP_CAT_CL_RESPUESTA = "TP_CAT_CL_RESPUESTA";
     public static final String TP_CAT_ESTATUS_REVISION = "TP_CAT_ESTATUS_REVISION";
+    public static final String TP_CAT_ROLES_USUARIO = "TP_CAT_ROLES_USUARIO";
 
     public static String QUERY_CREATE_TABLE_TP_CAT_CL_ESTATUS_EVIDENCIA = "CREATE TABLE " + TP_CAT_CL_ESTATUS_EVIDENCIA + " (" +
             "ID_ESTATUS INTEGER PRIMARY KEY, " +
@@ -214,6 +216,50 @@ public class CatalogosDBMethods {
     public void deleteEstatusRevision(){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         db.execSQL("delete from "+ TP_CAT_ESTATUS_REVISION);
+        db.close();
+    }
+
+    //**********************************************************************************************
+
+    public static String QUERY_CREATE_TABLE_ROLES_USUARIO = "CREATE TABLE " + TP_CAT_ROLES_USUARIO + " (" +
+            "ID_ROL INTEGER PRIMARY KEY, " +
+            "DESCRIPCION TEXT)";
+
+    public void createRolUsuario(RolUsuario rolUsuario){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        ContentValues values = new ContentValues();
+        values.put("ID_ROL",rolUsuario.getIdRol());
+        values.put("DESCRIPCION",rolUsuario.getDescripcion());
+        db.insertWithOnConflict(TP_CAT_ROLES_USUARIO, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        db.close();
+    }
+
+    public List<RolUsuario> readRolesUsuario(String condition, String[] args){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        List<RolUsuario> listRolesUsuario = new ArrayList<>();
+        String query = "SELECT ID_ROL,DESCRIPCION FROM " + TP_CAT_ROLES_USUARIO;
+        if(condition != null){
+            query = query + " " + condition;
+        }
+        Cursor cursor = db.rawQuery(query,args);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    RolUsuario rolUsuario = new RolUsuario();
+                    rolUsuario.setIdRol(cursor.getInt(0));
+                    rolUsuario.setDescripcion(cursor.getString(1));
+                    listRolesUsuario.add(rolUsuario);
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return listRolesUsuario;
+    }
+
+    public void deleteRolesUsuario(){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        db.execSQL("delete from "+ TP_CAT_ROLES_USUARIO);
         db.close();
     }
 }

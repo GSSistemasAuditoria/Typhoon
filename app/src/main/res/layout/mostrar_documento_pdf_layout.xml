@@ -6,6 +6,21 @@
     android:layout_height="match_parent"
     android:background="@color/gris">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imageViewCloseDialog"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_alignParentEnd="true"
+            android:src="@mipmap/ic_close_dialog"/>
+
+    </RelativeLayout>
+
     <TextView
         android:id="@+id/textViewNombreDocumento"
         android:layout_width="match_parent"
@@ -60,7 +75,7 @@
                 android:id="@+id/buttonHistorico"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@mipmap/ic_historico" />
+                android:background="@drawable/historial_icono" />
 
         </LinearLayout>
 

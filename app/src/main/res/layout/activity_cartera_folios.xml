@@ -47,9 +47,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:background="@color/azul">
+            android:background="@color/azulOscuro">
 
             <LinearLayout
+                android:id="@+id/linearLayoutUsuario"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -90,6 +91,15 @@
                     android:text="@string/simbolo_exclamacion_tag"/>
 
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/textViewRol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/blanco"
+                android:layout_below="@+id/linearLayoutUsuario"
+                android:layout_alignEnd="@+id/linearLayoutUsuario"
+                android:text="Rol"/>
 
         </RelativeLayout>
 

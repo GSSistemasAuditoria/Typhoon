@@ -278,7 +278,11 @@ public class ChecklistDBMethods {
                     respuestaData.setIdEstatus(cursor.getInt(4));
                     respuestaData.setIdBarco(cursor.getInt(5));
                     respuestaData.setIdRegistro(cursor.getInt(6));
-                    respuestaData.setIdRespuesta(cursor.getInt(7));
+                    if(cursor.getInt(7) == 0){
+                        respuestaData.setIdRespuesta(null);
+                    }else{
+                        respuestaData.setIdRespuesta(cursor.getInt(7));
+                    }
                     listRespuestas.add(respuestaData);
                 }while(cursor.moveToNext());
             }

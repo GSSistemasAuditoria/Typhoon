@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 /**
  * Proyecto: TYPHOON
  * Autor: Emmanuel Rangel Reyes
@@ -45,6 +47,10 @@ public class Evidencia {
     @SerializedName("LONGITUD")
     @Expose
     private double longitude;
+
+    @SerializedName("Historial")
+    @Expose
+    private List<Historico> listHistorico;
 
     private Bitmap smallBitmap;
     private Bitmap originalBitmap;
@@ -196,5 +202,13 @@ public class Evidencia {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public List<Historico> getListHistorico() {
+        return listHistorico;
+    }
+
+    public void setListHistorico(List<Historico> listHistorico) {
+        this.listHistorico = listHistorico;
     }
 }

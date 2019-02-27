@@ -41,6 +41,8 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_CL_ETAPA_EVIDENCIA);
         sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_CL_RESPUESTA);
         sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_ESTATUS_REVISION);
+        sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_ROLES_USUARIO);
+        sqLiteDatabase.execSQL(HistoricoDBMethods.QUERY_CREATE_TABLE_TP_TRAN_HISTORIAL_EVIDENCIA);
     }
 
     public void deleteAll(){
@@ -57,6 +59,8 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
         db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_CL_ETAPA_EVIDENCIA);
         db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_CL_RESPUESTA);
         db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_ESTATUS_REVISION);
+        db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_ROLES_USUARIO);
+        db.execSQL("delete from " + HistoricoDBMethods.TP_TRAN_HISTORIAL_EVIDENCIA);
         db.close();
     }
 

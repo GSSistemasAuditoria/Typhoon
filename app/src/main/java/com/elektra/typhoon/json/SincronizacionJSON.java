@@ -7,6 +7,7 @@ import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.FoliosDBMethods;
+import com.elektra.typhoon.database.HistoricoDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.objetos.Folio;
@@ -76,7 +77,7 @@ public class SincronizacionJSON {
                     if(usuario.getIdrol() == 1){
                         //idRol = "2";
                         listEvidencias = evidenciasDBMethods.readEvidencias("" +
-                                        "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_ETAPA = 2",
+                                        "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND (ID_ETAPA = 2) OR (ID_ETAPA = 1 AND ID_ESTATUS = 2)",
                                 new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
                                         String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta())},true);
                     //}if(usuario.getIdrol() == 2){
@@ -92,13 +93,19 @@ public class SincronizacionJSON {
                                     " AND ID_ESTATUS != 2",
                             new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
                                     String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),idRol},true);//*/
+
+                    for(Evidencia evidencia:listEvidencias){
+                        evidencia.setListHistorico(new HistoricoDBMethods(activity).readHistorico("WHERE ID_EVIDENCIA = ?",new String[]{evidencia.getIdEvidencia()}));
+                    }
+
                     preguntaData.setListEvidencias(listEvidencias);
                     listPreguntasPost.add(preguntaData);
                 }
                 rubro.setListPreguntas(listPreguntasPost);
             }
 
-            List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta("WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RESPUESTA != 0"
+            //List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta("WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RESPUESTA != 0"
+            List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta("WHERE ID_REVISION = ? AND ID_CHECKLIST = ?"
                 , new String[]{String.valueOf(checklistData.getIdRevision()), String.valueOf(checklistData.getIdChecklist())});
 
             sincronizacionData.setIdRevision(folio);

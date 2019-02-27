@@ -21,9 +21,80 @@
                 android:layout_height="50dp"
                 android:src="@drawable/typhoone_logo_bn" />
 
+            <Button
+                android:id="@+id/buttonSincronizarChecklist"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:background="@mipmap/ic_sincronizacion_blanco"/>
+
         </RelativeLayout>
 
     </android.support.v7.widget.Toolbar>
+
+    <RelativeLayout
+        android:id="@+id/relativeLayoutUsuario"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:layout_below="@+id/toolbarCartera"
+        android:background="@color/azulOscuro">
+
+        <LinearLayout
+            android:id="@+id/linearLayoutUsuario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="5dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="13dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="5dp"
+                android:background="@mipmap/ic_user_tp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/blanco"
+                android:textSize="12sp"
+                android:layout_gravity="center_vertical"
+                android:text="@string/bienvenido_tag"/>
+
+            <TextView
+                android:id="@+id/textViewNombreUsuario"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/blanco"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="5dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/blanco"
+                android:textSize="12sp"
+                android:layout_gravity="center_vertical"
+                android:text="@string/simbolo_exclamacion_tag"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textViewRol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/blanco"
+            android:layout_below="@+id/linearLayoutUsuario"
+            android:layout_alignEnd="@+id/linearLayoutUsuario"
+            android:text="Rol"/>
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/relativeLayout1"
@@ -33,7 +104,7 @@
         android:paddingEnd="10dp"
         android:paddingBottom="5dp"
         android:paddingTop="5dp"
-        android:layout_below="@+id/toolbarCartera"
+        android:layout_below="@+id/relativeLayoutUsuario"
         android:background="@color/azul">
 
         <LinearLayout

@@ -43,4 +43,9 @@
     <string name="mes_revision_tag">Mes revisión:</string>
     <string name="estatus_tag">Estatus:</string>
     <string name="motivo_de_rechazo_tag">Motivo de rechazo:</string>
+    <string name="historico_tag">Histórico</string>
+    <string name="estatus_general_tag">Estatus general:</string>
+    <string name="etapa_tag">Etapa:</string>
+    <string name="historial_de_validaciones_y_rechazos_tag">Historial de validaciones y rechazos:</string>
+    <string name="cerrar_tag">Cerrar</string>
 </resources>
