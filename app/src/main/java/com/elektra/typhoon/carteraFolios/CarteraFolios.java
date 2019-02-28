@@ -98,14 +98,6 @@ public class CarteraFolios extends AppCompatActivity {
         TextView textViewNombreUsuario = (TextView) findViewById(R.id.textViewNombreUsuario);
         TextView textViewRol = findViewById(R.id.textViewRol);
 
-        GPSTracker gps = new GPSTracker(this,2);
-        if(gps.canGetLocation()) {
-            double latitude = gps.getLatitude();
-            double longitude = gps.getLongitude();
-            Utils.message(this,"Lat: " + latitude + " Lon: " + longitude);
-            gps.stopUsingGPS();
-        }
-
         UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(this);
         ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario(null,null);
         if(usuario != null){
