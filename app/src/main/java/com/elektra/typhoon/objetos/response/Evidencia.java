@@ -61,6 +61,7 @@ public class Evidencia {
     //private int idRegistro;
     private String contenidoPreview;
     private int idBarco;
+    private int agregadoCoordinador;
 
     public Evidencia(){
 
@@ -210,5 +211,13 @@ public class Evidencia {
 
     public void setListHistorico(List<Historico> listHistorico) {
         this.listHistorico = listHistorico;
+    }
+
+    public int getAgregadoCoordinador() {
+        return agregadoCoordinador;
+    }
+
+    public void setAgregadoCoordinador(int agregadoCoordinador) {
+        this.agregadoCoordinador = agregadoCoordinador;
     }
 }

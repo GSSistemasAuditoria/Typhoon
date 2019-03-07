@@ -46,6 +46,7 @@ public class EvidenciasDBMethods {
 	        "ID_ETAPA INTEGER, " +
             "LATITUDE REAL, " +
             "LONGITUDE REAL, " +
+            "AGREGADO_COORDINADOR INTEGER, " +
             "PRIMARY KEY (ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_EVIDENCIA))";
 
     public void createEvidencia(Evidencia evidencia){
@@ -56,7 +57,7 @@ public class EvidenciasDBMethods {
         values.put("CONTENIDO",evidencia.getContenido());
         if(evidencia.getContenidoPreview() == null){
             try {
-                if(!evidencia.getNombre().contains("pdf")) {
+                if(!evidencia.getNombre().contains(".pdf") && !evidencia.getNombre().contains(".PDF")) {
                     if(evidencia.getContenido() != null) {
                         if(!evidencia.getContenido().equals("")) {
                             Bitmap bitmap = Utils.base64ToBitmap(evidencia.getContenido());
@@ -82,6 +83,7 @@ public class EvidenciasDBMethods {
         values.put("ID_BARCO",evidencia.getIdBarco());
         values.put("LATITUDE",evidencia.getLatitude());
         values.put("LONGITUDE",evidencia.getLongitude());
+        values.put("AGREGADO_COORDINADOR",evidencia.getAgregadoCoordinador());
         db.insertWithOnConflict(TP_TRAN_CL_EVIDENCIA, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -91,7 +93,7 @@ public class EvidenciasDBMethods {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<Evidencia> listEvidencia = new ArrayList<>();
         String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
-                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE FROM " + TP_TRAN_CL_EVIDENCIA;
+                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM " + TP_TRAN_CL_EVIDENCIA;
         if(condition != null){
             query = query + " " + condition;
         }
@@ -104,7 +106,7 @@ public class EvidenciasDBMethods {
                     evidencia.setNombre(cursor.getString(1));
                     //evidencia.setContenido(cursor.getString(2));
                     if(!flagJson) {
-                        if (!evidencia.getNombre().contains("pdf")) {
+                        if (!evidencia.getNombre().contains(".pdf") && !evidencia.getNombre().contains(".PDF")) {
                             evidencia.setSmallBitmap(Utils.base64ToBitmap(cursor.getString(2)));
                         }
                     }else{
@@ -120,6 +122,7 @@ public class EvidenciasDBMethods {
                     evidencia.setIdBarco(cursor.getInt(10));
                     evidencia.setLatitude(cursor.getDouble(12));
                     evidencia.setLongitude(cursor.getDouble(13));
+                    evidencia.setAgregadoCoordinador(cursor.getInt(14));
                     listEvidencia.add(evidencia);
                 }while(cursor.moveToNext());
             }
@@ -134,7 +137,7 @@ public class EvidenciasDBMethods {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         Evidencia evidencia = null;
         String query = "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
-                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,LATITUDE,LONGITUDE FROM " + TP_TRAN_CL_EVIDENCIA;
+                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM " + TP_TRAN_CL_EVIDENCIA;
         if(condition != null){
             query = query + " " + condition;
         }
@@ -145,7 +148,7 @@ public class EvidenciasDBMethods {
                     evidencia = new Evidencia();
                     evidencia.setIdEvidencia(cursor.getString(0));
                     evidencia.setNombre(cursor.getString(1));
-                    if(!evidencia.getNombre().contains("pdf")) {
+                    if(!evidencia.getNombre().contains(".pdf") && !evidencia.getNombre().contains(".PDF")) {
                         evidencia.setOriginalBitmap(Utils.base64ToBitmap(cursor.getString(2)));
                     }
                     evidencia.setContenido(cursor.getString(2));
@@ -161,6 +164,7 @@ public class EvidenciasDBMethods {
                     evidencia.setIdBarco(cursor.getInt(10));
                     evidencia.setLatitude(cursor.getDouble(11));
                     evidencia.setLongitude(cursor.getDouble(12));
+                    evidencia.setAgregadoCoordinador(cursor.getInt(13));
                 }while(cursor.moveToNext());
             }
         }

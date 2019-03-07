@@ -2,6 +2,7 @@ package com.elektra.typhoon.registro;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import com.elektra.typhoon.utils.Utils;
+
+import java.io.IOException;
 
 /**
  * Proyecto: TYPHOON
@@ -123,7 +126,8 @@ public class NuevoRegistro extends AppCompatActivity {
 
         ApiInterface mApiService = Utils.getInterfaceService();
 
-        Call<ResponseValidaUsuario> mService = mApiService.validaUsuarioExterno(correo);
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        Call<ResponseValidaUsuario> mService = mApiService.validaUsuarioExterno(sharedPreferences.getString(Constants.SP_JWT_TAG,""),correo);
         mService.enqueue(new Callback<ResponseValidaUsuario>() {
 
             @Override
@@ -138,7 +142,16 @@ public class NuevoRegistro extends AppCompatActivity {
                         Utils.message(getApplicationContext(), response.body().getValidaUsuario().getError());
                     }
                 }else{
-                    Utils.message(getApplicationContext(),"Error al validar usuario");
+                    if(response.errorBody() != null){
+                        try {
+                            Utils.message(getApplicationContext(), "Error al validar usuario: " + response.errorBody().string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Utils.message(getApplicationContext(), "Error al validar usuario: " + e.getMessage());
+                        }
+                    }else {
+                        Utils.message(getApplicationContext(), "Error al validar usuario");
+                    }
                 }
             }
 
@@ -156,7 +169,8 @@ public class NuevoRegistro extends AppCompatActivity {
 
         ApiInterface mApiService = Utils.getInterfaceService();
 
-        Call<ResponseNuevoUsuario> mService = mApiService.insertarNuevoUsuario(correo,password);
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        Call<ResponseNuevoUsuario> mService = mApiService.insertarNuevoUsuario(sharedPreferences.getString(Constants.SP_JWT_TAG,""),correo,password);
         mService.enqueue(new Callback<ResponseNuevoUsuario>() {
 
             @Override
@@ -170,7 +184,16 @@ public class NuevoRegistro extends AppCompatActivity {
                         Utils.message(getApplicationContext(), response.body().getNuevoUsuario().getError());
                     }
                 }else{
-                    Utils.message(getApplicationContext(),"Error al registrar usuario");
+                    if(response.errorBody() != null){
+                        try {
+                            Utils.message(getApplicationContext(), "Error al registrar usuario: " + response.errorBody().string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Utils.message(getApplicationContext(), "Error al registrar usuario: " + e.getMessage());
+                        }
+                    }else {
+                        Utils.message(getApplicationContext(), "Error al registrar usuario");
+                    }
                 }
             }
 

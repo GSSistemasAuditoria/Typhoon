@@ -12,7 +12,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.elektra.typhoon.R;
+import com.elektra.typhoon.database.ChecklistDBMethods;
+import com.elektra.typhoon.objetos.response.ChecklistData;
 import com.elektra.typhoon.objetos.response.Pregunta;
+import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
 import com.elektra.typhoon.utils.Utils;
@@ -35,6 +38,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
     private TextView textViewCumplen;
     private TextView textViewNoCumplen;
     private String fechaFolio;
+    private int idBarco;
 
     public AdapterRecycleViewPreguntas getAdapterRecycleViewPreguntasTemp() {
         return adapterRecycleViewPreguntasTemp;
@@ -48,12 +52,13 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         return rubroPosition;
     }
 
-    public AdapterExpandableChecklist(List<RubroData> listRubros, Activity activity,TextView textViewCumplen,TextView textViewNoCumplen,String fechaFolio){
+    public AdapterExpandableChecklist(List<RubroData> listRubros, Activity activity,TextView textViewCumplen,TextView textViewNoCumplen,String fechaFolio,int idBarco){
         this.listRubros = listRubros;
         this.activity = activity;
         this.textViewCumplen = textViewCumplen;
         this.textViewNoCumplen = textViewNoCumplen;
         this.fechaFolio = fechaFolio;
+        this.idBarco = idBarco;
     }
 
     @Override
@@ -132,7 +137,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
 
         //textViewTituloRubro.setText("Rubro " + i);
         AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntasTemp(),activity,i,
-                textViewCumplen,textViewNoCumplen,this,fechaFolio);
+                textViewCumplen,textViewNoCumplen,this,fechaFolio,idBarco);
         recyclerViewPreguntas.setAdapter(adapterRecycleViewPreguntas);
         LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
         recyclerViewPreguntas.setLayoutManager(layoutManager);
@@ -146,24 +151,55 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         return false;
     }
 
-    public void contarPreguntasCumplen(){
-        int cumple = 0;
+    public void contarPreguntasCumplen(int idBarco){
+        /*int cumple = 0;
         int noCumple = 0;
+        int numeroPreguntas = 0;//*/
+        int folio = 0;
+        int checklist = 0;
         for(RubroData rubro:listRubros){
-            for(Pregunta pregunta:rubro.getListPreguntasTemp()){
-                /*if(pregunta.isCumple()){
-                    cumple++;
-                }else{
-                    noCumple++;
-                }//*/
+            folio = rubro.getIdRevision();
+            checklist = rubro.getIdChecklist();
+            /*for(Pregunta pregunta:rubro.getListPreguntasTemp()){
                 if (Utils.aplicaPregunta(activity,pregunta.getListEvidencias())) {
                     cumple++;
                 } else {
                     noCumple++;
                 }
+                numeroPreguntas++;
+            }//*/
+        }
+
+        ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
+        List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta("WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_BARCO = ?",
+                new String[]{String.valueOf(folio),String.valueOf(checklist),String.valueOf(idBarco)});
+        int cumple = 0;
+        int noCumple = 0;
+        for(RespuestaData respuestaData:listRespuestas){
+            if(respuestaData.getIdRespuesta() != null) {
+                if (respuestaData.getIdRespuesta() == 2) {
+                    cumple++;
+                }
+                if (respuestaData.getIdRespuesta() == 3) {
+                    noCumple++;
+                }
+            }else{
+                noCumple++;
             }
         }
+
         textViewCumplen.setText(String.valueOf(cumple));
         textViewNoCumplen.setText(String.valueOf(noCumple));
+
+        /*ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
+        ChecklistData checklist = checklistDBMethods.readChecklist("WHERE ID_REVISION = ?",new String[]{String.valueOf(folio)});
+        List<Pregunta> listPreguntas = checklistDBMethods.readPregunta("WHERE ID_REVISION = ? AND ID_CHECKLIST = ?",new String[]{String.valueOf(checklist.getIdRevision())
+        ,String.valueOf(checklist.getIdChecklist())});
+
+        int numeroPreguntasVisualizadas = listPreguntas.size();
+        int diferenciaPreguntas = numeroPreguntasVisualizadas - numeroPreguntas;
+
+        textViewCumplen.setText(String.valueOf(cumple));
+        textViewNoCumplen.setText(String.valueOf(noCumple+diferenciaPreguntas));//*/
     }
 }

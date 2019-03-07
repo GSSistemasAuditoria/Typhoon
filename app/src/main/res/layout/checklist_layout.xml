@@ -92,6 +92,7 @@
             android:textColor="@color/blanco"
             android:layout_below="@+id/linearLayoutUsuario"
             android:layout_alignEnd="@+id/linearLayoutUsuario"
+            android:textSize="12sp"
             android:text="Rol"/>
 
     </RelativeLayout>
@@ -118,6 +119,7 @@
                 android:textColor="@color/blanco"
                 android:layout_marginEnd="3dp"
                 android:textStyle="bold"
+                android:textSize="12sp"
                 android:text="@string/folio_tag"/>
 
             <TextView
@@ -127,6 +129,7 @@
                 android:textColor="@color/azulClaro"
                 android:padding="3dp"
                 android:textStyle="bold"
+                android:textSize="12sp"
                 android:text="1001"/>
 
         </LinearLayout>
@@ -143,6 +146,7 @@
                 android:textColor="@color/blanco"
                 android:layout_marginEnd="3dp"
                 android:textStyle="bold"
+                android:textSize="12sp"
                 android:text="@string/mes_revision_tag"/>
 
             <TextView
@@ -152,6 +156,7 @@
                 android:layout_marginEnd="10dp"
                 android:padding="3dp"
                 android:textStyle="bold"
+                android:textSize="12sp"
                 android:textColor="@color/azulClaro" />
 
             <TextView
@@ -160,6 +165,7 @@
                 android:textColor="@color/blanco"
                 android:layout_marginEnd="3dp"
                 android:textStyle="bold"
+                android:textSize="12sp"
                 android:text="@string/estatus_tag"/>
 
             <TextView
@@ -168,6 +174,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/azulClaro"
                 android:padding="3dp"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 />
 
@@ -277,6 +284,7 @@
                             android:textColor="@color/azul"
                             android:textStyle="bold"
                             android:layout_marginEnd="5dp"
+                            android:textSize="12sp"
                             android:text="@string/cumplen_tag"/>
 
                         <TextView
@@ -291,6 +299,7 @@
                             android:paddingEnd="7dp"
                             android:layout_marginEnd="10dp"
                             android:textColor="@color/blanco"
+                            android:textSize="12sp"
                             android:text="0"/>
 
                         <TextView
@@ -300,6 +309,7 @@
                             android:textColor="@color/azul"
                             android:textStyle="bold"
                             android:layout_marginEnd="5dp"
+                            android:textSize="12sp"
                             android:text="@string/no_cumplen_tag"/>
 
                         <TextView
@@ -314,6 +324,7 @@
                             android:paddingStart="7dp"
                             android:paddingEnd="7dp"
                             android:layout_marginEnd="10dp"
+                            android:textSize="12sp"
                             android:text="0"/>
 
                         <TextView
@@ -323,6 +334,7 @@
                             android:textColor="@color/azul"
                             android:textStyle="bold"
                             android:layout_marginEnd="5dp"
+                            android:textSize="12sp"
                             android:text="@string/total_tag"/>
 
                         <TextView
@@ -336,6 +348,7 @@
                             android:paddingBottom="1dp"
                             android:paddingStart="7dp"
                             android:paddingEnd="7dp"
+                            android:textSize="12sp"
                             android:text="0"/>
 
                     </LinearLayout>

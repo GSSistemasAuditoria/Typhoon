@@ -33,6 +33,7 @@ import com.elektra.typhoon.R;
 import com.elektra.typhoon.adapters.AdapterRecyclerViewCartera;
 import com.elektra.typhoon.adapters.SpinnerAdapter;
 import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.FoliosDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.gps.GPSTracker;
@@ -43,6 +44,7 @@ import com.elektra.typhoon.objetos.request.SincronizacionData;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.response.FolioRevision;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
+import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.SincronizacionResponse;
 import com.elektra.typhoon.service.ApiInterface;
 import com.elektra.typhoon.objetos.request.CarteraData;
@@ -227,6 +229,8 @@ public class CarteraFolios extends AppCompatActivity {
         });
 
         //sincronizacionDialog();
+
+        setRadioGroup(1,5,50);
     }
 
     @Override
@@ -249,7 +253,10 @@ public class CarteraFolios extends AppCompatActivity {
         carteraData.setMes(mes);
         requestCartera.setCarteraData(carteraData);
 
-        Call<ResponseCartera> mService = mApiService.carteraRevisiones(requestCartera);
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+
+        //Call<ResponseCartera> mService = mApiService.carteraRevisiones(requestCartera);
+        Call<ResponseCartera> mService = mApiService.carteraRevisiones(sharedPreferences.getString(Constants.SP_JWT_TAG,""),requestCartera);
         mService.enqueue(new Callback<ResponseCartera>() {
 
             @Override
@@ -270,7 +277,16 @@ public class CarteraFolios extends AppCompatActivity {
                         Utils.message(getApplicationContext(), response.body().getCarteraRevisiones().getError());
                     }
                 }else{
-                    Utils.message(getApplicationContext(),"Error al descargar folios");
+                    if(response.errorBody() != null){
+                        try {
+                            Utils.message(getApplicationContext(), "Error al descargar folios: " + response.errorBody().string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Utils.message(getApplicationContext(), "Error al descargar folios: " + e.getMessage());
+                        }
+                    }else {
+                        Utils.message(getApplicationContext(), "Error al descargar folios");
+                    }
                 }
             }
 
@@ -325,4 +341,25 @@ public class CarteraFolios extends AppCompatActivity {
             }
         });
     }//*/
+
+    private void setRadioGroup(int idBarco,int idRevision,int idChecklist){
+        ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(getApplicationContext());
+        List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta("WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_BARCO = ?",
+                new String[]{String.valueOf(idRevision),String.valueOf(idChecklist),String.valueOf(idBarco)});
+        int cumple = 0;
+        int noCumple = 0;
+        for(RespuestaData respuestaData:listRespuestas){
+            if(respuestaData.getIdRespuesta() != null) {
+                if (respuestaData.getIdRespuesta() == 2) {
+                    cumple++;
+                }
+                if (respuestaData.getIdRespuesta() == 3) {
+                    noCumple++;
+                }
+            }else{
+                noCumple++;
+            }
+        }
+        System.out.println();
+    }
 }

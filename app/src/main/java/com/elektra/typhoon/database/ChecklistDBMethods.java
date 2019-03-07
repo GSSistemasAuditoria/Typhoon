@@ -187,6 +187,7 @@ public class ChecklistDBMethods {
             "ID_RUBRO INTEGER, " +
             "ESTATUS INTEGER, " +
             "DESCRIPCION TEXT, " +
+            "IS_TIERRA INTEGER, " +
             "PRIMARY KEY (ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA))";
 
     public void createPregunta(PreguntaData preguntaData){
@@ -199,6 +200,11 @@ public class ChecklistDBMethods {
         values.put("ID_TIPO_RESPUESTA",preguntaData.getIdTipoRespuesta());
         values.put("ESTATUS",preguntaData.getEstatus());
         values.put("DESCRIPCION",preguntaData.getDescripcion());
+        if(preguntaData.isTierra()){
+            values.put("IS_TIERRA",1);
+        }else{
+            values.put("IS_TIERRA",0);
+        }
         db.insertWithOnConflict(TP_CAT_CL_PREGUNTA, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -206,7 +212,7 @@ public class ChecklistDBMethods {
     public List<Pregunta> readPregunta(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<Pregunta> listPreguntas = new ArrayList<>();
-        String query = "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION FROM " + TP_CAT_CL_PREGUNTA;
+        String query = "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA FROM " + TP_CAT_CL_PREGUNTA;
         if(condition != null){
             query = query + " " + condition;
         }
@@ -222,6 +228,11 @@ public class ChecklistDBMethods {
                     pregunta.setIdRubro(cursor.getInt(4));
                     pregunta.setEstatus(cursor.getInt(5));
                     pregunta.setDescripcion(cursor.getString(6));
+                    if(cursor.getInt(7) == 1){
+                        pregunta.setTierra(true);
+                    }else{
+                        pregunta.setTierra(false);
+                    }
                     listPreguntas.add(pregunta);
                 }while(cursor.moveToNext());
             }

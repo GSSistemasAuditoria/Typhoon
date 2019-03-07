@@ -40,6 +40,8 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
+
 }
 
 apply plugin: 'com.google.gms.google-services'

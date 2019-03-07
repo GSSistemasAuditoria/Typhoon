@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
@@ -86,7 +87,8 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
             SincronizacionPost sincronizacionPost = new SincronizacionPost();
             sincronizacionPost.setSincronizacionData(sincronizacionData);
 
-            Call<SincronizacionResponse> mService = mApiService.sincronizacion(sincronizacionPost);
+            SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
+            Call<SincronizacionResponse> mService = mApiService.sincronizacion(sharedPreferences.getString(Constants.SP_JWT_TAG,""),sincronizacionPost);
             Response<SincronizacionResponse> response = mService.execute();
             if(response != null) {
                 if (response.body() != null) {
@@ -99,7 +101,8 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                 for (ChecklistData checklistData : response.body().getSincronizacion().getSincronizacionResponseData().getListChecklist()) {
                                     evidenciasDBMethods.deleteEvidencia("ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_ESTATUS != 1 AND ID_ETAPA != 1",
                                             new String[]{String.valueOf(idRevision), String.valueOf(checklistData.getIdChecklist())});
-                                    historicoDBMethods.deleteHistorico(null, null);//TODO: cambiar para borrar por folio y checklist
+                                    historicoDBMethods.deleteHistorico("ID_REVISION = ? AND ID_CHECKLIST = ?",
+                                            new String[]{String.valueOf(checklistData.getIdRevision()),String.valueOf(checklistData.getIdChecklist())});//TODO: cambiar para borrar por folio y checklist
                                     checklistData.setIdRevision(idRevision);
                                     checklistDBMethods.createChecklist(checklistData);
                                     if (checklistData.getListRubros() != null) {
@@ -162,13 +165,17 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                     }//*/
                 } else {
                     progressDialog.dismiss();
-                    return "No se pudo sincronizar";
+                    if(response.errorBody() != null){
+                        return "No se pudo sincronizar: " + response.errorBody().string();
+                    }else {
+                        return "No se pudo sincronizar";
+                    }
                 }
             }else{
                 progressDialog.dismiss();
                 return "No se pudo sincronizar";
             }
-        } catch (Exception e) {
+        } catch (Exception | OutOfMemoryError e) {
             e.printStackTrace();
             return "Error al sincronizar: " + e.getMessage();
         }

@@ -27,6 +27,7 @@ public class Pregunta {
     private int idRevision;
     private int idChecklist;
     private int idBarco;
+    private boolean isTierra;
 
     public Pregunta(){
 
@@ -125,5 +126,13 @@ public class Pregunta {
 
     public void setIdBarco(int idBarco) {
         this.idBarco = idBarco;
+    }
+
+    public boolean isTierra() {
+        return isTierra;
+    }
+
+    public void setTierra(boolean tierra) {
+        isTierra = tierra;
     }
 }

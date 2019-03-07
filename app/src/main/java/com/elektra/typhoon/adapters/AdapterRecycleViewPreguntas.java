@@ -2,16 +2,21 @@ package com.elektra.typhoon.adapters;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,12 +44,21 @@ import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.Historico;
 import com.elektra.typhoon.objetos.response.Pregunta;
+import com.elektra.typhoon.objetos.response.ResponseDescargaPdf;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
+import com.elektra.typhoon.objetos.response.RespuestaData;
+import com.elektra.typhoon.service.ApiInterface;
 import com.elektra.typhoon.utils.Utils;
 import com.github.barteksc.pdfviewer.PDFView;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Proyecto: TYPHOON
@@ -63,6 +77,10 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     private TextView textViewNoCumplen;
     private AdapterExpandableChecklist adapterExpandableChecklist;
     private String fechaFolio;
+    private int idBarco;
+    private AdapterRecycleViewPreguntas adapterRecycleViewPreguntas;
+    private final Handler handler = new Handler();
+    private AdapterRecycleViewPreguntas.MyViewHolder holderTemp;
 
     public int getIdRubro() {
         return idRubro;
@@ -80,6 +98,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         public HorizontalScrollView horizontalScrollView;
         public RadioGroup radioGroup;
         public TextView textViewPregunta;
+        public RelativeLayout relativeLayoutDescargaPdf;
+        public ImageView imageViewDescargaPdf;
 
         public MyViewHolder(View view) {
             super(view);
@@ -92,6 +112,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             radioGroup = (RadioGroup) view.findViewById(R.id.myRadioGroup);
             imageViewAgregaEvidencia = (ImageView) view.findViewById(R.id.imageViewAgregaEvidencias);
             textViewPregunta = (TextView) view.findViewById(R.id.textViewPregunta);
+            relativeLayoutDescargaPdf = view.findViewById(R.id.relativeLayoutDescargaPdf);
+            imageViewDescargaPdf = view.findViewById(R.id.imageViewDescargaPdf);
             //view.setOnClickListener(this);
         }
 
@@ -102,7 +124,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     }
 
     public AdapterRecycleViewPreguntas(List<Pregunta> listPreguntas,Activity activity,int idRubro,TextView textViewCumplen,
-                                       TextView textViewNoCumplen,AdapterExpandableChecklist adapterExpandableChecklist,String fechaFolio){
+                                       TextView textViewNoCumplen,AdapterExpandableChecklist adapterExpandableChecklist,String fechaFolio,int idBarco){
         this.activity = activity;
         this.listPreguntas = listPreguntas;
         this.idRubro = idRubro;
@@ -110,6 +132,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         this.textViewNoCumplen = textViewNoCumplen;
         this.adapterExpandableChecklist = adapterExpandableChecklist;
         this.fechaFolio = fechaFolio;
+        this.idBarco = idBarco;
+        this.adapterRecycleViewPreguntas = this;
     }
 
     @NonNull
@@ -123,12 +147,18 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     @Override
     public void onBindViewHolder(@NonNull final AdapterRecycleViewPreguntas.MyViewHolder holder, final int position) {
         //acciones
-        Pregunta pregunta = listPreguntas.get(position);
+        final Pregunta pregunta = listPreguntas.get(position);
         ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario(null,null);
         holder.linearLayout.setVisibility(View.GONE);
         holder.radioGroup.setEnabled(false);
         pregunta.setRadioGroup(holder.radioGroup);
         holder.textViewPregunta.setText(pregunta.getDescripcion());
+        holderTemp = holder;
+
+        List<RespuestaData> listRespuestas = new ChecklistDBMethods(activity).readRespuesta("WHERE ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                "AND ID_PREGUNTA = ? AND ID_RUBRO = ? AND ID_BARCO = ?",new String[]{String.valueOf(pregunta.getIdRevision()),
+                String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),String.valueOf(pregunta.getIdRubro()),
+                String.valueOf(idBarco)});
 
         if(usuario.getIdrol() == 1){
             holder.imageViewAddEvidencia.setVisibility(View.VISIBLE);
@@ -138,7 +168,23 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             holder.imageViewAddEvidencia.setVisibility(View.GONE);
             holder.imageViewAgregaEvidencia.setVisibility(View.GONE);
             holder.textViewAddEvidencias.setVisibility(View.GONE);
+            if(usuario.getIdrol() == 3 && pregunta.isTierra()){
+                holder.imageViewAddEvidencia.setVisibility(View.VISIBLE);
+                holder.imageViewAgregaEvidencia.setVisibility(View.VISIBLE);
+                holder.textViewAddEvidencias.setVisibility(View.VISIBLE);
+            }else{
+                holder.imageViewAddEvidencia.setVisibility(View.GONE);
+                holder.imageViewAgregaEvidencia.setVisibility(View.GONE);
+                holder.textViewAddEvidencias.setVisibility(View.GONE);
+            }
         }
+
+        holder.imageViewDescargaPdf.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                descargaPDF(pregunta.getIdPregunta());
+            }
+        });
 
         holder.textViewAddEvidencias.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -174,14 +220,14 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 holder.linearLayoutAddEvidencias.setVisibility(View.GONE);
                 for (Evidencia evidencia : pregunta.getListEvidencias()) {
                     //if (evidencia.getSmallBitmap() != null) {
-                    if(usuario.getIdrol() != 1){
+                    /*if(usuario.getIdrol() != 1){
                         if(evidencia.getIdEstatus() != 3){
                             holder.linearLayoutEvidencias.addView(insertEvidencia(evidencia.getSmallBitmap(), evidencia.getIdEvidencia(), position), 1);
                         }
                     }else{
                         holder.linearLayoutEvidencias.addView(insertEvidencia(evidencia.getSmallBitmap(), evidencia.getIdEvidencia(), position), 1);
-                    }
-                    //holder.linearLayoutEvidencias.addView(insertEvidencia(evidencia.getSmallBitmap(), evidencia.getIdEvidencia(), position), 1);
+                    }//*/
+                    holder.linearLayoutEvidencias.addView(insertEvidencia(evidencia.getSmallBitmap(), evidencia.getIdEvidencia(), position), 1);
                     //}
                 }
                 holder.horizontalScrollView.postDelayed(new Runnable() {
@@ -200,7 +246,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     holder.radioGroup.check(R.id.opcion2);
                     pregunta.setCumple(false);
                 }
-                adapterExpandableChecklist.contarPreguntasCumplen();
+                adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
             }else{
                 holder.linearLayout.setVisibility(View.GONE);
                 holder.linearLayoutAddEvidencias.setVisibility(View.VISIBLE);
@@ -219,7 +265,32 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 }
             }
         }
-        reiniciaRadioGroup(holder.radioGroup,pregunta.getListEvidencias());
+
+        if(listRespuestas.size() != 0){
+            for(RespuestaData respuestaData:listRespuestas){
+                if(respuestaData.getIdRespuesta() != null){
+                    if(respuestaData.getIdRespuesta() == 2){
+                        holder.radioGroup.check(R.id.opcion1);
+                    }else if(respuestaData.getIdRespuesta() == 3){
+                        holder.radioGroup.check(R.id.opcion2);
+                    }else{
+                        holder.radioGroup.clearCheck();
+                    }
+                }else{
+                    holder.radioGroup.clearCheck();
+                }
+
+                if(respuestaData.getIdEstatus() == 2){
+                    holder.relativeLayoutDescargaPdf.setVisibility(View.VISIBLE);
+                    holder.linearLayout.setVisibility(View.GONE);
+                    holder.linearLayoutAddEvidencias.setVisibility(View.GONE);
+                }else{
+                    holder.relativeLayoutDescargaPdf.setVisibility(View.GONE);
+                }
+            }
+        }
+
+        //reiniciaRadioGroup(holder.radioGroup,pregunta.getListEvidencias());
     }
 
     /*private ImageView insertEvidencia(Bitmap bitmap,String id,int numPregunta){
@@ -409,10 +480,17 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             if(usuario.getIdrol() == 1){
                 buttonNoCumple.setVisibility(View.GONE);
             }else{
-                buttonBorrar.setVisibility(View.GONE);
+                if(usuario.getIdrol() == 3){
+                    buttonBorrar.setVisibility(View.VISIBLE);
+                }else {
+                    buttonBorrar.setVisibility(View.GONE);
+                }
                 //buttonHistorico.setVisibility(View.GONE);
             }
         }
+
+        buttonCumple.setBackground(drawableCumpleVerde);
+        buttonNoCumple.setBackground(drawableNoCumpleRojo);
 
         for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
             if(evidencia.getIdEvidencia().equals(identificador)) {
@@ -428,35 +506,42 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
                 if(usuario.getIdrol() == 1) {
                     if (evidencia.getIdEtapa() != 1 && evidencia.getIdEstatus() == 1) {
-                        buttonCumple.setBackground(drawableCumpleVerde);
-                        buttonNoCumple.setBackground(drawableNoCumpleGris);
+                        //buttonCumple.setBackground(drawableCumpleVerde);
+                        //buttonNoCumple.setBackground(drawableNoCumpleGris);
                         buttonCumple.setVisibility(View.GONE);
                         buttonBorrar.setVisibility(View.GONE);
                     } else if (evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 3) {
-                        buttonCumple.setBackground(drawableCumpleGris);
-                        buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                        //buttonCumple.setBackground(drawableCumpleGris);
+                        //buttonNoCumple.setBackground(drawableNoCumpleRojo);
                         buttonCumple.setVisibility(View.GONE);
                     } else {
-                        buttonCumple.setBackground(drawableCumpleGris);
-                        buttonNoCumple.setBackground(drawableNoCumpleGris);
+                        //buttonCumple.setBackground(drawableCumpleGris);
+                        //buttonNoCumple.setBackground(drawableNoCumpleGris);
                     }
                     //}else if(usuario.getIdrol() == 2) {
                 }else{
                     if (evidencia.getIdEtapa() > usuario.getIdrol() && evidencia.getIdEstatus() == 1) {
-                        buttonCumple.setBackground(drawableCumpleVerde);
-                        buttonNoCumple.setBackground(drawableNoCumpleGris);
+                        //buttonCumple.setBackground(drawableCumpleVerde);
+                        //buttonNoCumple.setBackground(drawableNoCumpleGris);
                         buttonBorrar.setVisibility(View.GONE);
                         buttonCumple.setVisibility(View.GONE);
                         buttonNoCumple.setVisibility(View.GONE);
                     } else if (evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 3) {
-                        buttonCumple.setBackground(drawableCumpleGris);
-                        buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                        //buttonCumple.setBackground(drawableCumpleGris);
+                        //buttonNoCumple.setBackground(drawableNoCumpleRojo);
                         buttonBorrar.setVisibility(View.GONE);
                         buttonCumple.setVisibility(View.GONE);
                         buttonNoCumple.setVisibility(View.GONE);
                     } else {
-                        buttonCumple.setBackground(drawableCumpleGris);
-                        buttonNoCumple.setBackground(drawableNoCumpleGris);
+                        //buttonCumple.setBackground(drawableCumpleGris);
+                        //buttonNoCumple.setBackground(drawableNoCumpleGris);
+                    }
+
+                    if(evidencia.getAgregadoCoordinador() == 1){
+                        //buttonBorrar.setVisibility(View.VISIBLE);
+                        buttonNoCumple.setVisibility(View.GONE);
+                    }else{
+                        buttonBorrar.setVisibility(View.GONE);
                     }
                 }
                 textViewNombreDocumento.setText(evidencia.getNombre());
@@ -574,7 +659,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                 updateRespuesta(evidencia,3);
                                 listPreguntas.get(numeroPregunta).setCumple(false);
                             }
-                            adapterExpandableChecklist.contarPreguntasCumplen();
+                            adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
                             buttonCumple.setBackground(drawableCumpleVerde);
                             buttonNoCumple.setBackground(drawableNoCumpleGris);
                             alertDialog.dismiss();
@@ -599,13 +684,15 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
                 final EditText editTextMotivoRechazo = dialogLayout.findViewById(R.id.editTextMotivoRechazo);
                 TextView textViewCancelar = dialogLayout.findViewById(R.id.buttonCancelar);
-                TextView textViewAceptar = dialogLayout.findViewById(R.id.buttonAceptar);
+                final TextView textViewAceptar = dialogLayout.findViewById(R.id.buttonAceptar);
 
-                LinearLayout linearLayoutAceptar = dialogLayout.findViewById(R.id.linearLayoutAceptar);
+                final LinearLayout linearLayoutAceptar = dialogLayout.findViewById(R.id.linearLayoutAceptar);
                 LinearLayout linearLayoutCancelar = dialogLayout.findViewById(R.id.linearLayoutCancelar);
 
                 final AlertDialog alertDialogMotivo = new AlertDialog.Builder(activity)
                         .setView(dialogLayout)
+                        .setNegativeButton("",null)
+                        .setPositiveButton("",null)
                         .create();
                 alertDialogMotivo.show();
 
@@ -623,31 +710,114 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     }
                 });
 
-                textViewAceptar.setOnClickListener(new View.OnClickListener() {
+                /*alertDialogMotivo.setOnShowListener(new DialogInterface.OnShowListener() {
+
+                    @Override
+                    public void onShow(DialogInterface dialog) {
+                        textViewAceptar.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if(!editTextMotivoRechazo.getText().toString().equals("")) {
+                                    rechazarEvidencia(numeroPregunta, identificador, buttonCumple, buttonNoCumple, alertDialog, drawableCumpleGris, drawableNoCumpleRojo,usuario,editTextMotivoRechazo.getText().toString(),adapterRecycleViewPreguntas);
+                                    alertDialogMotivo.dismiss();
+                                    notifyDataSetChanged();
+                                }else{
+                                    Utils.message(activity,"Debe especificar el motivo de rechazo");
+                                }
+                            }
+                        });
+
+                        linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if(!editTextMotivoRechazo.getText().toString().equals("")) {
+                                    rechazarEvidencia(numeroPregunta, identificador, buttonCumple, buttonNoCumple, alertDialog, drawableCumpleGris, drawableNoCumpleRojo,usuario,editTextMotivoRechazo.getText().toString(),adapterRecycleViewPreguntas);
+                                    alertDialogMotivo.dismiss();
+                                    notifyDataSetChanged();
+                                }else{
+                                    Utils.message(activity,"Debe especificar el motivo de rechazo");
+                                }
+                            }
+                        });
+                    }
+                });
+                alertDialogMotivo.show();//*/
+
+                /*textViewAceptar.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if(!editTextMotivoRechazo.getText().toString().equals("")) {
-                            rechazarEvidencia(numeroPregunta, identificador, buttonCumple, buttonNoCumple, alertDialog, drawableCumpleGris, drawableNoCumpleRojo,usuario,editTextMotivoRechazo.getText().toString());
-                            notifyDataSetChanged();
+                            rechazarEvidencia(numeroPregunta, identificador, buttonCumple, buttonNoCumple, alertDialog, drawableCumpleGris, drawableNoCumpleRojo,usuario,editTextMotivoRechazo.getText().toString(),adapterRecycleViewPreguntas);
                             alertDialogMotivo.dismiss();
+                            notifyDataSetChanged();
                         }else{
                             Utils.message(activity,"Debe especificar el motivo de rechazo");
                         }
                     }
-                });
+                });//*/
 
                 linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if(!editTextMotivoRechazo.getText().toString().equals("")) {
-                            rechazarEvidencia(numeroPregunta, identificador, buttonCumple, buttonNoCumple, alertDialog, drawableCumpleGris, drawableNoCumpleRojo,usuario,editTextMotivoRechazo.getText().toString());
-                            notifyDataSetChanged();
+
+                            rechazarEvidencia(numeroPregunta, identificador, buttonCumple, buttonNoCumple, alertDialog, drawableCumpleGris, drawableNoCumpleRojo,usuario,editTextMotivoRechazo.getText().toString(),adapterRecycleViewPreguntas);
+
+                            //********************************************************************
+                            /*Evidencia evidenciaTemp = null;
+                            for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
+                                if(evidencia.getIdEvidencia().equals(identificador)) {
+                                    evidencia.setIdEstatus(3);
+                                    evidencia.setIdEtapa(1);
+                                    ContentValues contentValues = new ContentValues();
+                                    contentValues.put("ID_ETAPA",1);
+                                    contentValues.put("ID_ESTATUS",3);
+                                    try {
+                                        new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
+                                                "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                                                        "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
+                                                new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
+                                                        String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
+                                                        String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
+                                                        String.valueOf(evidencia.getIdBarco())});
+
+                                        Utils.message(activity,"Rechazada");
+                                        crearHistorico(evidencia,usuario,"Rechazado por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre() + "\nMotivo: " +
+                                                editTextMotivoRechazo.getText().toString());
+
+                                        if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
+                                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
+                                            updateRespuesta(evidencia,2);
+                                            listPreguntas.get(numeroPregunta).setCumple(true);
+                                        }else{
+                                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
+                                            updateRespuesta(evidencia,3);
+                                            listPreguntas.get(numeroPregunta).setCumple(false);
+                                        }
+                                        adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
+                                        buttonCumple.setBackground(drawableCumpleGris);
+                                        buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                                        alertDialog.dismiss();
+                                        //notifyDataSetChanged();
+                                        //adapterRecycleViewPreguntas.notifyDataSetChanged();
+                                        //evidenciaTemp = evidencia;
+                                        break;
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                        Utils.message(activity,"Error al rechazar evidencia: " + e.getMessage());
+                                    }
+                                }
+                            }//*/
+                            //********************************************************************
+
+                            adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
                             alertDialogMotivo.dismiss();
+
                         }else{
                             Utils.message(activity,"Debe especificar el motivo de rechazo");
                         }
                     }
-                });
+                });//*/
 
                 /*Evidencia evidenciaTemp = null;
                 for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
@@ -732,6 +902,18 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                     });
                                 }
                                 listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
+                            }else if(usuario.getIdrol()==3) {
+                                //borrado físico
+                                new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
+                                        "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
+                                        identificador,
+                                        String.valueOf(evidencia.getIdRevision()),
+                                        String.valueOf(evidencia.getIdChecklist()),
+                                        String.valueOf(evidencia.getIdRubro()),
+                                        String.valueOf(evidencia.getIdPregunta()),
+                                        String.valueOf(evidencia.getIdBarco())
+                                });
+                                listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
                             }
                             break;
                         }
@@ -750,20 +932,20 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                 updateRespuesta(evidenciaTemp,3);
                                 listPreguntas.get(numeroPregunta).setCumple(false);
                             }
-                            adapterExpandableChecklist.contarPreguntasCumplen();
+                            adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
                         } else {
                             listPreguntas.get(numeroPregunta).getRadioGroup().clearCheck();
                             //updateRespuesta(evidenciaTemp,3);
                             updateRespuesta(evidenciaTemp,null);
                             listPreguntas.get(numeroPregunta).setCumple(false);
-                            adapterExpandableChecklist.contarPreguntasCumplen();
+                            adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
                         }
                     } else {
                         listPreguntas.get(numeroPregunta).getRadioGroup().clearCheck();
                         //updateRespuesta(evidenciaTemp,3);
                         updateRespuesta(evidenciaTemp,null);
                         listPreguntas.get(numeroPregunta).setCumple(false);
-                        adapterExpandableChecklist.contarPreguntasCumplen();
+                        adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
                     }
                     notifyDataSetChanged();
                     alertDialog.dismiss();
@@ -773,6 +955,20 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 }
             }
         });
+    }
+
+    private void refresh()
+    {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //movies.add(0,movies.get(new Random().nextInt(movies.size())));
+
+                AdapterRecycleViewPreguntas.this.notifyDataSetChanged();
+
+                //swiper.setRefreshing(false);
+            }
+        },3000);
     }
 
     private void crearHistorico(Evidencia evidencia, ResponseLogin.Usuario usuario,String motivo){
@@ -799,7 +995,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     }
 
     private void rechazarEvidencia(int numeroPregunta, String identificador, Button buttonCumple, Button buttonNoCumple, AlertDialog alertDialog,
-                                   Drawable drawableCumpleGris, Drawable drawableNoCumpleRojo, ResponseLogin.Usuario usuario,String motivoRechazo){
+                                   Drawable drawableCumpleGris, Drawable drawableNoCumpleRojo, ResponseLogin.Usuario usuario,String motivoRechazo,
+                                   AdapterRecycleViewPreguntas adapterRecycleViewPreguntas){
         Evidencia evidenciaTemp = null;
         for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
             if(evidencia.getIdEvidencia().equals(identificador)) {
@@ -823,18 +1020,19 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
                     if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
                         listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
-                        updateRespuesta(evidenciaTemp,2);
+                        updateRespuesta(evidencia,2);
                         listPreguntas.get(numeroPregunta).setCumple(true);
                     }else{
                         listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
-                        updateRespuesta(evidenciaTemp,3);
+                        updateRespuesta(evidencia,3);
                         listPreguntas.get(numeroPregunta).setCumple(false);
                     }
-                    adapterExpandableChecklist.contarPreguntasCumplen();
+                    adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
                     buttonCumple.setBackground(drawableCumpleGris);
                     buttonNoCumple.setBackground(drawableNoCumpleRojo);
                     alertDialog.dismiss();
                     //notifyDataSetChanged();
+                    //adapterRecycleViewPreguntas.notifyDataSetChanged();
                     //evidenciaTemp = evidencia;
                     break;
                 }catch (Exception e){
@@ -868,7 +1066,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 }
                 //}else if(usuario.getIdrol() == 2) {
             }else {
-                if (ev.getIdEtapa() > usuario.getIdrol() && ev.getIdEstatus() == 1) {
+                if (ev.getIdEtapa() != 1 && ev.getIdEstatus() == 1) {
+                    //if (ev.getIdEtapa() > usuario.getIdrol() && ev.getIdEstatus() == 1) {
 
                 }else{
                     return false;
@@ -995,7 +1194,14 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         popup.setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.drawable_editext));
         // Show anchored to button
         //popup.setBackgroundDrawable(new BitmapDrawable());
-        popup.showAsDropDown(anchorView);
+        popup.showAsDropDown(anchorView,0,Math.round(anchorView.getY())-dpToPx(100));
+    }
+
+    public int dpToPx(int dp) {
+        float density = activity.getResources()
+                .getDisplayMetrics()
+                .density;
+        return Math.round((float) dp * density);
     }
 
     public void seleccionarArchivo(int position) {
@@ -1008,5 +1214,107 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         activity.startActivityForResult(intent.createChooser(intent, "Selecciona el archivo"),position);
         //activity.startActivity(intent.createChooser(intent, "Selecciona el archivo"));
+    }
+
+    private void descargaPDF(int idPregunta){
+
+        final ProgressDialog progressDialog = Utils.typhoonLoader(activity,"Descargando informe...");
+
+        try {
+
+            SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
+
+            ApiInterface mApiService = Utils.getInterfaceService();
+            Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(sharedPrefs.getString(Constants.SP_JWT_TAG, ""), idPregunta);
+            mService.enqueue(new Callback<ResponseDescargaPdf>() {
+                @Override
+                public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {
+                    progressDialog.dismiss();
+                    if (response.body() != null) {
+                        if (response.body().getDescargaPDF().getExito()) {
+                            try {
+                                if (response.body().getDescargaPDF().getDocumentoPDF() != null) {
+                                    String base64 = response.body().getDescargaPDF().getDocumentoPDF().getBase64();
+                                    if (base64 != null) {
+                                        if (!base64.equals("")) {
+                                            String nombre = response.body().getDescargaPDF().getDocumentoPDF().getNombre();
+                                            LayoutInflater inflater = LayoutInflater.from(activity);
+                                            View dialogLayout = null;
+                                            dialogLayout = inflater.inflate(R.layout.mostrar_descarga_pdf_layout, null, false);
+
+                                            DisplayMetrics displayMetrics = new DisplayMetrics();
+                                            activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                                            int height = displayMetrics.heightPixels;
+                                            int width = displayMetrics.widthPixels;
+
+                                            /*LinearLayout layout = dialogLayout.findViewById(R.id.linearLayoutMostrarDescargaPdf);
+                                            ViewGroup.LayoutParams params = layout.getLayoutParams();
+                                            params.height = height - 20;
+                                            params.width = width - 20;
+                                            layout.setLayoutParams(params);//*/
+
+                                            PDFView pdfView = dialogLayout.findViewById(R.id.pdfViewDocumento);
+                                            byte[] pdf = Utils.base64ToFile(base64);
+                                            pdfView.fromBytes(pdf).load();
+
+                                            TextView textViewNombreDocumento = (TextView) dialogLayout.findViewById(R.id.textViewNombreDocumento);
+                                            ImageView imageViewCerrarDialog = dialogLayout.findViewById(R.id.imageViewCloseDialog);
+
+                                            textViewNombreDocumento.setText(nombre);
+
+                                            final AlertDialog alertDialog = new AlertDialog.Builder(activity)
+                                                    .setView(dialogLayout)
+                                                    //.setPositiveButton("Cerrar", null)
+                                                    .create();
+
+                                            alertDialog.show();
+
+                                            imageViewCerrarDialog.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+                                                    alertDialog.dismiss();
+                                                }
+                                            });
+                                        } else {
+                                            Utils.message(activity, "No se pudo descargar el informe");
+                                        }
+                                    } else {
+                                        Utils.message(activity, "No se pudo descargar el informe");
+                                    }
+                                } else {
+                                    Utils.message(activity, "No se pudo descargar el informe");
+                                }
+                            } catch (Exception e) {
+                                Utils.message(activity, "No se pudo descargar el informe: " + e.getMessage());
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Utils.message(activity, response.body().getDescargaPDF().getError());
+                        }
+                    } else {
+                        if (response.errorBody() != null) {
+                            try {
+                                Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Utils.message(activity, "Error al descargar informe: " + e.getMessage());
+                            }
+                        } else {
+                            Utils.message(activity, "Error al descargar informe");
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseDescargaPdf> call, Throwable t) {
+                    progressDialog.dismiss();
+                    Utils.message(activity, Constants.MSG_ERR_CONN);
+                }
+            });
+        }catch (Exception e){
+            progressDialog.dismiss();
+            e.printStackTrace();
+            Utils.message(activity, "Error al descargar informe: " + e.getMessage());
+        }
     }
 }

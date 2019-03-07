@@ -48,6 +48,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import com.elektra.typhoon.utils.Utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -244,7 +245,16 @@ public class MainActivity extends AppCompatActivity {
                         Utils.message(getApplicationContext(), response.body().getValidarEmpleado().getError());
                     }
                 }else{
-                    Utils.message(getApplicationContext(),"Error al iniciar sesión");
+                    if(response.errorBody() != null){
+                        try {
+                            Utils.message(getApplicationContext(), "Error al iniciar sesión: " + response.errorBody().string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Utils.message(getApplicationContext(), "Error al iniciar sesión: " + e.getMessage());
+                        }
+                    }else {
+                        Utils.message(getApplicationContext(), "Error al iniciar sesión");
+                    }
                 }
             }
             @Override

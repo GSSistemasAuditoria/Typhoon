@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayoutMostrarDescargaPdf"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/gris">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <ImageView
+            android:id="@+id/imageViewCloseDialog"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_alignParentEnd="true"
+            android:src="@mipmap/ic_close_dialog"/>
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textViewNombreDocumento"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:textStyle="bold"
+        android:textColor="@color/azul"
+        android:layout_marginTop="10dp"/>
+
+    <com.github.barteksc.pdfviewer.PDFView
+        android:id="@+id/pdfViewDocumento"
+        android:layout_width="300dp"
+        android:layout_height="350dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_gravity="center_horizontal"
+         />
+
+</LinearLayout>

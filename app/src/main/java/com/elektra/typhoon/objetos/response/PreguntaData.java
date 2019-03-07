@@ -40,6 +40,10 @@ public class PreguntaData {
     @Expose
     private List<Evidencia> listEvidencias;
 
+    @SerializedName("IS_TIERRA")
+    @Expose
+    private boolean isTierra;
+
     private int idRevision;
     private int idChecklist;
 
@@ -105,5 +109,13 @@ public class PreguntaData {
 
     public void setListEvidencias(List<Evidencia> listEvidencias) {
         this.listEvidencias = listEvidencias;
+    }
+
+    public boolean isTierra() {
+        return isTierra;
+    }
+
+    public void setTierra(boolean tierra) {
+        isTierra = tierra;
     }
 }

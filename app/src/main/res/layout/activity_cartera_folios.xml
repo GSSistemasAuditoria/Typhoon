@@ -99,6 +99,7 @@
                 android:textColor="@color/blanco"
                 android:layout_below="@+id/linearLayoutUsuario"
                 android:layout_alignEnd="@+id/linearLayoutUsuario"
+                android:textSize="12sp"
                 android:text="Rol"/>
 
         </RelativeLayout>
