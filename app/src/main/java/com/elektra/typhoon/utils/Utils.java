@@ -48,6 +48,7 @@ import com.elektra.typhoon.objetos.response.EstatusEvidencia;
 import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.EtapaEvidencia;
 import com.elektra.typhoon.objetos.response.Evidencia;
+import com.elektra.typhoon.objetos.response.LatLng;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.RolUsuario;
 import com.elektra.typhoon.objetos.response.TipoRespuesta;
@@ -67,6 +68,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -804,13 +806,46 @@ public class Utils {
         }
     }
 
-    public static void typhoonGeofence(){
-        new Geofence.Builder()
-                .setRequestId("")
-                .setCircularRegion( 19.1111, 19.22222, 12.2F)
-                .setExpirationDuration( Geofence.NEVER_EXPIRE )
-                .setTransitionTypes( Geofence.GEOFENCE_TRANSITION_ENTER
-                        | Geofence.GEOFENCE_TRANSITION_EXIT )
-                .build();
-    }//*/
+    public static boolean isPointInPolygon(LatLng tap) {
+
+        ArrayList<LatLng> geocerca = new ArrayList<>();
+        geocerca.add(new LatLng(19.304805241165596,-99.20415345810665));
+        geocerca.add(new LatLng(19.30430908658883,-99.20403544090999));
+        geocerca.add(new LatLng(19.30449134762865,-99.20354191445125));
+        geocerca.add(new LatLng(19.3044407195824,-99.20318786286128));
+        geocerca.add(new LatLng(19.304703985251763,-99.20313421868099));
+        geocerca.add(new LatLng(19.30481536675354,-99.20348827027095));
+        geocerca.add(new LatLng(19.304876120267995,-99.20381013535274));
+
+        int intersectCount = 0;
+        for (int j = 0; j < geocerca.size() - 1; j++) {
+            if (rayCastIntersect(tap, geocerca.get(j), geocerca.get(j + 1))) {
+                intersectCount++;
+            }
+        }
+
+        return ((intersectCount % 2) == 1); // odd = inside, even = outside;
+    }
+
+    private static boolean rayCastIntersect(LatLng tap, LatLng vertA, LatLng vertB) {
+
+        double aY = vertA.getLatitude();
+        double bY = vertB.getLatitude();
+        double aX = vertA.getLongitude();
+        double bX = vertB.getLongitude();
+        double pY = tap.getLatitude();
+        double pX = tap.getLongitude();
+
+        if ((aY > pY && bY > pY) || (aY < pY && bY < pY)
+                || (aX < pX && bX < pX)) {
+            return false; // a and b can't both be above or below pt.y, and a or
+            // b must be east of pt.x
+        }
+
+        double m = (aY - bY) / (aX - bX); // Rise over run
+        double bee = (-aX) * m + aY; // y = mx + b
+        double x = (pY - bee) / m; // algebra is neat!
+
+        return x > pX;
+    }
 }
