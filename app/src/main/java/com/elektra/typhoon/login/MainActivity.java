@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         Utils.deviceLockVerification(this);
         Utils.installerVerification(this);
+        Utils.isDeviceRooted();
 
         editTextUsuario = (EditText)findViewById(R.id.editTextUsuario);
         editTextContrasena = (EditText)findViewById(R.id.editTextContrasena);

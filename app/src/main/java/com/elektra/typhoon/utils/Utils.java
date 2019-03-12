@@ -60,11 +60,13 @@ import com.elektra.typhoon.service.ApiInterface;
 import com.elektra.typhoon.service.NuevaInstalacion;
 import com.google.android.gms.location.Geofence;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -391,16 +393,16 @@ public class Utils {
                                     SharedPreferences.Editor ed;
                                     ed = sharedPrefs.edit();
                                     for (Configuracion configuracion : response.body().getCatalogos().getCatalogosData().getListConfiguracion()) {
-                                        if(configuracion.getKey().equals("LimiteEvidencias")){
-                                            ed.putString(Constants.SP_LIMITE_EVIDENCIAS, configuracion.getValue());
+                                        if(configuracion.getConfiguracion().equals("LimiteEvidencias")){
+                                            ed.putString(Constants.SP_LIMITE_EVIDENCIAS, configuracion.getArgumento());
                                             ed.apply();
                                         }
-                                        if(configuracion.getKey().equals("Gps")){
-                                            ed.putString(Constants.SP_GPS_FLAG, configuracion.getValue());
+                                        if(configuracion.getConfiguracion().equals("Gps")){
+                                            ed.putString(Constants.SP_GPS_FLAG, configuracion.getArgumento());
                                             ed.apply();
                                         }
-                                        if(configuracion.getKey().equals("GpsConfig")){
-                                            ed.putString(Constants.SP_GPS_GEOCERCA, configuracion.getValue());
+                                        if(configuracion.getConfiguracion().equals("GpsConfig")){
+                                            ed.putString(Constants.SP_GPS_GEOCERCA, configuracion.getArgumento());
                                             ed.apply();
                                         }
                                     }
@@ -929,11 +931,19 @@ public class Utils {
 
     public static boolean deviceLockVerification(Context context){
         KeyguardManager keyguardManager = (KeyguardManager)context.getSystemService(Context.KEYGUARD_SERVICE);
-        if (keyguardManager.isKeyguardSecure()) {
-            // Device can be locked, using either a PIN, a password or a pattern
-            return true;
-        } else {
-            // Device locking disabled
+        try {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+                // Device can be locked, using either a PIN, a password or a pattern
+                // Device locking disabled
+                assert keyguardManager != null;
+                return keyguardManager.isDeviceSecure();
+            } else {
+                // Device can be locked, using either a PIN, a password or a pattern
+                // Device locking disabled
+                assert keyguardManager != null;
+                return keyguardManager.isKeyguardSecure();
+            }
+        }catch (NullPointerException e){
             return false;
         }
     }
@@ -948,6 +958,38 @@ public class Utils {
             }
         }else{
             return false;
+        }
+    }
+
+    public static boolean isDeviceRooted() {
+        return checkRootMethod1() || checkRootMethod2() || checkRootMethod3();
+    }
+
+    private static boolean checkRootMethod1() {
+        String buildTags = android.os.Build.TAGS;
+        return buildTags != null && buildTags.contains("test-keys");
+    }
+
+    private static boolean checkRootMethod2() {
+        String[] paths = { "/system/app/Superuser.apk", "/sbin/su", "/system/bin/su", "/system/xbin/su", "/data/local/xbin/su", "/data/local/bin/su", "/system/sd/xbin/su",
+                "/system/bin/failsafe/su", "/data/local/su", "/su/bin/su"};
+        for (String path : paths) {
+            if (new File(path).exists()) return true;
+        }
+        return false;
+    }
+
+    private static boolean checkRootMethod3() {
+        Process process = null;
+        try {
+            process = Runtime.getRuntime().exec(new String[] { "/system/xbin/which", "su" });
+            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            if (in.readLine() != null) return true;
+            return false;
+        } catch (Throwable t) {
+            return false;
+        } finally {
+            if (process != null) process.destroy();
         }
     }
 }

@@ -14,25 +14,25 @@ public class Configuracion {
 
     @SerializedName("Key")
     @Expose
-    private String key;
+    private String configuracion;
 
     @SerializedName("Value")
     @Expose
-    private String value;
+    private String argumento;
 
-    public String getKey() {
-        return key;
+    public String getConfiguracion() {
+        return configuracion;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setConfiguracion(String configuracion) {
+        this.configuracion = configuracion;
     }
 
-    public String getValue() {
-        return value;
+    public String getArgumento() {
+        return argumento;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setArgumento(String argumento) {
+        this.argumento = argumento;
     }
 }

@@ -22,7 +22,8 @@
         android:gravity="top"
         android:background="@color/blanco"
         android:padding="5dp"
-        android:maxLength="512" />
+        android:maxLength="512"
+        android:inputType="textNoSuggestions|textVisiblePassword"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
