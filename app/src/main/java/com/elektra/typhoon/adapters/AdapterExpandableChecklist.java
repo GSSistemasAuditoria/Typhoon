@@ -13,12 +13,8 @@ import android.widget.TextView;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.database.ChecklistDBMethods;
-import com.elektra.typhoon.objetos.response.ChecklistData;
-import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.RespuestaData;
-import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
-import com.elektra.typhoon.utils.Utils;
 
 import java.util.List;
 
@@ -105,8 +101,8 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
             view = layoutInflater.inflate(R.layout.header_layout, null);
         }
 
-        TextView textViewTituloEncabezado = (TextView) view.findViewById(R.id.textViewTituloHeader);
-        ImageView imageView = (ImageView) view.findViewById(R.id.imageViewIconoGrupo);
+        TextView textViewTituloEncabezado = view.findViewById(R.id.textViewTituloHeader);
+        ImageView imageView =  view.findViewById(R.id.imageViewIconoGrupo);
         textViewTituloEncabezado.setText(rubro.getNombre());
 
         rubroPosition = i;
@@ -130,10 +126,10 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         }
 
         //TextView textViewTituloRubro = (TextView) view.findViewById(R.id.textViewTituloRubro);
-        TextView textViewCumplenValor = (TextView) view.findViewById(R.id.textViewCumplenValor);
-        TextView textViewNoCumpleValor = (TextView) view.findViewById(R.id.textViewNoCumplenValor);
-        TextView textViewValorTotal = (TextView) view.findViewById(R.id.textViewValorTotal);
-        RecyclerView recyclerViewPreguntas = (RecyclerView) view.findViewById(R.id.recyclerViewPreguntas);
+        TextView textViewCumplenValor = view.findViewById(R.id.textViewCumplenValor);
+        TextView textViewNoCumpleValor = view.findViewById(R.id.textViewNoCumplenValor);
+        TextView textViewValorTotal = view.findViewById(R.id.textViewValorTotal);
+        RecyclerView recyclerViewPreguntas = view.findViewById(R.id.recyclerViewPreguntas);
 
         //textViewTituloRubro.setText("Rubro " + i);
         AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntasTemp(),activity,i,

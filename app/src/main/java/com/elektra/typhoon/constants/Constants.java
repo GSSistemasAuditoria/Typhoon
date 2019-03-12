@@ -37,4 +37,7 @@ public class Constants {
 
     public final static String SP_LOGIN_TAG = "login";
     public final static String SP_JWT_TAG = "jwt";
+    public final static String SP_LIMITE_EVIDENCIAS = "limiteEvidencias";
+    public final static String SP_GPS_FLAG = "gpsFlag";
+    public final static String SP_GPS_GEOCERCA = "gpsGeocerca";
 }

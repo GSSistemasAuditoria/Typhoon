@@ -2,6 +2,7 @@ package com.elektra.typhoon.utils;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.app.ProgressDialog;
 import android.content.ContentUris;
 import android.content.Context;
@@ -12,6 +13,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.location.Location;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -41,9 +43,11 @@ import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.CatalogosDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
+import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.response.Barco;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
+import com.elektra.typhoon.objetos.response.Configuracion;
 import com.elektra.typhoon.objetos.response.EstatusEvidencia;
 import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.EtapaEvidencia;
@@ -237,8 +241,8 @@ public class Utils {
                 return "Noviembre";
             case 12:
                 return "Diciembre";
-                default:
-                    return "";
+            default:
+                return "";
         }
     }
 
@@ -379,6 +383,26 @@ public class Utils {
                                     catalogosDBMethods.deleteRolesUsuario();
                                     for (RolUsuario rolUsuario : response.body().getCatalogos().getCatalogosData().getListRolesUsuario()) {
                                         catalogosDBMethods.createRolUsuario(rolUsuario);
+                                    }
+                                }
+                                if (response.body().getCatalogos().getCatalogosData().getListConfiguracion() != null) {
+                                    //catalogosDBMethods.deleteRolesUsuario();
+                                    SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
+                                    SharedPreferences.Editor ed;
+                                    ed = sharedPrefs.edit();
+                                    for (Configuracion configuracion : response.body().getCatalogos().getCatalogosData().getListConfiguracion()) {
+                                        if(configuracion.getKey().equals("LimiteEvidencias")){
+                                            ed.putString(Constants.SP_LIMITE_EVIDENCIAS, configuracion.getValue());
+                                            ed.apply();
+                                        }
+                                        if(configuracion.getKey().equals("Gps")){
+                                            ed.putString(Constants.SP_GPS_FLAG, configuracion.getValue());
+                                            ed.apply();
+                                        }
+                                        if(configuracion.getKey().equals("GpsConfig")){
+                                            ed.putString(Constants.SP_GPS_GEOCERCA, configuracion.getValue());
+                                            ed.apply();
+                                        }
                                     }
                                 }
                                 progressDialog.dismiss();
@@ -590,7 +614,7 @@ public class Utils {
                     }else{
                         return false;
                     }
-                //}else if(usuario.getIdrol() == 2){
+                    //}else if(usuario.getIdrol() == 2){
                 }else {
                     if(evidencia.getIdEtapa() > usuario.getIdrol() && evidencia.getIdEstatus() == 1){
 
@@ -648,49 +672,49 @@ public class Utils {
                     activity,Manifest.permission.ACCESS_FINE_LOCATION)
                     || ActivityCompat.shouldShowRequestPermissionRationale(
                     activity,Manifest.permission.WRITE_EXTERNAL_STORAGE)){//*/
-                // If we should give explanation of requested permissions
+            // If we should give explanation of requested permissions
 
-                // Show an alert dialog here with request explanation
+            // Show an alert dialog here with request explanation
 
-                LayoutInflater li = LayoutInflater.from(activity);
-                LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.permission_layout, null);
+            LayoutInflater li = LayoutInflater.from(activity);
+            LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.permission_layout, null);
 
-                Button buttonAceptar = (Button) layoutDialog.findViewById(R.id.buttonAceptar);
-                LinearLayout linearLayoutCamera = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCameraPermission);
-                LinearLayout linearLayoutLocation = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutLocationPermission);
-                LinearLayout linearLayoutStorage = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutStoragePermission);
+            Button buttonAceptar = (Button) layoutDialog.findViewById(R.id.buttonAceptar);
+            LinearLayout linearLayoutCamera = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCameraPermission);
+            LinearLayout linearLayoutLocation = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutLocationPermission);
+            LinearLayout linearLayoutStorage = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutStoragePermission);
 
-                if(ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
-                    linearLayoutStorage.setVisibility(View.GONE);
+            if(ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+                linearLayoutStorage.setVisibility(View.GONE);
+            }
+
+            if(ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
+                linearLayoutCamera.setVisibility(View.GONE);
+            }
+
+            if(ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+                linearLayoutLocation.setVisibility(View.GONE);
+            }
+
+            final AlertDialog builder = new AlertDialog.Builder(activity)
+                    .setView(layoutDialog)
+                    .show();
+
+            buttonAceptar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ActivityCompat.requestPermissions(
+                            activity,
+                            new String[]{
+                                    Manifest.permission.CAMERA,
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            },
+                            200
+                    );
+                    builder.dismiss();
                 }
-
-                if(ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
-                    linearLayoutCamera.setVisibility(View.GONE);
-                }
-
-                if(ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-                    linearLayoutLocation.setVisibility(View.GONE);
-                }
-
-                final AlertDialog builder = new AlertDialog.Builder(activity)
-                        .setView(layoutDialog)
-                        .show();
-
-                buttonAceptar.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        ActivityCompat.requestPermissions(
-                                activity,
-                                new String[]{
-                                        Manifest.permission.CAMERA,
-                                        Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                                },
-                                200
-                        );
-                        builder.dismiss();
-                    }
-                });
+            });
             /*}else{
                 // Directly request for required permissions, without explanation
                 ActivityCompat.requestPermissions(
@@ -847,5 +871,83 @@ public class Utils {
         double x = (pY - bee) / m; // algebra is neat!
 
         return x > pX;
+    }
+
+    public static boolean validaGeocerca(Activity activity){
+        GPSTracker gps = new GPSTracker(activity,1);
+        LatLng miPosicion = null;
+        if(gps.canGetLocation()) {
+            double latitude = gps.getLatitude();
+            double longitude = gps.getLongitude();
+            miPosicion = new LatLng(latitude,longitude);
+            gps.stopUsingGPS();
+        }
+
+        if(miPosicion != null) {
+            /*boolean enZona = Utils.isPointInPolygon(miPosicion);//dentro
+            if (enZona) {
+                Utils.message(this, "Dentro de la geocerca");
+            } else {
+                Utils.message(this, "Fuera de la geocerca");
+            }//*/
+
+            float[] disResultado = new float[2];
+            SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
+            if(sharedPreferences.contains(Constants.SP_GPS_GEOCERCA)){
+                String geocerca = sharedPreferences.getString(Constants.SP_GPS_GEOCERCA,"");
+                String[] temp = geocerca.split("\\|");
+                double latitudeTyphoon = Double.parseDouble(temp[1].replace("Lat:",""));
+                double longitudeTyphoon = Double.parseDouble(temp[0].replace("Lon:",""));
+                float radioTyphoon = Float.parseFloat(temp[2].replace("Rad:",""));
+
+                Location.distanceBetween(latitudeTyphoon,longitudeTyphoon,miPosicion.getLatitude(),miPosicion.getLongitude(),disResultado);
+                //Location.distanceBetween(19.3046277,-99.2037863,miPosicion.getLatitude(),miPosicion.getLongitude(),disResultado);
+                //Location.distanceBetween(19.3046277,-99.2037863,19.304980, -99.204047,disResultado);
+
+                if(disResultado[0] > radioTyphoon){
+                    //Utils.message(this,"Fuera de la geocerca");
+                } else {
+                    //Utils.message(this,"Dentro de la geocerca");
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean validaConfiguracionApp(Context context){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.SP_NAME, context.MODE_PRIVATE);
+        if(sharedPreferences.contains(Constants.SP_LIMITE_EVIDENCIAS) && sharedPreferences.contains(Constants.SP_GPS_GEOCERCA) &&
+                sharedPreferences.contains(Constants.SP_GPS_FLAG)){
+            return true;
+        }else{
+            Utils.message(context,"No se descargo correctamente la configuración");
+            return false;
+        }
+    }
+
+    public static boolean deviceLockVerification(Context context){
+        KeyguardManager keyguardManager = (KeyguardManager)context.getSystemService(Context.KEYGUARD_SERVICE);
+        if (keyguardManager.isKeyguardSecure()) {
+            // Device can be locked, using either a PIN, a password or a pattern
+            return true;
+        } else {
+            // Device locking disabled
+            return false;
+        }
+    }
+
+    public static boolean installerVerification(Context context){
+        String installer = context.getPackageManager().getInstallerPackageName(context.getPackageName());
+        if(installer != null) {
+            if (installer.startsWith("com.android.vending")) {
+                return true;
+            } else {
+                return false;
+            }
+        }else{
+            return false;
+        }
     }
 }

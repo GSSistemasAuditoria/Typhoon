@@ -1046,7 +1046,9 @@ public class ChecklistBarcos extends AppCompatActivity{
                             }
                             evidencia.setContenido(base64);
                             evidencia.setContenidoPreview(base64Preview);
-                            evidencia.setNombre(Utils.getDate("yyyyMMddHHmmss") + ".png");
+                            StringBuilder stringBuilder = new StringBuilder();
+                            stringBuilder.append(Utils.getDate("yyyyMMddHHmmss")).append(".png");
+                            //evidencia.setNombre(Utils.getDate("yyyyMMddHHmmss") + ".png");
                             evidencia.setIdEvidencia(UUID.randomUUID().toString());
                             CatalogoBarco barco = (CatalogoBarco) spinnerBarco.getSelectedItem();
                             evidencia.setIdBarco(barco.getIdBarco());
@@ -1274,7 +1276,9 @@ public class ChecklistBarcos extends AppCompatActivity{
                             }
                             evidencia.setContenido(base64);
                             evidencia.setContenidoPreview(base64Preview);
-                            evidencia.setNombre(Utils.getDate("yyyyMMddHHmmss") + ".jpg");
+                            StringBuilder stringBuilder = new StringBuilder();
+                            stringBuilder.append(Utils.getDate("yyyyMMddHHmmss")).append(".png");
+                            //evidencia.setNombre(Utils.getDate("yyyyMMddHHmmss") + ".jpg");
                             evidencia.setIdEvidencia(UUID.randomUUID().toString());
                             CatalogoBarco barco = (CatalogoBarco) spinnerBarco.getSelectedItem();
                             evidencia.setIdBarco(barco.getIdBarco());

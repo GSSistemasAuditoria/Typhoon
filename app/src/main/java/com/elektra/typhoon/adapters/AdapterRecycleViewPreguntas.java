@@ -89,17 +89,17 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     public class MyViewHolder extends RecyclerView.ViewHolder /*implements View.OnClickListener*/{
 
         //public TextView textViewSKU;
-        public LinearLayout linearLayout;
-        public LinearLayout linearLayoutAddEvidencias;
-        public LinearLayout linearLayoutEvidencias;
-        public Button textViewAddEvidencias;
-        public ImageView imageViewAddEvidencia;
-        public ImageView imageViewAgregaEvidencia;
-        public HorizontalScrollView horizontalScrollView;
-        public RadioGroup radioGroup;
-        public TextView textViewPregunta;
-        public RelativeLayout relativeLayoutDescargaPdf;
-        public ImageView imageViewDescargaPdf;
+        private LinearLayout linearLayout;
+        private LinearLayout linearLayoutAddEvidencias;
+        private LinearLayout linearLayoutEvidencias;
+        private Button textViewAddEvidencias;
+        private ImageView imageViewAddEvidencia;
+        private ImageView imageViewAgregaEvidencia;
+        private HorizontalScrollView horizontalScrollView;
+        private RadioGroup radioGroup;
+        private TextView textViewPregunta;
+        private RelativeLayout relativeLayoutDescargaPdf;
+        private ImageView imageViewDescargaPdf;
 
         public MyViewHolder(View view) {
             super(view);
@@ -189,21 +189,84 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         holder.textViewAddEvidencias.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarPopupEvidencias(holder.textViewAddEvidencias,position);
+                if(Utils.validaConfiguracionApp(activity)) {
+                    String flagGPS = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, "");
+                    if (flagGPS.equals("true")) {
+                        if (Utils.validaGeocerca(activity)) {
+                            agregarEvidencias(pregunta.getListEvidencias(), holder.textViewAddEvidencias, position);
+                        } else {
+                            Utils.message(activity, "No se encuentra dentro de la zona");
+                        }
+                    } else {
+                        agregarEvidencias(pregunta.getListEvidencias(), holder.textViewAddEvidencias, position);
+                    }
+                }
+                /*if(pregunta.getListEvidencias() != null) {
+                    if (validaNumeroEvidencias(pregunta.getListEvidencias().size())) {
+                        String noEvidencias = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_LIMITE_EVIDENCIAS,"");
+                        Utils.message(activity,"Sólo se permite agregar " + noEvidencias + " evidencias");
+                    }else{
+                        mostrarPopupEvidencias(holder.textViewAddEvidencias, position);
+                    }
+                }else{
+                    mostrarPopupEvidencias(holder.textViewAddEvidencias, position);
+                }//*/
             }
         });
 
         holder.imageViewAgregaEvidencia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarPopupEvidencias(holder.imageViewAgregaEvidencia,position);
+                if(Utils.validaConfiguracionApp(activity)) {
+                    String flagGPS = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, "");
+                    if (flagGPS.equals("true")) {
+                        if (Utils.validaGeocerca(activity)) {
+                            agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia, position);
+                        } else {
+                            Utils.message(activity, "No se encuentra dentro de la zona");
+                        }
+                    } else {
+                        agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia, position);
+                    }
+                }
+                /*if(pregunta.getListEvidencias() != null) {
+                    if (validaNumeroEvidencias(pregunta.getListEvidencias().size())) {
+                        String noEvidencias = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_LIMITE_EVIDENCIAS, "");
+                        Utils.message(activity, "Sólo se permite agregar " + noEvidencias + " evidencias");
+                    } else {
+                        mostrarPopupEvidencias(holder.imageViewAgregaEvidencia, position);
+                    }
+                }else{
+                    mostrarPopupEvidencias(holder.imageViewAgregaEvidencia, position);
+                }//*/
             }
         });
 
         holder.imageViewAddEvidencia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarPopupEvidencias(holder.imageViewAddEvidencia,position);
+                if(Utils.validaConfiguracionApp(activity)) {
+                    String flagGPS = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, "");
+                    if (flagGPS.equals("true")) {
+                        if (Utils.validaGeocerca(activity)) {
+                            agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
+                        } else {
+                            Utils.message(activity, "No se encuentra dentro de la zona");
+                        }
+                    } else {
+                        agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
+                    }
+                }
+                /*if(pregunta.getListEvidencias() != null) {
+                    if (validaNumeroEvidencias(pregunta.getListEvidencias().size())) {
+                        String noEvidencias = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_LIMITE_EVIDENCIAS, "");
+                        Utils.message(activity, "Sólo se permite agregar " + noEvidencias + " evidencias");
+                    } else {
+                        mostrarPopupEvidencias(holder.imageViewAddEvidencia, position);
+                    }
+                }else{
+                    mostrarPopupEvidencias(holder.imageViewAddEvidencia, position);
+                }//*/
             }
         });
 
@@ -293,6 +356,19 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         //reiniciaRadioGroup(holder.radioGroup,pregunta.getListEvidencias());
     }
 
+    private void agregarEvidencias(List<Evidencia> listEvidencias,View view,int position){
+        if(listEvidencias != null) {
+            if (validaNumeroEvidencias(listEvidencias.size())) {
+                String noEvidencias = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_LIMITE_EVIDENCIAS,"");
+                Utils.message(activity,"Sólo se permite agregar " + noEvidencias + " evidencias");
+            }else{
+                mostrarPopupEvidencias(view, position);
+            }
+        }else{
+            mostrarPopupEvidencias(view, position);
+        }
+    }
+
     /*private ImageView insertEvidencia(Bitmap bitmap,String id,int numPregunta){
         ImageView iv = new ImageView(activity.getApplicationContext());
         if(bitmap != null) {
@@ -340,6 +416,30 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         });
         return iv;
     }//*/
+
+    private boolean validaNumeroEvidencias(int evidenciasCargadas){
+        try {
+            SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
+            if (sharedPrefs.contains(Constants.SP_LIMITE_EVIDENCIAS)) {
+                String evidenciasPermitidas = sharedPrefs.getString(Constants.SP_LIMITE_EVIDENCIAS, "");
+                int numeroEvidencias = Integer.parseInt(evidenciasPermitidas);
+                if (numeroEvidencias == evidenciasCargadas) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                if (evidenciasCargadas == 5) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }catch (Exception e){
+            Utils.message(activity,"No se descargo correctamente la configuración");
+            return false;
+        }
+    }
 
     private RelativeLayout insertEvidencia(Bitmap bitmap, String id, int numPregunta){
 

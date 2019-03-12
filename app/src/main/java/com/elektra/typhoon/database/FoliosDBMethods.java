@@ -54,11 +54,12 @@ public class FoliosDBMethods {
     public List<FolioRevision> readFolios(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<FolioRevision> listFolios = new ArrayList<>();
-        String query = "SELECT ID_REVISION,NOMBRE,ID_TIPO_REVISION,ID_USUARIO,FECHA_INICIO,FECHA_FIN,ESTATUS FROM " + TP_TRAN_REVISION;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_REVISION,NOMBRE,ID_TIPO_REVISION,ID_USUARIO,FECHA_INICIO,FECHA_FIN,ESTATUS FROM ").append(TP_TRAN_REVISION);
         if(condition != null){
-            query = query + " " + condition;
+            query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query,args);
+        Cursor cursor = db.rawQuery(query.toString(),args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -82,11 +83,12 @@ public class FoliosDBMethods {
     public FolioRevision readFolio(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         FolioRevision folioRevision = null;
-        String query = "SELECT ID_REVISION,NOMBRE,ID_TIPO_REVISION,ID_USUARIO,FECHA_INICIO,FECHA_FIN,ESTATUS FROM " + TP_TRAN_REVISION;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_REVISION,NOMBRE,ID_TIPO_REVISION,ID_USUARIO,FECHA_INICIO,FECHA_FIN,ESTATUS FROM ").append(TP_TRAN_REVISION);
         if(condition != null){
-            query = query + " " + condition;
+            query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query,args);
+        Cursor cursor = db.rawQuery(query.toString(),args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{

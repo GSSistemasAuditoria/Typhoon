@@ -45,11 +45,12 @@ public class BarcoDBMethods {
     public List<CatalogoBarco> readBarcos(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<CatalogoBarco> listBarco = new ArrayList<>();
-        String query = "SELECT ID_BARCO,NOMBRE FROM " + TP_CAT_BARCO;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_BARCO,NOMBRE FROM ").append(TP_CAT_BARCO);
         if(condition != null){
-            query = query + " " + condition;
+            query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query,args);
+        Cursor cursor = db.rawQuery(query.toString(),args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -65,31 +66,9 @@ public class BarcoDBMethods {
         return listBarco;
     }
 
-    /*public Barco readBarco(String condition, String[] args){
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
-        Barco barco = null;
-        String query = "SELECT ID_BARCO,NOMBRE FROM " + TP_CAT_BARCO;
-        if(condition != null){
-            query = query + " " + condition;
-        }
-        Cursor cursor = db.rawQuery(query,args);
-        if(cursor != null){
-            if(cursor.moveToFirst()){
-                do{
-                    barco = new Barco();
-                    barco.setIdBarco(cursor.getInt(0));
-                    barco.setNombre(cursor.getString(1));
-                }while(cursor.moveToNext());
-            }
-        }
-        cursor.close();
-        db.close();
-        return barco;
-    }//*/
-
     public void deleteBarco(){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
-        db.execSQL("delete from "+ TP_CAT_BARCO);
+        db.execSQL("delete from " + TP_CAT_BARCO);
         db.close();
     }
 

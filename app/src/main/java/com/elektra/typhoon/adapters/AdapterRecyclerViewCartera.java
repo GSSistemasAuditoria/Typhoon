@@ -1,7 +1,6 @@
 package com.elektra.typhoon.adapters;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -13,38 +12,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.checklist.ChecklistBarcos;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.CatalogosDBMethods;
-import com.elektra.typhoon.database.ChecklistDBMethods;
-import com.elektra.typhoon.json.SincronizacionJSON;
-import com.elektra.typhoon.objetos.request.SincronizacionData;
-import com.elektra.typhoon.objetos.request.SincronizacionPost;
-import com.elektra.typhoon.objetos.response.ChecklistData;
 import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.FolioRevision;
-import com.elektra.typhoon.objetos.response.Pregunta;
-import com.elektra.typhoon.objetos.response.PreguntaData;
-import com.elektra.typhoon.objetos.response.RespuestaData;
-import com.elektra.typhoon.objetos.response.Rubro;
-import com.elektra.typhoon.objetos.response.RubroData;
-import com.elektra.typhoon.objetos.response.SincronizacionResponse;
-import com.elektra.typhoon.service.ApiInterface;
 import com.elektra.typhoon.service.SincronizacionRequestService;
 import com.elektra.typhoon.utils.Utils;
 
 import java.io.IOException;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Proyecto: TYPHOON
@@ -63,12 +44,12 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
     private static final int item = 1;
 
     public static class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        public TextView textViewFolio;
-        public TextView textViewFecha;
-        public TextView textViewDescripcion;
-        public ImageView imageViewSincronizar;
-        public RelativeLayout relativeLayoutSincronizar;
-        public ImageView imageViewEstatus;
+        private TextView textViewFolio;
+        private TextView textViewFecha;
+        private TextView textViewDescripcion;
+        private ImageView imageViewSincronizar;
+        private RelativeLayout relativeLayoutSincronizar;
+        private ImageView imageViewEstatus;
 
         public ItemViewHolder(View v) {
             super(v);
@@ -94,8 +75,8 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
     }
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder{
-        public TextView headerTitle;
-        public HeaderViewHolder(View itemView) {
+        private TextView headerTitle;
+        private HeaderViewHolder(View itemView) {
             super(itemView);
             headerTitle = (TextView)itemView.findViewById(R.id.textViewAno);
         }
@@ -288,10 +269,10 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
         LayoutInflater li = LayoutInflater.from(activity);
         LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_sincronizacion_layout, null);
 
-        TextView textViewCancelar = (TextView) layoutDialog.findViewById(R.id.buttonCancelar);
-        TextView textViewSincronizar = (TextView) layoutDialog.findViewById(R.id.buttonSincronizar);
-        LinearLayout linearLayoutCancelar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCancelar);
-        LinearLayout linearLayoutSincronizar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutSincronizar);
+        TextView textViewCancelar = layoutDialog.findViewById(R.id.buttonCancelar);
+        TextView textViewSincronizar = layoutDialog.findViewById(R.id.buttonSincronizar);
+        LinearLayout linearLayoutCancelar = layoutDialog.findViewById(R.id.linearLayoutCancelar);
+        LinearLayout linearLayoutSincronizar = layoutDialog.findViewById(R.id.linearLayoutSincronizar);
 
         final AlertDialog dialog = new AlertDialog.Builder(activity)
                 .setView(layoutDialog)

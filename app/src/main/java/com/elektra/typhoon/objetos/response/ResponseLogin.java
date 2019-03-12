@@ -98,7 +98,7 @@ public class ResponseLogin {
         private String nombre;
         @SerializedName("PASSWORD")
         @Expose
-        private String password;
+        private String acceso;
 
         public String getCorreo() {
             return correo;
@@ -156,12 +156,12 @@ public class ResponseLogin {
             this.nombre = nombre;
         }
 
-        public String getPassword() {
-            return password;
+        public String getAcceso() {
+            return acceso;
         }
 
-        public void setPassword(String password) {
-            this.password = password;
+        public void setAcceso(String acceso) {
+            this.acceso = acceso;
         }
     }
 }

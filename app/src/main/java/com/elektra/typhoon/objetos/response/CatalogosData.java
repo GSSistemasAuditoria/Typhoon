@@ -38,6 +38,10 @@ public class CatalogosData {
     @Expose
     private List<RolUsuario> listRolesUsuario;
 
+    @SerializedName("CatalogoAppSettings")
+    @Expose
+    private List<Configuracion> listConfiguracion;
+
     public List<Barco> getListBarcos() {
         return listBarcos;
     }
@@ -84,5 +88,13 @@ public class CatalogosData {
 
     public void setListRolesUsuario(List<RolUsuario> listRolesUsuario) {
         this.listRolesUsuario = listRolesUsuario;
+    }
+
+    public List<Configuracion> getListConfiguracion() {
+        return listConfiguracion;
+    }
+
+    public void setListConfiguracion(List<Configuracion> listConfiguracion) {
+        this.listConfiguracion = listConfiguracion;
     }
 }

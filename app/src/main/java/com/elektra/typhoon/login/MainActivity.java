@@ -77,6 +77,9 @@ public class MainActivity extends AppCompatActivity {
         //setContentView(R.layout.activity_main);
         setContentView(R.layout.login_layout);
 
+        Utils.deviceLockVerification(this);
+        Utils.installerVerification(this);
+
         editTextUsuario = (EditText)findViewById(R.id.editTextUsuario);
         editTextContrasena = (EditText)findViewById(R.id.editTextContrasena);
         entrar = (Button) findViewById(R.id.buttonEntrar);

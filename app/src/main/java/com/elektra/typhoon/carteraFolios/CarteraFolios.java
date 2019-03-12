@@ -234,36 +234,7 @@ public class CarteraFolios extends AppCompatActivity {
         //sincronizacionDialog();
 
         //boolean enZona = Utils.isPointInPolygon(new LatLng(19.30511913410018,-99.20381013535274));//fuera
-        GPSTracker gps = new GPSTracker(CarteraFolios.this,1);
-        LatLng miPosicion = null;
-        if(gps.canGetLocation()) {
-            double latitude = gps.getLatitude();
-            double longitude = gps.getLongitude();
-            //evidencia.setLatitude(latitude);
-            //evidencia.setLongitude(longitude);
-            System.out.println("Latitude: " + latitude + " Longitude: " + longitude);
-            miPosicion = new LatLng(latitude,longitude);
-            gps.stopUsingGPS();
-        }
 
-        if(miPosicion != null) {
-            /*boolean enZona = Utils.isPointInPolygon(miPosicion);//dentro
-            if (enZona) {
-                Utils.message(this, "Dentro de la geocerca");
-            } else {
-                Utils.message(this, "Fuera de la geocerca");
-            }//*/
-
-            float[] disResultado = new float[2];
-            Location.distanceBetween(19.3046277,-99.2037863,miPosicion.getLatitude(),miPosicion.getLongitude(),disResultado);
-            //Location.distanceBetween(19.3046277,-99.2037863,19.304980, -99.204047,disResultado);
-
-            if(disResultado[0] > 10){
-                Utils.message(this,"Fuera de la geocerca");
-            } else {
-                Utils.message(this,"Dentro de la geocerca");
-            }//*/
-        }
     }
 
     @Override

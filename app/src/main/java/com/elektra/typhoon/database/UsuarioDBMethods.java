@@ -58,11 +58,12 @@ public class UsuarioDBMethods {
     public List<ResponseLogin.Usuario> readUsuarios(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<ResponseLogin.Usuario> listUsuarios = new ArrayList<>();
-        String query = "SELECT ID_USUARIO,CORREO,NOMBRE,PASSWORD,INTERNO,ID_ROL,ESTATUS FROM " + TP_CAT_USUARIO;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_USUARIO,CORREO,NOMBRE,PASSWORD,INTERNO,ID_ROL,ESTATUS FROM ").append(TP_CAT_USUARIO);
         if(condition != null){
-            query = query + " " + condition;
+            query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query,args);
+        Cursor cursor = db.rawQuery(query.toString(),args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -70,7 +71,7 @@ public class UsuarioDBMethods {
                     usuario.setIdUsuario(cursor.getString(0));
                     usuario.setCorreo(cursor.getString(1));
                     usuario.setNombre(cursor.getString(2));
-                    usuario.setPassword(cursor.getString(3));
+                    usuario.setAcceso(cursor.getString(3));
                     if(cursor.getInt(4) == 1){
                         usuario.setInterno(true);
                     }else{
@@ -90,11 +91,12 @@ public class UsuarioDBMethods {
     public ResponseLogin.Usuario readUsuario(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ResponseLogin.Usuario usuario = null;
-        String query = "SELECT ID_USUARIO,CORREO,NOMBRE,PASSWORD,INTERNO,ID_ROL,ESTATUS FROM " + TP_CAT_USUARIO;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_USUARIO,CORREO,NOMBRE,PASSWORD,INTERNO,ID_ROL,ESTATUS FROM ").append(TP_CAT_USUARIO);
         if(condition != null){
-            query = query + " " + condition;
+            query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query,args);
+        Cursor cursor = db.rawQuery(query.toString(),args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -102,7 +104,7 @@ public class UsuarioDBMethods {
                     usuario.setIdUsuario(cursor.getString(0));
                     usuario.setCorreo(cursor.getString(1));
                     usuario.setNombre(cursor.getString(2));
-                    usuario.setPassword(cursor.getString(3));
+                    usuario.setAcceso(cursor.getString(3));
                     if(cursor.getInt(4) == 1){
                         usuario.setInterno(true);
                     }else{

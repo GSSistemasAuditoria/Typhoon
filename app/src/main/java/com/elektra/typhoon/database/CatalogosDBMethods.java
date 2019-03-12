@@ -52,11 +52,12 @@ public class CatalogosDBMethods {
     public List<EstatusEvidencia> readEstatusEvidencia(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<EstatusEvidencia> listEstatus = new ArrayList<>();
-        String query = "SELECT ID_ESTATUS,DESCRIPCION FROM " + TP_CAT_CL_ESTATUS_EVIDENCIA;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_ESTATUS,DESCRIPCION FROM ").append(TP_CAT_CL_ESTATUS_EVIDENCIA);
         if(condition != null){
-            query = query + " " + condition;
+            query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query,args);
+        Cursor cursor = db.rawQuery(query.toString(),args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -98,11 +99,12 @@ public class CatalogosDBMethods {
     public List<EtapaEvidencia> readEtapaEvidencia(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<EtapaEvidencia> listEtapas = new ArrayList<>();
-        String query = "SELECT ID_ETAPA,ID_USUARIO,DESCRIPCION FROM " + TP_CAT_CL_ETAPA_EVIDENCIA;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_ETAPA,ID_USUARIO,DESCRIPCION FROM ").append(TP_CAT_CL_ETAPA_EVIDENCIA);
         if(condition != null){
-            query = query + " " + condition;
+            query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query,args);
+        Cursor cursor = db.rawQuery(query.toString(),args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -145,11 +147,12 @@ public class CatalogosDBMethods {
     public List<TipoRespuesta> readTipoRespuesta(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<TipoRespuesta> listTipoRespuesta = new ArrayList<>();
-        String query = "SELECT ID_RESPUESTA,ID_TIPO_RESPUESTA,DESCRIPCION FROM " + TP_CAT_CL_RESPUESTA;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_RESPUESTA,ID_TIPO_RESPUESTA,DESCRIPCION FROM ").append(TP_CAT_CL_RESPUESTA);
         if(condition != null){
-            query = query + " " + condition;
+            query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query,args);
+        Cursor cursor = db.rawQuery(query.toString(),args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -192,11 +195,12 @@ public class CatalogosDBMethods {
     public List<EstatusRevision> readEstatusRevision(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<EstatusRevision> listEstatusRevision = new ArrayList<>();
-        String query = "SELECT ID_ESTATUS,DESCRIPCION,SRC FROM " + TP_CAT_ESTATUS_REVISION;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_ESTATUS,DESCRIPCION,SRC FROM ").append(TP_CAT_ESTATUS_REVISION);
         if(condition != null){
-            query = query + " " + condition;
+            query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query,args);
+        Cursor cursor = db.rawQuery(query.toString(),args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -237,11 +241,12 @@ public class CatalogosDBMethods {
     public List<RolUsuario> readRolesUsuario(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<RolUsuario> listRolesUsuario = new ArrayList<>();
-        String query = "SELECT ID_ROL,DESCRIPCION FROM " + TP_CAT_ROLES_USUARIO;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_ROL,DESCRIPCION FROM ").append(TP_CAT_ROLES_USUARIO);
         if(condition != null){
-            query = query + " " + condition;
+            query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query,args);
+        Cursor cursor = db.rawQuery(query.toString(),args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
