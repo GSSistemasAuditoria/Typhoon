@@ -4,8 +4,15 @@ import android.util.Base64;
 
 import com.elektra.typhoon.utils.Utils;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -22,8 +29,8 @@ public class Encryption {
     private Key privateKey = null;
     private final static String alg = "AES";
     private final static String cI = "AES/CBC/PKCS5Padding";
-    String key="8080808080808080";
-    String iv="8080808080808080";
+    private String key="8080808080808080";
+    private String iv="8080808080808080";
 
     public Encryption(){
     }
@@ -46,7 +53,17 @@ public class Encryption {
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivParameterSpec);
             encrypted = cipher.doFinal(cleartext.getBytes());
             encryptedText = new String(Base64.encode(encrypted,Base64.DEFAULT)).trim();
-        }catch (Exception e){
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
             e.printStackTrace();
         }
         return encryptedText;
@@ -61,7 +78,18 @@ public class Encryption {
             byte[] enc = Base64.decode(encrypted.getBytes(),Base64.DEFAULT);
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivParameterSpec);
             decrypted = cipher.doFinal(enc);
-        }catch (Exception e){
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
         }
         return new String(decrypted);
     }

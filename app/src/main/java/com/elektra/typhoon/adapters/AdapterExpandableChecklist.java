@@ -167,7 +167,8 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         }
 
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
-        List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta("WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_BARCO = ?",
+        List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
+                "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_BARCO = ?",
                 new String[]{String.valueOf(folio),String.valueOf(checklist),String.valueOf(idBarco)});
         int cumple = 0;
         int noCumple = 0;

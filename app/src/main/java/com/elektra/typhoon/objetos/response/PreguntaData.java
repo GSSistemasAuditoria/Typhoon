@@ -42,7 +42,7 @@ public class PreguntaData {
 
     @SerializedName("IS_TIERRA")
     @Expose
-    private boolean isTierra;
+    private boolean tierra;
 
     private int idRevision;
     private int idChecklist;
@@ -112,10 +112,10 @@ public class PreguntaData {
     }
 
     public boolean isTierra() {
-        return isTierra;
+        return tierra;
     }
 
     public void setTierra(boolean tierra) {
-        isTierra = tierra;
+        this.tierra = tierra;
     }
 }

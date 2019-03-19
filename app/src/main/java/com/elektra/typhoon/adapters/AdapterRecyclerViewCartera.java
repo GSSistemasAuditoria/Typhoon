@@ -19,6 +19,7 @@ import com.elektra.typhoon.R;
 import com.elektra.typhoon.checklist.ChecklistBarcos;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.CatalogosDBMethods;
+import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.FolioRevision;
 import com.elektra.typhoon.service.SincronizacionRequestService;
@@ -65,11 +66,18 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
         @Override
         public void onClick(View v) {
             FolioRevision folioRevision = folios.get(getAdapterPosition());
+            Encryption encryption = new Encryption();
             Intent intent = new Intent(activity, ChecklistBarcos.class);
-            intent.putExtra(Constants.INTENT_FOLIO_TAG,folioRevision.getIdRevision());
+            /*intent.putExtra(Constants.INTENT_FOLIO_TAG,folioRevision.getIdRevision());
             intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG,folioRevision.getFechaInicio());
             intent.putExtra(Constants.INTENT_FECHA_FIN_TAG,folioRevision.getFechaFin());
-            intent.putExtra(Constants.INTENT_ESTATUS_TAG,folioRevision.getEstatus());
+            intent.putExtra(Constants.INTENT_ESTATUS_TAG,folioRevision.getEstatus());//*/
+
+            intent.putExtra(Constants.INTENT_FOLIO_TAG,encryption.encryptAES(String.valueOf(folioRevision.getIdRevision())));
+            intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG,encryption.encryptAES(folioRevision.getFechaInicio()));
+            intent.putExtra(Constants.INTENT_FECHA_FIN_TAG,encryption.encryptAES(folioRevision.getFechaFin()));
+            intent.putExtra(Constants.INTENT_ESTATUS_TAG,encryption.encryptAES(String.valueOf(folioRevision.getEstatus())));
+
             activity.startActivity(intent);
         }
     }
@@ -106,7 +114,10 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
     }
 
     private Drawable getEstatusImagen(int estatus){
-        List<EstatusRevision> listEstatusRevision = new CatalogosDBMethods(activity).readEstatusRevision("WHERE ID_ESTATUS = ?",new String[]{String.valueOf(estatus)});
+        CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(activity);
+        List<EstatusRevision> listEstatusRevision = catalogosDBMethods.readEstatusRevision(
+                "SELECT ID_ESTATUS,DESCRIPCION,SRC FROM " + catalogosDBMethods.TP_CAT_ESTATUS_REVISION + " WHERE ID_ESTATUS = ?",
+                new String[]{String.valueOf(estatus)});
         if(listEstatusRevision.size() != 0){
             String imagen = listEstatusRevision.get(0).getImagen();
             if(imagen.contains("status-1")){
@@ -173,8 +184,9 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
 
     @Override
     public int getItemViewType(int position) {
-        if (isPositionHeader(position))
+        if (isPositionHeader(position)) {
             return header;
+        }
         return item;
     }
 

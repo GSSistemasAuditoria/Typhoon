@@ -65,12 +65,13 @@ public class ChecklistDBMethods {
     public List<ChecklistData> readChecklists(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<ChecklistData> listChecklist = new ArrayList<>();
-        StringBuilder query = new StringBuilder();
+        /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_REVISION,ID_CHECKLIST,ID_ESTATUS,ID_LOGO,ID_TIPO_REVISION,NOMBRE,PONDERACION FROM ").append(TP_CAT_CHEKLIST);
         if(condition != null){
             query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query.toString(),args);
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition,args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -94,12 +95,13 @@ public class ChecklistDBMethods {
     public ChecklistData readChecklist(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ChecklistData checklist = null;
-        StringBuilder query = new StringBuilder();
+        /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_REVISION,ID_CHECKLIST,ID_ESTATUS,ID_LOGO,ID_TIPO_REVISION,NOMBRE,PONDERACION FROM ").append(TP_CAT_CHEKLIST);
         if(condition != null){
             query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query.toString(),args);
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition,args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -156,12 +158,13 @@ public class ChecklistDBMethods {
     public List<RubroData> readRubro(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<RubroData> listRubro = new ArrayList<>();
-        StringBuilder query = new StringBuilder();
+        /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_REVISION,ID_CHECKLIST,ID_RUBRO,ESTATUS,NOMBRE FROM ").append(TP_CAT_CL_RUBRO);
         if(condition != null){
             query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query.toString(),args);
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition,args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -215,12 +218,13 @@ public class ChecklistDBMethods {
     public List<Pregunta> readPregunta(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<Pregunta> listPreguntas = new ArrayList<>();
-        StringBuilder query = new StringBuilder();
+        /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA FROM ").append(TP_CAT_CL_PREGUNTA);
         if(condition != null){
             query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query.toString(),args);
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition,args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -277,12 +281,13 @@ public class ChecklistDBMethods {
     public List<RespuestaData> readRespuesta(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<RespuestaData> listRespuestas = new ArrayList<>();
-        StringBuilder query = new StringBuilder();
+        /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA FROM ").append(TP_TRAN_CL_RESPUESTA);
         if(condition != null){
             query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query.toString(),args);
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition,args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{

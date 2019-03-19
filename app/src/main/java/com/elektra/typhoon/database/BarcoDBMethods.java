@@ -42,15 +42,12 @@ public class BarcoDBMethods {
         db.close();
     }
 
-    public List<CatalogoBarco> readBarcos(String condition, String[] args){
+    public List<CatalogoBarco> readBarcos(){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<CatalogoBarco> listBarco = new ArrayList<>();
         StringBuilder query = new StringBuilder();
         query.append("SELECT ID_BARCO,NOMBRE FROM ").append(TP_CAT_BARCO);
-        if(condition != null){
-            query.append(" ").append(condition);
-        }
-        Cursor cursor = db.rawQuery(query.toString(),args);
+        Cursor cursor = db.rawQuery(query.toString(),null);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{

@@ -41,6 +41,7 @@ import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.HistoricoDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
+import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.Historico;
 import com.elektra.typhoon.objetos.response.Pregunta;
@@ -52,6 +53,7 @@ import com.elektra.typhoon.utils.Utils;
 import com.github.barteksc.pdfviewer.PDFView;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
@@ -148,14 +150,16 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     public void onBindViewHolder(@NonNull final AdapterRecycleViewPreguntas.MyViewHolder holder, final int position) {
         //acciones
         final Pregunta pregunta = listPreguntas.get(position);
-        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario(null,null);
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
         holder.linearLayout.setVisibility(View.GONE);
         holder.radioGroup.setEnabled(false);
         pregunta.setRadioGroup(holder.radioGroup);
         holder.textViewPregunta.setText(pregunta.getDescripcion());
         holderTemp = holder;
 
-        List<RespuestaData> listRespuestas = new ChecklistDBMethods(activity).readRespuesta("WHERE ID_REVISION = ? AND ID_CHECKLIST = ? " +
+        ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
+        List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
+                "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? " +
                 "AND ID_PREGUNTA = ? AND ID_RUBRO = ? AND ID_BARCO = ?",new String[]{String.valueOf(pregunta.getIdRevision()),
                 String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),String.valueOf(pregunta.getIdRubro()),
                 String.valueOf(idBarco)});
@@ -190,7 +194,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             @Override
             public void onClick(View view) {
                 if(Utils.validaConfiguracionApp(activity)) {
-                    String flagGPS = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, "");
+                    String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
                     if (flagGPS.equals("true")) {
                         if (Utils.validaGeocerca(activity)) {
                             agregarEvidencias(pregunta.getListEvidencias(), holder.textViewAddEvidencias, position);
@@ -218,7 +222,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             @Override
             public void onClick(View view) {
                 if(Utils.validaConfiguracionApp(activity)) {
-                    String flagGPS = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, "");
+                    String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
                     if (flagGPS.equals("true")) {
                         if (Utils.validaGeocerca(activity)) {
                             agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia, position);
@@ -246,12 +250,12 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             @Override
             public void onClick(View view) {
                 if(Utils.validaConfiguracionApp(activity)) {
-                    String flagGPS = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, "");
+                    String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
                     if (flagGPS.equals("true")) {
                         if (Utils.validaGeocerca(activity)) {
                             agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
                         } else {
-                            Utils.message(activity, "No se encuentra dentro de la zona");
+                            Utils.message(activity, "No se pueden agregar evidencias fuera de la zona de operación");
                         }
                     } else {
                         agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
@@ -359,7 +363,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     private void agregarEvidencias(List<Evidencia> listEvidencias,View view,int position){
         if(listEvidencias != null) {
             if (validaNumeroEvidencias(listEvidencias.size())) {
-                String noEvidencias = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_LIMITE_EVIDENCIAS,"");
+                String noEvidencias = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_LIMITE_EVIDENCIAS,""));
                 Utils.message(activity,"Sólo se permite agregar " + noEvidencias + " evidencias");
             }else{
                 mostrarPopupEvidencias(view, position);
@@ -421,7 +425,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         try {
             SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
             if (sharedPrefs.contains(Constants.SP_LIMITE_EVIDENCIAS)) {
-                String evidenciasPermitidas = sharedPrefs.getString(Constants.SP_LIMITE_EVIDENCIAS, "");
+                String evidenciasPermitidas = new Encryption().decryptAES(sharedPrefs.getString(Constants.SP_LIMITE_EVIDENCIAS, ""));
                 int numeroEvidencias = Integer.parseInt(evidenciasPermitidas);
                 if (numeroEvidencias == evidenciasCargadas) {
                     return true;
@@ -435,7 +439,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     return false;
                 }
             }
-        }catch (Exception e){
+        }catch (NumberFormatException e){
             Utils.message(activity,"No se descargo correctamente la configuración");
             return false;
         }
@@ -443,7 +447,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
     private RelativeLayout insertEvidencia(Bitmap bitmap, String id, int numPregunta){
 
-        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario(null,null);
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
 
         LayoutInflater inflater = LayoutInflater.from(activity);
         RelativeLayout relativeLayout = (RelativeLayout) inflater.inflate(R.layout.image_item_layout, null, false);
@@ -510,7 +514,10 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     //Bitmap bitmap = listPreguntas.get(numeroPregunta).getListEvidencias().get(identificador - 1).getOriginalBitmap();
                     Bitmap bitmap = null;
                     Pregunta pregunta = listPreguntas.get(numeroPregunta);
-                    Evidencia evidencia = new EvidenciasDBMethods(activity).readEvidencia("WHERE ID_EVIDENCIA = ? AND ID_REVISION = ? " +
+                    EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
+                    Evidencia evidencia = evidenciasDBMethods.readEvidencia(
+                            "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
+                                    "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA + " WHERE ID_EVIDENCIA = ? AND ID_REVISION = ? " +
                                     "AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?",
                             new String[]{String.valueOf(identificador),String.valueOf(pregunta.getIdRevision()),
                                     String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdRubro()),
@@ -526,7 +533,10 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     }else{
                         Utils.message(activity,"No se pudo cargar la imagen");
                     }
-                }catch (Exception e){
+                }catch (IOException e){
+                    Utils.message(activity,"Error al cargar imagen");
+                    e.printStackTrace();
+                }catch (NumberFormatException e){
                     Utils.message(activity,"Error al cargar imagen");
                     e.printStackTrace();
                 }
@@ -548,7 +558,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
         View dialogLayout = null;
         UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(activity);
-        final ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario(null,null);
+        final ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario();
 
         if(documento != null) {
             dialogLayout = inflater.inflate(R.layout.mostrar_documento_layout, null, false);
@@ -695,7 +705,10 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 textViewEstatus.setText("Estatus general: " + finalEstatusString);
                 textViewEtapa.setText("Etapa actual: " + finalEtapaString);
 
-                List<Historico> listHistorico = new HistoricoDBMethods(activity).readHistorico("WHERE ID_EVIDENCIA = ?",new String[]{identificador});
+                HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(activity);
+                List<Historico> listHistorico = historicoDBMethods.readHistorico(
+                        "SELECT ID_EVIDENCIA,ID_ETAPA,ID_USUARIO,MOTIVO,CONSEC,ID_REVISION,ID_CHECKLIST,FECHA_MOD FROM " + historicoDBMethods.TP_TRAN_HISTORIAL_EVIDENCIA + " WHERE ID_EVIDENCIA = ?",
+                        new String[]{identificador});
                 HistoricoAdapter historicoAdapter = new HistoricoAdapter(activity,listHistorico);
                 listViewHistorico.setAdapter(historicoAdapter);
 
@@ -728,7 +741,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         }else {
                             evidencia.setIdEtapa(usuario.getIdrol() + 1);
                         }
-                        try {
+                        //try {
                             ContentValues contentValues = new ContentValues();
                             //contentValues.put("ID_ETAPA", getEtapaValidado(evidencia.getIdEtapa()));
                             if(usuario.getIdrol() == 1) {
@@ -748,7 +761,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                             String.valueOf(evidencia.getIdBarco())});
 
                             Utils.message(activity,"Validada");
-                            crearHistorico(evidencia,usuario,"Validado por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
+                            crearHistorico(evidencia,usuario,"Validada por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
 
                             if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
                                 listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
@@ -766,10 +779,10 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                             notifyDataSetChanged();
                             break;
 
-                        }catch (Exception e){
+                        /*}catch (NullPointerException e){
                             e.printStackTrace();
                             Utils.message(activity,"Error al validar evidencia: " + e.getMessage());
-                        }
+                        }//*/
                     }
                 }
             }
@@ -963,7 +976,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         buttonBorrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
+                //try {
                     Evidencia evidenciaTemp = null;
                     for (Evidencia evidencia : listPreguntas.get(numeroPregunta).getListEvidencias()) {
                         if (evidencia.getIdEvidencia().equals(identificador)) {
@@ -1049,10 +1062,10 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     }
                     notifyDataSetChanged();
                     alertDialog.dismiss();
-                }catch (Exception e){
+                /*}catch (NullPointerException e){
                     e.printStackTrace();
                     Utils.message(activity,"Error al borrar evidencia: " + e.getMessage());
-                }
+                }//*/
             }
         });
     }
@@ -1073,7 +1086,9 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
     private void crearHistorico(Evidencia evidencia, ResponseLogin.Usuario usuario,String motivo){
         HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(activity);
-        List<Historico> listHistorico = historicoDBMethods.readHistorico("WHERE ID_EVIDENCIA = ?",new String[]{evidencia.getIdEvidencia()});
+        List<Historico> listHistorico = historicoDBMethods.readHistorico(
+                "SELECT ID_EVIDENCIA,ID_ETAPA,ID_USUARIO,MOTIVO,CONSEC,ID_REVISION,ID_CHECKLIST,FECHA_MOD FROM " + historicoDBMethods.TP_TRAN_HISTORIAL_EVIDENCIA + " WHERE ID_EVIDENCIA = ?",
+                new String[]{evidencia.getIdEvidencia()});
         int consecutivo = 1;
         /*if(listHistorico.size() != 0){
             for(Historico historico:listHistorico){
@@ -1105,7 +1120,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 ContentValues contentValues = new ContentValues();
                 contentValues.put("ID_ETAPA",1);
                 contentValues.put("ID_ESTATUS",3);
-                try {
+                //try {
                     new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
                             "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
                                     "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
@@ -1135,10 +1150,10 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     //adapterRecycleViewPreguntas.notifyDataSetChanged();
                     //evidenciaTemp = evidencia;
                     break;
-                }catch (Exception e){
+                /*}catch (NullPointerException e){
                     e.printStackTrace();
                     Utils.message(activity,"Error al rechazar evidencia: " + e.getMessage());
-                }
+                }//*/
             }
         }
     }
@@ -1155,7 +1170,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     }
 
     public boolean validaEvidencias(List<Evidencia> listEvidencias){
-        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario(null,null);
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
         for(Evidencia ev:listEvidencias){
             //if(ev.getIdEstatus() == 2){
             if(usuario.getIdrol() == 1) {
@@ -1179,7 +1194,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
     public void reiniciaRadioGroup(RadioGroup radioGroup,List<Evidencia> listEvidencias){
         boolean flag = true;
-        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario(null,null);
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
         //if(usuario.getIdrol() == 2) {
         if(usuario.getIdrol() != 1) {
             for (Evidencia ev : listEvidencias) {
@@ -1320,7 +1335,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
         final ProgressDialog progressDialog = Utils.typhoonLoader(activity,"Descargando informe...");
 
-        try {
+        //try {
 
             SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
 
@@ -1330,9 +1345,10 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 @Override
                 public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {
                     progressDialog.dismiss();
-                    if (response.body() != null) {
-                        if (response.body().getDescargaPDF().getExito()) {
-                            try {
+                    if(response != null) {
+                        if (response.body() != null) {
+                            if (response.body().getDescargaPDF().getExito()) {
+                                //try {
                                 if (response.body().getDescargaPDF().getDocumentoPDF() != null) {
                                     String base64 = response.body().getDescargaPDF().getDocumentoPDF().getBase64();
                                     if (base64 != null) {
@@ -1384,24 +1400,27 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                 } else {
                                     Utils.message(activity, "No se pudo descargar el informe");
                                 }
-                            } catch (Exception e) {
+                            /*} catch (NullPointerException e) {
                                 Utils.message(activity, "No se pudo descargar el informe: " + e.getMessage());
                                 e.printStackTrace();
+                            }//*/
+                            } else {
+                                Utils.message(activity, response.body().getDescargaPDF().getError());
                             }
                         } else {
-                            Utils.message(activity, response.body().getDescargaPDF().getError());
-                        }
-                    } else {
-                        if (response.errorBody() != null) {
-                            try {
-                                Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Utils.message(activity, "Error al descargar informe: " + e.getMessage());
+                            if (response.errorBody() != null) {
+                                try {
+                                    Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    Utils.message(activity, "Error al descargar informe: " + e.getMessage());
+                                }
+                            } else {
+                                Utils.message(activity, "Error al descargar informe");
                             }
-                        } else {
-                            Utils.message(activity, "Error al descargar informe");
                         }
+                    }else{
+                        Utils.message(activity, "Error al descargar informe");
                     }
                 }
 
@@ -1411,10 +1430,10 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     Utils.message(activity, Constants.MSG_ERR_CONN);
                 }
             });
-        }catch (Exception e){
+        /*}catch (NullPointerException e){
             progressDialog.dismiss();
             e.printStackTrace();
             Utils.message(activity, "Error al descargar informe: " + e.getMessage());
-        }
+        }//*/
     }
 }

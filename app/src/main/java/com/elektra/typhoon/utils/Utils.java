@@ -1,6 +1,7 @@
 package com.elektra.typhoon.utils;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.app.ProgressDialog;
@@ -43,6 +44,7 @@ import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.CatalogosDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
+import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.response.Barco;
@@ -58,6 +60,7 @@ import com.elektra.typhoon.objetos.response.RolUsuario;
 import com.elektra.typhoon.objetos.response.TipoRespuesta;
 import com.elektra.typhoon.service.ApiInterface;
 import com.elektra.typhoon.service.NuevaInstalacion;
+import com.google.android.gms.common.util.IOUtils;
 import com.google.android.gms.location.Geofence;
 
 import java.io.BufferedReader;
@@ -174,7 +177,8 @@ public class Utils {
 
     public static void openCamera(Activity activity,int requestCode){
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        File file = new File(Constants.PATH + "tempPhotos/evidencia.jpg");
+        //File file = new File(Constants.PATH + "tempPhotos/evidencia.jpg");
+        File file = new File(Constants.PATH);
         //Uri capturedImageUri = Uri.fromFile(file);
         boolean isDirectoryCreated = file.getParentFile().mkdirs();
         System.out.println("openCamera: isDirectoryCreated: " + isDirectoryCreated);
@@ -211,7 +215,7 @@ public class Utils {
         try {
             String[] temp = fecha.split("-");
             mes = getMonth(Integer.parseInt(temp[1]));
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             e.printStackTrace();
         }
         return mes;
@@ -338,17 +342,19 @@ public class Utils {
 
         final ProgressDialog progressDialog = Utils.typhoonLoader(activity,titulo);
 
-        try {
+        final Encryption encryption = new Encryption();
 
+        //try {
             ApiInterface mApiService = getInterfaceService();
             SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
             Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(sharedPreferences.getString(Constants.SP_JWT_TAG, ""));
             mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
                 @Override
                 public void onResponse(Call<CatalogosTyphoonResponse> call, Response<CatalogosTyphoonResponse> response) {
-                    if (response.body() != null) {
-                        if (response.body().getCatalogos().getExito()) {
-                            try {
+                    if(response != null) {
+                        if (response.body() != null) {
+                            if (response.body().getCatalogos().getExito()) {
+                                //try {
                                 BarcoDBMethods barcoDBMethods = new BarcoDBMethods(activity);
                                 CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(activity);
                                 if (response.body().getCatalogos().getCatalogosData().getListBarcos() != null) {
@@ -393,16 +399,16 @@ public class Utils {
                                     SharedPreferences.Editor ed;
                                     ed = sharedPrefs.edit();
                                     for (Configuracion configuracion : response.body().getCatalogos().getCatalogosData().getListConfiguracion()) {
-                                        if(configuracion.getConfiguracion().equals("LimiteEvidencias")){
-                                            ed.putString(Constants.SP_LIMITE_EVIDENCIAS, configuracion.getArgumento());
+                                        if (configuracion.getConfiguracion().equals("LimiteEvidencias")) {
+                                            ed.putString(Constants.SP_LIMITE_EVIDENCIAS, encryption.encryptAES(configuracion.getArgumento()));
                                             ed.apply();
                                         }
-                                        if(configuracion.getConfiguracion().equals("Gps")){
-                                            ed.putString(Constants.SP_GPS_FLAG, configuracion.getArgumento());
+                                        if (configuracion.getConfiguracion().equals("Gps")) {
+                                            ed.putString(Constants.SP_GPS_FLAG, encryption.encryptAES(configuracion.getArgumento()));
                                             ed.apply();
                                         }
-                                        if(configuracion.getConfiguracion().equals("GpsConfig")){
-                                            ed.putString(Constants.SP_GPS_GEOCERCA, configuracion.getArgumento());
+                                        if (configuracion.getConfiguracion().equals("GpsConfig")) {
+                                            ed.putString(Constants.SP_GPS_GEOCERCA, encryption.encryptAES(configuracion.getArgumento()));
                                             ed.apply();
                                         }
                                     }
@@ -414,27 +420,30 @@ public class Utils {
                                     activity.startActivity(intent);
                                     activity.finish();
                                 }
-                            } catch (Exception e) {
+                            /*} catch (NullPointerException e) {
                                 progressDialog.dismiss();
                                 Utils.message(activity, "Error al guardar los catálogos: " + e.getMessage());
                                 e.printStackTrace();
+                            }//*/
+                            } else {
+                                progressDialog.dismiss();
+                                Utils.message(activity, response.body().getCatalogos().getError());
                             }
                         } else {
                             progressDialog.dismiss();
-                            Utils.message(activity, response.body().getCatalogos().getError());
-                        }
-                    } else {
-                        progressDialog.dismiss();
-                        if (response.errorBody() != null) {
-                            try {
-                                Utils.message(activity, "Error al descargar catálogos: " + response.errorBody().string());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Utils.message(activity, "Error al descargar catálogos: " + e.getMessage());
+                            if (response.errorBody() != null) {
+                                try {
+                                    Utils.message(activity, "Error al descargar catálogos: " + response.errorBody().string());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    Utils.message(activity, "Error al descargar catálogos: " + e.getMessage());
+                                }
+                            } else {
+                                Utils.message(activity, "Error al descargar catálogos");
                             }
-                        } else {
-                            Utils.message(activity, "Error al descargar catálogos");
                         }
+                    }else{
+                        Utils.message(activity, "Error al descargar catálogos");
                     }
                 }
 
@@ -444,11 +453,11 @@ public class Utils {
                     Utils.message(activity, Constants.MSG_ERR_CONN);
                 }
             });
-        }catch (Exception e){
+        /*}catch (NullPointerException e){
             e.printStackTrace();
             progressDialog.dismiss();
             Utils.message(activity, "Error al descargar catálogos: " + e.getMessage());
-        }
+        }//*/
     }
 
     /**
@@ -508,8 +517,9 @@ public class Utils {
                 return cursor.getString(column_index);
             }
         } finally {
-            if (cursor != null)
+            if (cursor != null) {
                 cursor.close();
+            }
         }
         return null;
     }
@@ -523,7 +533,8 @@ public class Utils {
      */
     public static String fileToBase64(Context context, Uri uri) throws IOException {
         InputStream iStream =   context.getContentResolver().openInputStream(uri);
-        byte[] inputData = getBytes(iStream);
+        //byte[] inputData = getBytes(iStream);
+        byte[] inputData = IOUtils.toByteArray(iStream);
         String encodedImage = Base64.encodeToString(inputData, Base64.DEFAULT);
         return encodedImage;
     }
@@ -546,13 +557,7 @@ public class Utils {
         return fileAsBytes;
     }
 
-    /**
-     *
-     * @param inputStream
-     * @return
-     * @throws IOException
-     */
-    public static byte[] getBytes(InputStream inputStream) throws IOException {
+    /*public static byte[] getBytes(InputStream inputStream) throws IOException {
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         int bufferSize = 1024;
         byte[] buffer = new byte[bufferSize];
@@ -562,7 +567,7 @@ public class Utils {
             byteBuffer.write(buffer, 0, len);
         }
         return byteBuffer.toByteArray();
-    }
+    }//*/
 
     /**
      *
@@ -579,9 +584,11 @@ public class Utils {
     public static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
         InputStream input = context.getContentResolver().openInputStream(selectedImage);
         ExifInterface ei;
-        if (Build.VERSION.SDK_INT > 23)
+        if (Build.VERSION.SDK_INT > 23) {
             ei = new ExifInterface(input);
-        else ei = new ExifInterface(selectedImage.getPath());
+        }else{
+            ei = new ExifInterface(selectedImage.getPath());
+        }
         int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
         switch (orientation) {
             case ExifInterface.ORIENTATION_ROTATE_90:
@@ -607,7 +614,7 @@ public class Utils {
      * @return
      */
     public static boolean aplicaPregunta(Context context,List<Evidencia> evidencias){
-        ResponseLogin.Usuario usuario = new UsuarioDBMethods(context).readUsuario(null,null);
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(context).readUsuario();
         if(evidencias.size() != 0) {
             for (Evidencia evidencia : evidencias) {
                 if(usuario.getIdrol() == 1){
@@ -797,7 +804,10 @@ public class Utils {
     }
 
     public static String getEtapa(Context context,int etapa){
-        List<EtapaEvidencia> listEtapa = new CatalogosDBMethods(context).readEtapaEvidencia("WHERE ID_ETAPA = ?",new String[]{String.valueOf(etapa)});
+        CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(context);
+        List<EtapaEvidencia> listEtapa = catalogosDBMethods.readEtapaEvidencia(
+                "SELECT ID_ETAPA,ID_USUARIO,DESCRIPCION FROM " + catalogosDBMethods.TP_CAT_CL_ETAPA_EVIDENCIA + " WHERE ID_ETAPA = ?",
+                new String[]{String.valueOf(etapa)});
         if(listEtapa.size() != 0){
             return listEtapa.get(0).getDescripcion();
         }else{
@@ -806,7 +816,10 @@ public class Utils {
     }
 
     public static String getRol(Context context,int idRol){
-        List<RolUsuario> listRoles = new CatalogosDBMethods(context).readRolesUsuario("WHERE ID_ROL = ?",new String[]{String.valueOf(idRol)});
+        CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(context);
+        List<RolUsuario> listRoles = catalogosDBMethods.readRolesUsuario(
+                "SELECT ID_ROL,DESCRIPCION FROM " + catalogosDBMethods.TP_CAT_ROLES_USUARIO + " WHERE ID_ROL = ?",
+                new String[]{String.valueOf(idRol)});
         if(listRoles.size() != 0){
             return listRoles.get(0).getDescripcion();
         }else{
@@ -815,7 +828,10 @@ public class Utils {
     }
 
     public static String getEstatusEvidencia(Context context,int idEstatus){
-        List<EstatusEvidencia> listEstatusEvidencia = new CatalogosDBMethods(context).readEstatusEvidencia("WHERE ID_ESTATUS = ?",new String[]{String.valueOf(idEstatus)});
+        CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(context);
+        List<EstatusEvidencia> listEstatusEvidencia = catalogosDBMethods.readEstatusEvidencia(
+                "SELECT ID_ESTATUS,DESCRIPCION FROM " + catalogosDBMethods.TP_CAT_CL_ESTATUS_EVIDENCIA + " WHERE ID_ESTATUS = ?",
+                new String[]{String.valueOf(idEstatus)});
         if(listEstatusEvidencia.size() != 0){
             return listEstatusEvidencia.get(0).getDescripcion();
         }else{
@@ -823,14 +839,14 @@ public class Utils {
         }
     }
 
-    public static String getEtapaEvidencia(Context context,int idEtapa){
+    /*public static String getEtapaEvidencia(Context context,int idEtapa){
         List<EtapaEvidencia> listEtapa = new CatalogosDBMethods(context).readEtapaEvidencia("WHERE ID_ETAPA = ?",new String[]{String.valueOf(idEtapa)});
         if(listEtapa.size() != 0){
             return listEtapa.get(0).getDescripcion();
         }else{
             return "";
         }
-    }
+    }//*/
 
     public static boolean isPointInPolygon(LatLng tap) {
 
@@ -896,7 +912,7 @@ public class Utils {
             float[] disResultado = new float[2];
             SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
             if(sharedPreferences.contains(Constants.SP_GPS_GEOCERCA)){
-                String geocerca = sharedPreferences.getString(Constants.SP_GPS_GEOCERCA,"");
+                String geocerca = new Encryption().decryptAES(sharedPreferences.getString(Constants.SP_GPS_GEOCERCA,""));
                 String[] temp = geocerca.split("\\|");
                 double latitudeTyphoon = Double.parseDouble(temp[1].replace("Lat:",""));
                 double longitudeTyphoon = Double.parseDouble(temp[0].replace("Lon:",""));
@@ -929,22 +945,13 @@ public class Utils {
         }
     }
 
-    public static boolean deviceLockVerification(Context context){
+    @SuppressLint("NewApi")
+    public static void deviceLockVerification(Context context){
         KeyguardManager keyguardManager = (KeyguardManager)context.getSystemService(Context.KEYGUARD_SERVICE);
-        try {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-                // Device can be locked, using either a PIN, a password or a pattern
-                // Device locking disabled
-                assert keyguardManager != null;
-                return keyguardManager.isDeviceSecure();
-            } else {
-                // Device can be locked, using either a PIN, a password or a pattern
-                // Device locking disabled
-                assert keyguardManager != null;
-                return keyguardManager.isKeyguardSecure();
-            }
-        }catch (NullPointerException e){
-            return false;
+        if(keyguardManager.isDeviceSecure()){
+
+        }else{
+
         }
     }
 
@@ -974,7 +981,7 @@ public class Utils {
         String[] paths = { "/system/app/Superuser.apk", "/sbin/su", "/system/bin/su", "/system/xbin/su", "/data/local/xbin/su", "/data/local/bin/su", "/system/sd/xbin/su",
                 "/system/bin/failsafe/su", "/data/local/su", "/su/bin/su"};
         for (String path : paths) {
-            if (new File(path).exists()) return true;
+            if (new File(path).exists()){ return true;}
         }
         return false;
     }
@@ -984,12 +991,13 @@ public class Utils {
         try {
             process = Runtime.getRuntime().exec(new String[] { "/system/xbin/which", "su" });
             BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            if (in.readLine() != null) return true;
+            if (in.readLine() != null) {return true;}
             return false;
-        } catch (Throwable t) {
+        } catch (IOException e) {
+            e.printStackTrace();
             return false;
         } finally {
-            if (process != null) process.destroy();
+            if (process != null) {process.destroy();}
         }
     }
 }

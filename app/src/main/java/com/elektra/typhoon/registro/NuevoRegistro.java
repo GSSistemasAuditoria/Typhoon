@@ -8,6 +8,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +28,7 @@ import retrofit2.Response;
 import com.elektra.typhoon.utils.Utils;
 
 import java.io.IOException;
+import java.text.Normalizer;
 
 /**
  * Proyecto: TYPHOON
@@ -61,14 +65,55 @@ public class NuevoRegistro extends AppCompatActivity {
         linearLayoutContrasena.setVisibility(View.GONE);
         linearLayoutConfirmarContrasena.setVisibility(View.GONE);
 
+        editTextPassword.setLongClickable(false);
+        editTextPassword.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            public void onDestroyActionMode(ActionMode mode) {
+            }
+
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+        });
+
+        editTextConfirmaPassword.setLongClickable(false);
+        editTextConfirmaPassword.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            public void onDestroyActionMode(ActionMode mode) {
+            }
+
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+        });
+
         validar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 /*Intent intent = new Intent(NuevoRegistro.this, CarteraFolios.class);
                 startActivity(intent);//*/
-                if(!editTextCorreo.getText().toString().equals("")) {
-                    if (Utils.validaExpresion(editTextCorreo.getText().toString(), Constants.EMAIL_REGEX)) {
-                        validarUsuario(editTextCorreo.getText().toString());
+                //if(!editTextCorreo.getText().toString().equals("")) {
+                if(!Normalizer.normalize(editTextCorreo.getText().toString(), Normalizer.Form.NFD).equals("")) {
+                    //if (Utils.validaExpresion(editTextCorreo.getText().toString(), Constants.EMAIL_REGEX)) {
+                    if (Utils.validaExpresion(Normalizer.normalize(editTextCorreo.getText().toString(), Normalizer.Form.NFD), Constants.EMAIL_REGEX)) {
+                        //validarUsuario(editTextCorreo.getText().toString());
+                        validarUsuario(Normalizer.normalize(editTextCorreo.getText().toString(), Normalizer.Form.NFD));
                     } else {
                         Utils.message(getApplicationContext(), "Formato de correo no válido");
                     }
@@ -102,11 +147,16 @@ public class NuevoRegistro extends AppCompatActivity {
         registrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!editTextPassword.getText().toString().equals("")){
-                    if(!editTextConfirmaPassword.getText().toString().equals("")){
-                        if(editTextPassword.getText().toString().equals(editTextConfirmaPassword.getText().toString())){
-                            registrarUsuario(NuevoRegistro.this,editTextCorreo.getText().toString(),
-                                    editTextPassword.getText().toString());
+                //if(!editTextPassword.getText().toString().equals("")){
+                if(!Normalizer.normalize(editTextPassword.getText().toString(), Normalizer.Form.NFD).equals("")){
+                    //if(!editTextConfirmaPassword.getText().toString().equals("")){
+                    if(!Normalizer.normalize(editTextConfirmaPassword.getText().toString(), Normalizer.Form.NFD).equals("")){
+                        //if(editTextPassword.getText().toString().equals(editTextConfirmaPassword.getText().toString())){
+                        if(Normalizer.normalize(editTextPassword.getText().toString(), Normalizer.Form.NFD).
+                                equals(Normalizer.normalize(editTextConfirmaPassword.getText().toString(), Normalizer.Form.NFD))){
+                            //registrarUsuario(NuevoRegistro.this,editTextCorreo.getText().toString(), editTextPassword.getText().toString());
+                            registrarUsuario(NuevoRegistro.this,Normalizer.normalize(editTextCorreo.getText().toString(), Normalizer.Form.NFD),
+                                    Normalizer.normalize(editTextPassword.getText().toString(), Normalizer.Form.NFD));
                         }else{
                             Utils.message(getApplicationContext(),"Las contraseñas no coinciden");
                         }
@@ -133,25 +183,29 @@ public class NuevoRegistro extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseValidaUsuario> call, Response<ResponseValidaUsuario> response) {
                 progressDialog.dismiss();
-                if(response.body() != null) {
-                    if(response.body().getValidaUsuario().getExito()){
-                        registrar.setVisibility(View.VISIBLE);
-                        linearLayoutContrasena.setVisibility(View.VISIBLE);
-                        linearLayoutConfirmarContrasena.setVisibility(View.VISIBLE);
-                    }else{
-                        Utils.message(getApplicationContext(), response.body().getValidaUsuario().getError());
+                if(response != null) {
+                    if (response.body() != null) {
+                        if (response.body().getValidaUsuario().getExito()) {
+                            registrar.setVisibility(View.VISIBLE);
+                            linearLayoutContrasena.setVisibility(View.VISIBLE);
+                            linearLayoutConfirmarContrasena.setVisibility(View.VISIBLE);
+                        } else {
+                            Utils.message(getApplicationContext(), response.body().getValidaUsuario().getError());
+                        }
+                    } else {
+                        if (response.errorBody() != null) {
+                            try {
+                                Utils.message(getApplicationContext(), "Error al validar usuario: " + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Utils.message(getApplicationContext(), "Error al validar usuario: " + e.getMessage());
+                            }
+                        } else {
+                            Utils.message(getApplicationContext(), "Error al validar usuario");
+                        }
                     }
                 }else{
-                    if(response.errorBody() != null){
-                        try {
-                            Utils.message(getApplicationContext(), "Error al validar usuario: " + response.errorBody().string());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Utils.message(getApplicationContext(), "Error al validar usuario: " + e.getMessage());
-                        }
-                    }else {
-                        Utils.message(getApplicationContext(), "Error al validar usuario");
-                    }
+                    Utils.message(getApplicationContext(), "Error al validar usuario");
                 }
             }
 
@@ -176,24 +230,28 @@ public class NuevoRegistro extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseNuevoUsuario> call, Response<ResponseNuevoUsuario> response) {
                 progressDialog.dismiss();
-                if(response.body() != null) {
-                    if(response.body().getNuevoUsuario().getExito()){
-                        Utils.message(getApplicationContext(),"Registro exitoso");
-                        activity.finish();
-                    }else{
-                        Utils.message(getApplicationContext(), response.body().getNuevoUsuario().getError());
+                if(response != null) {
+                    if (response.body() != null) {
+                        if (response.body().getNuevoUsuario().getExito()) {
+                            Utils.message(getApplicationContext(), "Registro exitoso");
+                            activity.finish();
+                        } else {
+                            Utils.message(getApplicationContext(), response.body().getNuevoUsuario().getError());
+                        }
+                    } else {
+                        if (response.errorBody() != null) {
+                            try {
+                                Utils.message(getApplicationContext(), "Error al registrar usuario: " + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Utils.message(getApplicationContext(), "Error al registrar usuario: " + e.getMessage());
+                            }
+                        } else {
+                            Utils.message(getApplicationContext(), "Error al registrar usuario");
+                        }
                     }
                 }else{
-                    if(response.errorBody() != null){
-                        try {
-                            Utils.message(getApplicationContext(), "Error al registrar usuario: " + response.errorBody().string());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Utils.message(getApplicationContext(), "Error al registrar usuario: " + e.getMessage());
-                        }
-                    }else {
-                        Utils.message(getApplicationContext(), "Error al registrar usuario");
-                    }
+                    Utils.message(getApplicationContext(), "Error al registrar usuario");
                 }
             }
 

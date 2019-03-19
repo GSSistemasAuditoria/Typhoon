@@ -33,7 +33,7 @@ public class GPSTracker extends Service implements LocationListener {
     private boolean isNetworkEnabled = false;
 
     // flag for GPS status
-    private boolean canGetLocation = false;
+    private boolean getLocationFlag = false;
 
     private Location location; // location
     private double latitude; // latitude
@@ -60,7 +60,7 @@ public class GPSTracker extends Service implements LocationListener {
         this.mContext = context;
     }
 
-    public Location getLocation2() {
+    /*public Location getLocation2() {
         LocationManager mLocationManager = (LocationManager)mContext.getSystemService(LOCATION_SERVICE);
         List<String> providers = mLocationManager.getProviders(true);
         Location bestLocation = null;
@@ -75,20 +75,7 @@ public class GPSTracker extends Service implements LocationListener {
             }
         }
         return bestLocation;
-
-        /*locationManager = (LocationManager) mContext
-                .getSystemService(LOCATION_SERVICE);
-        if (locationManager.isProviderEnabled(provider)) {
-            locationManager.requestLocationUpdates(provider,
-                    MIN_TIME_BW_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-            if (locationManager != null) {
-                location = locationManager.getLastKnownLocation(provider);
-                return location;
-            }
-        }
-        return null;//*/
-    }
+    }//*/
 
     public Location getLocation() {
         try {
@@ -104,7 +91,7 @@ public class GPSTracker extends Service implements LocationListener {
             if (!isGPSEnabled && !isNetworkEnabled) {
                 // no network provider is enabled
             } else {
-                this.canGetLocation = true;
+                this.getLocationFlag = true;
                 // First get location from Network Provider
                 if(opcion == 1) {
                     if (isNetworkEnabled) {
@@ -151,7 +138,7 @@ public class GPSTracker extends Service implements LocationListener {
                 }
             }
 
-        } catch (Exception e) {
+        } catch (SecurityException e) {
             e.printStackTrace();
         }
 
@@ -201,7 +188,7 @@ public class GPSTracker extends Service implements LocationListener {
      * */
 
     public boolean canGetLocation() {
-        return this.canGetLocation;
+        return this.getLocationFlag;
     }
 
     /**

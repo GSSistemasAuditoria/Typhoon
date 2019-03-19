@@ -38,16 +38,16 @@ public class NuevaInstalacion extends AsyncTask<String,String,String> {
 
     @Override
     protected String doInBackground(String... params) {
-        try {
+        //try {
             SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME,
                     activity.MODE_PRIVATE);
             sharedPrefs.edit().clear().commit();
             new TyphoonDataBase(activity).deleteAll();
             //FileUtils.cleanDirectory(new File(ScanConstants.PATH));
-        } catch (Exception e) {
+        /*} catch (NullPointerException e) {
             e.printStackTrace();
             return "Error al realizar la nueva instalación: " + e.getMessage();
-        }
+        }//*/
         return "OK";
     }
 

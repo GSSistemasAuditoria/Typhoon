@@ -55,48 +55,12 @@ public class UsuarioDBMethods {
         db.close();
     }
 
-    public List<ResponseLogin.Usuario> readUsuarios(String condition, String[] args){
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
-        List<ResponseLogin.Usuario> listUsuarios = new ArrayList<>();
-        StringBuilder query = new StringBuilder();
-        query.append("SELECT ID_USUARIO,CORREO,NOMBRE,PASSWORD,INTERNO,ID_ROL,ESTATUS FROM ").append(TP_CAT_USUARIO);
-        if(condition != null){
-            query.append(" ").append(condition);
-        }
-        Cursor cursor = db.rawQuery(query.toString(),args);
-        if(cursor != null){
-            if(cursor.moveToFirst()){
-                do{
-                    ResponseLogin.Usuario usuario = new ResponseLogin.Usuario();
-                    usuario.setIdUsuario(cursor.getString(0));
-                    usuario.setCorreo(cursor.getString(1));
-                    usuario.setNombre(cursor.getString(2));
-                    usuario.setAcceso(cursor.getString(3));
-                    if(cursor.getInt(4) == 1){
-                        usuario.setInterno(true);
-                    }else{
-                        usuario.setInterno(false);
-                    }
-                    usuario.setIdrol(cursor.getInt(5));
-                    usuario.setEstatus(cursor.getInt(6));
-                    listUsuarios.add(usuario);
-                }while(cursor.moveToNext());
-            }
-        }
-        cursor.close();
-        db.close();
-        return listUsuarios;
-    }
-
-    public ResponseLogin.Usuario readUsuario(String condition, String[] args){
+    public ResponseLogin.Usuario readUsuario(){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ResponseLogin.Usuario usuario = null;
         StringBuilder query = new StringBuilder();
         query.append("SELECT ID_USUARIO,CORREO,NOMBRE,PASSWORD,INTERNO,ID_ROL,ESTATUS FROM ").append(TP_CAT_USUARIO);
-        if(condition != null){
-            query.append(" ").append(condition);
-        }
-        Cursor cursor = db.rawQuery(query.toString(),args);
+        Cursor cursor = db.rawQuery(query.toString(),null);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{

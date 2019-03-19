@@ -57,12 +57,13 @@ public class HistoricoDBMethods {
     public List<Historico> readHistorico(String condition, String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<Historico> listHistorico = new ArrayList<>();
-        StringBuilder query = new StringBuilder();
+        /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_EVIDENCIA,ID_ETAPA,ID_USUARIO,MOTIVO,CONSEC,ID_REVISION,ID_CHECKLIST,FECHA_MOD FROM ").append(TP_TRAN_HISTORIAL_EVIDENCIA);
         if(condition != null){
             query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query.toString(),args);
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition,args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{

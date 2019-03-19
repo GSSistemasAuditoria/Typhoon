@@ -49,6 +49,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import com.elektra.typhoon.utils.Utils;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,9 +110,11 @@ public class MainActivity extends AppCompatActivity {
         entrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ResponseLogin.Usuario usuarioDB = new UsuarioDBMethods(getApplicationContext()).readUsuario(null,null);
-                usuario = editTextUsuario.getText().toString();
-                contrasena = editTextContrasena.getText().toString();
+                ResponseLogin.Usuario usuarioDB = new UsuarioDBMethods(getApplicationContext()).readUsuario();
+                usuario = Normalizer.normalize(editTextUsuario.getText().toString(), Normalizer.Form.NFD);
+                contrasena = Normalizer.normalize(editTextContrasena.getText().toString(), Normalizer.Form.NFD);
+                //usuario = editTextUsuario.getText().toString();
+                //contrasena = editTextContrasena.getText().toString();
                 if(!usuario.equals("")){
                     if(usuarioDB == null){
                         if (!contrasena.equals("")) {
@@ -225,40 +228,44 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseLogin> call, Response<ResponseLogin> response) {
                 progressDialog.dismiss();
-                if(response.body() != null) {
-                    if(response.body().getValidarEmpleado().getExito()){
-                        try {
+                if(response != null) {
+                    if (response.body() != null) {
+                        if (response.body().getValidarEmpleado().getExito()) {
+                            //try {
                             new UsuarioDBMethods(getApplicationContext()).createUsuario(response.body().getValidarEmpleado().getUsuario());
                             SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
                             sharedPrefs.edit().putBoolean(Constants.SP_LOGIN_TAG, true).apply();
                             sharedPrefs.edit().putString(Constants.SP_JWT_TAG, response.body().getValidarEmpleado().getUsuario().getJwt()).apply();
 
                             BarcoDBMethods barcoDBMethods = new BarcoDBMethods(getApplicationContext());
-                            if(barcoDBMethods.readBarcos(null,null).size() == 0) {
-                                Utils.descargaCatalogos(MainActivity.this,1);
-                            }else {
+                            if (barcoDBMethods.readBarcos().size() == 0) {
+                                Utils.descargaCatalogos(MainActivity.this, 1);
+                            } else {
                                 Intent intent = new Intent(MainActivity.this, CarteraFolios.class);
                                 startActivity(intent);
                                 finish();
                             }
-                        }catch (Exception e){
+                        /*}catch (NullPointerException e){
                             Utils.message(getApplicationContext(),"No se pudieron guardar los datos del usuario: " + e.getMessage());
                             e.printStackTrace();
+                        }//*/
+                        } else {
+                            Utils.message(getApplicationContext(), response.body().getValidarEmpleado().getError());
                         }
-                    }else{
-                        Utils.message(getApplicationContext(), response.body().getValidarEmpleado().getError());
+                    } else {
+                        if (response.errorBody() != null) {
+                            try {
+                                Utils.message(getApplicationContext(), "Error al iniciar sesión: " + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Utils.message(getApplicationContext(), "Error al iniciar sesión: " + e.getMessage());
+                            }
+                        } else {
+                            Utils.message(getApplicationContext(), "Error al iniciar sesión");
+                        }
                     }
                 }else{
-                    if(response.errorBody() != null){
-                        try {
-                            Utils.message(getApplicationContext(), "Error al iniciar sesión: " + response.errorBody().string());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Utils.message(getApplicationContext(), "Error al iniciar sesión: " + e.getMessage());
-                        }
-                    }else {
-                        Utils.message(getApplicationContext(), "Error al iniciar sesión");
-                    }
+                    Utils.message(getApplicationContext(), "Error al iniciar sesión");
                 }
             }
             @Override

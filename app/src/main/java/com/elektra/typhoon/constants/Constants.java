@@ -27,7 +27,7 @@ public class Constants {
     public static String DATE_FORMAT_FULL = "yyyy-MM-dd HH:mm:ss.SSS";
 
     //**********************************************************************************************
-    public final static String PATH = Environment.getExternalStorageDirectory().getPath() + "/Typhoon/";
+    public final static String PATH = Environment.getExternalStorageDirectory().getPath() + "/Typhoon/tempPhotos/evidencia.jpg";
 
     //**********************************************************************************************
     public final static String INTENT_FOLIO_TAG = "folio";

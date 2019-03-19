@@ -17,6 +17,7 @@ import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.FoliosDBMethods;
 import com.elektra.typhoon.database.HistoricoDBMethods;
+import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.json.SincronizacionJSON;
 import com.elektra.typhoon.objetos.Folio;
@@ -36,6 +37,7 @@ import com.elektra.typhoon.objetos.response.SincronizacionResponse;
 import com.elektra.typhoon.utils.Utils;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.List;
 
 import retrofit2.Call;
@@ -82,18 +84,21 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
 
         SincronizacionData sincronizacionData = null;
         try {
-            FolioRevision folio = new FoliosDBMethods(context).readFolio("WHERE ID_REVISION = ?",new String[]{String.valueOf(idRevision)});
+            FoliosDBMethods foliosDBMethods = new FoliosDBMethods(context);
+            FolioRevision folio = foliosDBMethods.readFolio(
+                    "SELECT ID_REVISION,NOMBRE,ID_TIPO_REVISION,ID_USUARIO,FECHA_INICIO,FECHA_FIN,ESTATUS FROM " + foliosDBMethods.TP_TRAN_REVISION + " WHERE ID_REVISION = ?",
+                    new String[]{String.valueOf(idRevision)});
             sincronizacionData = new SincronizacionJSON().generateRequestData(activity,context,idRevision);
             SincronizacionPost sincronizacionPost = new SincronizacionPost();
             sincronizacionPost.setSincronizacionData(sincronizacionData);
 
             SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
-            Call<SincronizacionResponse> mService = mApiService.sincronizacion(sharedPreferences.getString(Constants.SP_JWT_TAG,""),sincronizacionPost);
+            Call<SincronizacionResponse> mService = mApiService.sincronizacion(Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG,""), Normalizer.Form.NFD),sincronizacionPost);
             Response<SincronizacionResponse> response = mService.execute();
             if(response != null) {
                 if (response.body() != null) {
                     if (response.body().getSincronizacion().getExito()) {
-                        try {
+                        //try {
                             if (response.body().getSincronizacion().getSincronizacionResponseData().getListChecklist() != null) {
                                 ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(context);
                                 EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(context);
@@ -147,18 +152,26 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                             progressDialog.dismiss();
                             if(checklistBarcos == null) {
                                 Intent intent = new Intent(activity, ChecklistBarcos.class);
-                                intent.putExtra(Constants.INTENT_FOLIO_TAG, folio.getIdRevision());
+                                /*intent.putExtra(Constants.INTENT_FOLIO_TAG, folio.getIdRevision());
                                 intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG, folio.getFechaInicio());
                                 intent.putExtra(Constants.INTENT_FECHA_FIN_TAG, folio.getFechaFin());
-                                intent.putExtra(Constants.INTENT_ESTATUS_TAG, folio.getEstatus());
+                                intent.putExtra(Constants.INTENT_ESTATUS_TAG, folio.getEstatus());//*/
+
+                                Encryption encryption = new Encryption();
+
+                                intent.putExtra(Constants.INTENT_FOLIO_TAG,encryption.encryptAES(String.valueOf(folio.getIdRevision())));
+                                intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG,encryption.encryptAES(folio.getFechaInicio()));
+                                intent.putExtra(Constants.INTENT_FECHA_FIN_TAG,encryption.encryptAES(folio.getFechaFin()));
+                                intent.putExtra(Constants.INTENT_ESTATUS_TAG,encryption.encryptAES(String.valueOf(folio.getEstatus())));
+
                                 activity.startActivity(intent);
                             }
                             return "Sincronizado correctamente";
-                        } catch (Exception e) {
+                        /*} catch (NullPointerException e) {
                             progressDialog.dismiss();
                             e.printStackTrace();
                             return "Error al guardar datos: " + e.getMessage();
-                        }
+                        }//*/
                     } else {
                         progressDialog.dismiss();
                         return response.body().getSincronizacion().getError();
@@ -175,7 +188,10 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 progressDialog.dismiss();
                 return "No se pudo sincronizar";
             }
-        } catch (Exception | OutOfMemoryError e) {
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return "Error al sincronizar: " + e.getMessage();
+        } catch (IOException e) {
             e.printStackTrace();
             return "Error al sincronizar: " + e.getMessage();
         }

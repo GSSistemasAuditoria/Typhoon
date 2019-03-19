@@ -104,7 +104,7 @@ public class CarteraFolios extends AppCompatActivity {
         TextView textViewRol = findViewById(R.id.textViewRol);
 
         UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(this);
-        ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario(null,null);
+        ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario();
         if(usuario != null){
             textViewNombreUsuario.setText(usuario.getNombre());
             textViewRol.setText(Utils.getRol(this,usuario.getIdrol()));
@@ -163,7 +163,7 @@ public class CarteraFolios extends AppCompatActivity {
                             revision = Integer.parseInt(editTextBuscar.getText().toString());
                         }
                         obtenerFolios(revision, anio, mes);
-                    } catch (Exception e) {
+                    } catch (NumberFormatException e) {
                         Utils.message(getApplicationContext(), "Folio no válido");
                     }
                 }
@@ -173,7 +173,7 @@ public class CarteraFolios extends AppCompatActivity {
         buttonLimpiarFiltro.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                List<FolioRevision> listFolios = new FoliosDBMethods(getApplicationContext()).readFolios(null,null);
+                List<FolioRevision> listFolios = new FoliosDBMethods(getApplicationContext()).readFolios();
                 if(listFolios.size() == 0) {
                     obtenerFolios(-1, -1, -1);
                 }else{
@@ -186,7 +186,7 @@ public class CarteraFolios extends AppCompatActivity {
             }
         });
 
-        List<FolioRevision> listFolios = new FoliosDBMethods(getApplicationContext()).readFolios(null,null);
+        List<FolioRevision> listFolios = new FoliosDBMethods(getApplicationContext()).readFolios();
         if(listFolios.size() == 0) {
             obtenerFolios(-1, -1, -1);
         }else{
@@ -266,31 +266,35 @@ public class CarteraFolios extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseCartera> call, Response<ResponseCartera> response) {
                 progressDialog.dismiss();
-                if(response.body() != null) {
-                    if(response.body().getCarteraRevisiones().getExito()){
-                        FoliosDBMethods foliosDBMethods = new FoliosDBMethods(getApplicationContext());
-                        for(FolioRevision folioRevision:response.body().getCarteraRevisiones().getFolioRevision()) {
-                            foliosDBMethods.createFolio(folioRevision);
+                if(response != null) {
+                    if (response.body() != null) {
+                        if (response.body().getCarteraRevisiones().getExito()) {
+                            FoliosDBMethods foliosDBMethods = new FoliosDBMethods(getApplicationContext());
+                            for (FolioRevision folioRevision : response.body().getCarteraRevisiones().getFolioRevision()) {
+                                foliosDBMethods.createFolio(folioRevision);
+                            }
+                            adapterRecyclerViewCartera = new AdapterRecyclerViewCartera(CarteraFolios.this, CarteraFolios.this, response.body().getCarteraRevisiones().getFolioRevision());
+                            recyclerView.setAdapter(adapterRecyclerViewCartera);
+                            if (response.body().getCarteraRevisiones().getFolioRevision().size() == 0) {
+                                Utils.message(getApplicationContext(), "No se encontraron folios");
+                            }
+                        } else {
+                            Utils.message(getApplicationContext(), response.body().getCarteraRevisiones().getError());
                         }
-                        adapterRecyclerViewCartera = new AdapterRecyclerViewCartera(CarteraFolios.this,CarteraFolios.this,response.body().getCarteraRevisiones().getFolioRevision());
-                        recyclerView.setAdapter(adapterRecyclerViewCartera);
-                        if(response.body().getCarteraRevisiones().getFolioRevision().size() == 0){
-                            Utils.message(getApplicationContext(),"No se encontraron folios");
+                    } else {
+                        if (response.errorBody() != null) {
+                            try {
+                                Utils.message(getApplicationContext(), "Error al descargar folios: " + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Utils.message(getApplicationContext(), "Error al descargar folios: " + e.getMessage());
+                            }
+                        } else {
+                            Utils.message(getApplicationContext(), "Error al descargar folios");
                         }
-                    }else{
-                        Utils.message(getApplicationContext(), response.body().getCarteraRevisiones().getError());
                     }
                 }else{
-                    if(response.errorBody() != null){
-                        try {
-                            Utils.message(getApplicationContext(), "Error al descargar folios: " + response.errorBody().string());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Utils.message(getApplicationContext(), "Error al descargar folios: " + e.getMessage());
-                        }
-                    }else {
-                        Utils.message(getApplicationContext(), "Error al descargar folios");
-                    }
+                    Utils.message(getApplicationContext(), "Error al descargar folios");
                 }
             }
 
@@ -348,7 +352,8 @@ public class CarteraFolios extends AppCompatActivity {
 
     private void setRadioGroup(int idBarco,int idRevision,int idChecklist){
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(getApplicationContext());
-        List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta("WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_BARCO = ?",
+        List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
+                "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_BARCO = ?",
                 new String[]{String.valueOf(idRevision),String.valueOf(idChecklist),String.valueOf(idBarco)});
         int cumple = 0;
         int noCumple = 0;
@@ -364,6 +369,5 @@ public class CarteraFolios extends AppCompatActivity {
                 noCumple++;
             }
         }
-        System.out.println();
     }
 }

@@ -92,13 +92,14 @@ public class EvidenciasDBMethods {
         CursorWindowFixer.fix();
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<Evidencia> listEvidencia = new ArrayList<>();
-        StringBuilder query = new StringBuilder();
+        /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
                 "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM ").append(TP_TRAN_CL_EVIDENCIA);
         if(condition != null){
             query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query.toString(),args);
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition,args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -137,13 +138,14 @@ public class EvidenciasDBMethods {
         CursorWindowFixer.fix();
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         Evidencia evidencia = null;
-        StringBuilder query = new StringBuilder();
+        /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
                 "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM ").append(TP_TRAN_CL_EVIDENCIA);
         if(condition != null){
             query.append(" ").append(condition);
         }
-        Cursor cursor = db.rawQuery(query.toString(),args);
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition,args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
