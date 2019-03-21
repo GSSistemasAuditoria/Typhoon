@@ -21,24 +21,6 @@
                 android:layout_height="50dp"
                 android:src="@drawable/typhoone_logo_bn" />
 
-            <Button
-                android:id="@+id/buttonSincronizarChecklist"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="10dp"
-                android:background="@mipmap/ic_sincronizacion_blanco"/>
-
-            <Button
-                android:id="@+id/buttonAnexos"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_toStartOf="@+id/buttonSincronizarChecklist"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="10dp"
-                android:background="@mipmap/ic_anexos"/>
-
         </RelativeLayout>
 
     </android.support.v7.widget.Toolbar>
@@ -192,58 +174,9 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/relativeLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/gris_claro2"
-        android:layout_below="@+id/relativeLayout1">
-
-        <LinearLayout
-            android:id="@+id/linearLayout1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/drawable_back_barco"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="30dp"
-                android:layout_margin="5dp"
-                android:src="@drawable/ship"/>
-
-            <TextView
-                android:id="@+id/textViewNombreBarco"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/azul"
-                android:textStyle="bold"
-                android:layout_gravity="center_vertical"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:layout_marginEnd="10dp"
-                android:text="Far Sentinel"/>
-
-        </LinearLayout>
-
-        <Spinner
-            android:id="@+id/spinnerBarcos"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_centerVertical="true"
-            style="@style/spinner_style"
-            android:layout_toEndOf="@+id/linearLayout1"
-             />
-
-    </RelativeLayout>
-
-    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/relativeLayout2"
+        android:layout_below="@+id/relativeLayout1"
         android:background="@color/grisMedio">
 
         <RelativeLayout
@@ -254,14 +187,14 @@
             android:background="@drawable/drawable_back_checklist">
 
             <TextView
-                android:id="@+id/textViewTituloChecklist"
+                android:id="@+id/textViewTituloAnexos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:layout_marginBottom="5dp"
                 android:textStyle="bold"
                 android:textColor="@color/azul"
-                />
+                android:text="@string/anexos_tag"/>
 
             <android.support.v7.widget.CardView
                 android:id="@+id/cardView"
@@ -271,7 +204,7 @@
                 android:layout_marginBottom="5dp"
                 app:cardElevation="1dp"
                 app:cardCornerRadius="4dp"
-                android:layout_below="@+id/textViewTituloChecklist"
+                android:layout_below="@+id/textViewTituloAnexos"
                 app:cardBackgroundColor="@color/blanco">
 
                 <RelativeLayout
@@ -367,7 +300,7 @@
             </android.support.v7.widget.CardView>
 
             <ExpandableListView
-                android:id="@+id/expandableListViewChecklist"
+                android:id="@+id/expandableListViewAnexos"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:groupIndicator="@null"

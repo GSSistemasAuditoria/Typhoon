@@ -667,8 +667,8 @@ public class Utils {
     }
 
     public static boolean checkPermission(final Activity activity){
-        if(ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
-                + ContextCompat.checkSelfPermission(
+        if(/*ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
+                +*/ ContextCompat.checkSelfPermission(
                 activity,Manifest.permission.ACCESS_FINE_LOCATION)
                 + ContextCompat.checkSelfPermission(
                 activity,Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -715,7 +715,7 @@ public class Utils {
                     ActivityCompat.requestPermissions(
                             activity,
                             new String[]{
-                                    Manifest.permission.CAMERA,
+                                    //Manifest.permission.CAMERA,
                                     Manifest.permission.ACCESS_FINE_LOCATION,
                                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                             },

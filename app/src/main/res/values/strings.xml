@@ -48,4 +48,5 @@
     <string name="etapa_tag">Etapa:</string>
     <string name="historial_de_validaciones_y_rechazos_tag">Historial de validaciones y rechazos:</string>
     <string name="cerrar_tag">Cerrar</string>
+    <string name="anexos_tag">Anexos</string>
 </resources>

@@ -75,7 +75,7 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
 
             intent.putExtra(Constants.INTENT_FOLIO_TAG,encryption.encryptAES(String.valueOf(folioRevision.getIdRevision())));
             intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG,encryption.encryptAES(folioRevision.getFechaInicio()));
-            intent.putExtra(Constants.INTENT_FECHA_FIN_TAG,encryption.encryptAES(folioRevision.getFechaFin()));
+            //intent.putExtra(Constants.INTENT_FECHA_FIN_TAG,encryption.encryptAES(folioRevision.getFechaFin()));
             intent.putExtra(Constants.INTENT_ESTATUS_TAG,encryption.encryptAES(String.valueOf(folioRevision.getEstatus())));
 
             activity.startActivity(intent);

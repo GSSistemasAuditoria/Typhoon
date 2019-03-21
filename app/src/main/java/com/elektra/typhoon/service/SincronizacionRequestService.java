@@ -161,7 +161,9 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
 
                                 intent.putExtra(Constants.INTENT_FOLIO_TAG,encryption.encryptAES(String.valueOf(folio.getIdRevision())));
                                 intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG,encryption.encryptAES(folio.getFechaInicio()));
-                                intent.putExtra(Constants.INTENT_FECHA_FIN_TAG,encryption.encryptAES(folio.getFechaFin()));
+                                /*if(folio.getFechaFin() != null){
+                                    intent.putExtra(Constants.INTENT_FECHA_FIN_TAG,encryption.encryptAES(folio.getFechaFin()));
+                                }//*/
                                 intent.putExtra(Constants.INTENT_ESTATUS_TAG,encryption.encryptAES(String.valueOf(folio.getEstatus())));
 
                                 activity.startActivity(intent);

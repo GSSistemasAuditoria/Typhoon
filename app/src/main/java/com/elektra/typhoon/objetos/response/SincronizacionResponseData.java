@@ -50,6 +50,10 @@ public class SincronizacionResponseData {
     @Expose
     private List<RespuestaData> listRespuestas;
 
+    /*@SerializedName("Anexos")
+    @Expose
+    private List<Anexo> listAnexos;//*/
+
     public List<ChecklistData> getListChecklist() {
         return listChecklist;
     }
@@ -121,4 +125,12 @@ public class SincronizacionResponseData {
     public void setListRespuestas(List<RespuestaData> listRespuestas) {
         this.listRespuestas = listRespuestas;
     }
+
+    /*public List<Anexo> getListAnexos() {
+        return listAnexos;
+    }
+
+    public void setListAnexos(List<Anexo> listAnexos) {
+        this.listAnexos = listAnexos;
+    }//*/
 }

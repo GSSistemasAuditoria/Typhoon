@@ -32,6 +32,7 @@ import android.widget.TextView;
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.adapters.AdapterExpandableChecklist;
 import com.elektra.typhoon.adapters.SpinnerBarcosAdapter;
+import com.elektra.typhoon.anexos.AnexosActivity;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.CatalogosDBMethods;
@@ -93,7 +94,7 @@ public class ChecklistBarcos extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.checklist_layout);
 
-        Encryption encryption = new Encryption();
+        final Encryption encryption = new Encryption();
 
         /*folio = getIntent().getIntExtra(Constants.INTENT_FOLIO_TAG, 0);
         fechaInicio = getIntent().getStringExtra(Constants.INTENT_FECHA_INICIO_TAG);
@@ -102,7 +103,11 @@ public class ChecklistBarcos extends AppCompatActivity{
 
         folio = Integer.parseInt(encryption.decryptAES(getIntent().getStringExtra(Constants.INTENT_FOLIO_TAG)));
         fechaInicio = encryption.decryptAES(Normalizer.normalize(getIntent().getStringExtra(Constants.INTENT_FECHA_INICIO_TAG), Normalizer.Form.NFD));
-        fechaFin = encryption.decryptAES(Normalizer.normalize(getIntent().getStringExtra(Constants.INTENT_FECHA_FIN_TAG), Normalizer.Form.NFD));
+        /*if(getIntent().hasExtra(Constants.INTENT_FECHA_FIN_TAG)){
+            fechaFin = encryption.decryptAES(Normalizer.normalize(getIntent().getStringExtra(Constants.INTENT_FECHA_FIN_TAG), Normalizer.Form.NFD));
+        }else{
+            fechaFin = "";
+        }//*/
         estatus = Integer.parseInt(encryption.decryptAES(getIntent().getStringExtra(Constants.INTENT_ESTATUS_TAG)));
 
         spinnerBarco = (Spinner) findViewById(R.id.spinnerBarcos);
@@ -133,6 +138,18 @@ public class ChecklistBarcos extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 sincronizacionDialog(ChecklistBarcos.this,folio);
+            }
+        });
+
+        final Button buttonAnexos = findViewById(R.id.buttonAnexos);
+        buttonAnexos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ChecklistBarcos.this, AnexosActivity.class);
+                intent.putExtra(Constants.INTENT_FOLIO_TAG,encryption.encryptAES(String.valueOf(folio)));
+                intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG,encryption.encryptAES(fechaInicio));
+                intent.putExtra(Constants.INTENT_ESTATUS_TAG,encryption.encryptAES(String.valueOf(estatus)));
+                startActivity(intent);
             }
         });
 

@@ -1,0 +1,240 @@
+package com.elektra.typhoon.anexos;
+
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.ExpandableListView;
+import android.widget.TextView;
+
+import com.elektra.typhoon.R;
+import com.elektra.typhoon.adapters.AdapterExpandableAnexos;
+import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.database.CatalogosDBMethods;
+import com.elektra.typhoon.database.UsuarioDBMethods;
+import com.elektra.typhoon.encryption.Encryption;
+import com.elektra.typhoon.objetos.response.Anexo;
+import com.elektra.typhoon.objetos.response.EstatusRevision;
+import com.elektra.typhoon.objetos.response.ResponseLogin;
+import com.elektra.typhoon.utils.Utils;
+
+import java.io.IOException;
+import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Proyecto:
+ * Autor: Emmanuel Rangel Reyes
+ * Fecha: 19/03/2019.
+ * Empresa: Elektra
+ * Area: Auditoria Sistemas y Monitoreo de Alarmas
+ */
+public class AnexosActivity extends AppCompatActivity {
+
+    private int folio;
+    private String fechaInicio;
+    private int estatus;
+    private ExpandableListView expandableListView;
+    private AdapterExpandableAnexos adapterExpandableAnexos;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.anexos_layout);
+
+        Encryption encryption = new Encryption();
+
+        folio = Integer.parseInt(encryption.decryptAES(getIntent().getStringExtra(Constants.INTENT_FOLIO_TAG)));
+        fechaInicio = encryption.decryptAES(Normalizer.normalize(getIntent().getStringExtra(Constants.INTENT_FECHA_INICIO_TAG), Normalizer.Form.NFD));
+        estatus = Integer.parseInt(encryption.decryptAES(getIntent().getStringExtra(Constants.INTENT_ESTATUS_TAG)));
+
+        TextView textViewNombreUsuario = (TextView) findViewById(R.id.textViewNombreUsuario);
+        TextView textViewRol = findViewById(R.id.textViewRol);
+
+        TextView textViewFolio = findViewById(R.id.textViewFolio);
+        TextView textViewFechaInicio = findViewById(R.id.textViewFechaInicio);
+        TextView textViewFechaFin = findViewById(R.id.textViewFechaFin);
+
+        CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(this);
+        List<EstatusRevision> listEstatusRevision = catalogosDBMethods.readEstatusRevision(
+                "SELECT ID_ESTATUS,DESCRIPCION,SRC FROM " + catalogosDBMethods.TP_CAT_ESTATUS_REVISION + " WHERE ID_ESTATUS = ?",new String[]{String.valueOf(estatus)});
+
+        textViewFolio.setText("" + folio);
+        textViewFechaInicio.setText(Utils.getDateMonth(fechaInicio));
+        if(listEstatusRevision.size() != 0){
+            textViewFechaFin.setText(listEstatusRevision.get(0).getDescripcion());
+        }
+
+        expandableListView = findViewById(R.id.expandableListViewAnexos);
+
+        UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(this);
+        ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario();
+        if(usuario != null){
+            textViewNombreUsuario.setText(usuario.getNombre());
+            textViewRol.setText(Utils.getRol(this,usuario.getIdrol()));
+        }
+
+        List<Anexo> listHeader = new ArrayList<>();
+        List<Anexo> listInspeccion = new ArrayList<>();
+        List<Anexo> listBitacoras = new ArrayList<>();
+
+        listInspeccion.add(new Anexo("Inspección 1"));
+        listInspeccion.add(new Anexo("Inspección 2"));
+        listInspeccion.add(new Anexo("Inspección 3"));
+        listInspeccion.add(new Anexo("Inspección 4"));
+        listInspeccion.add(new Anexo("Inspección 5"));
+
+        listBitacoras.add(new Anexo("Bitácora 1"));
+        listBitacoras.add(new Anexo("Bitácora 2"));
+        listBitacoras.add(new Anexo("Bitácora 3"));
+        listBitacoras.add(new Anexo("Bitácora 4"));
+
+        listHeader.add(new Anexo("Inspecciónes",listInspeccion));
+        listHeader.add(new Anexo("Bitácoras",listBitacoras));
+
+        adapterExpandableAnexos = new AdapterExpandableAnexos(listHeader,this);
+        expandableListView.setAdapter(adapterExpandableAnexos);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (resultCode == RESULT_OK) {
+
+            new GuardandoAnexosTask(AnexosActivity.this, data, requestCode).execute();
+        }
+    }
+
+    class GuardandoAnexosTask extends AsyncTask<String,String,String> {
+
+        private ProgressDialog statusDialog;
+        private Context context;
+        private Intent data;
+        private int requestCode;
+
+        public GuardandoAnexosTask(Context context,Intent data,int requestCode){
+            this.context = context;
+            this.data = data;
+            this.requestCode = requestCode;
+        }
+
+        protected void onPreExecute() {
+            statusDialog = Utils.typhoonLoader(context,"Guardando anexo...");
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "OK";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            String respuesta = guardarEvidencia();
+            statusDialog.dismiss();
+            //if(!result.equals("OK")){
+            if(!respuesta.equals("OK")){
+                //Utils.message(context,result);
+                Utils.message(context,respuesta);
+            }else{
+                //adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
+                Utils.message(context,"Evidencia guardada");
+            }
+        }
+
+        private String guardarEvidencia(){
+            if(data != null) {
+                Uri uri = data.getData();
+                String nombre = Utils.getRealPathFromURI(AnexosActivity.this, uri);
+                int idrubro = adapterExpandableAnexos.getAdapterRecycleViewItemsAnexosTemp().getHeader();
+                if (nombre.endsWith(".pdf") || nombre.endsWith(".PDF")) {
+                    try {
+                        String base64 = Utils.fileToBase64(AnexosActivity.this, uri);
+                        Anexo anexo = adapterExpandableAnexos.getListAnexosHeader().get(idrubro).getListAnexos().get(requestCode);
+                        anexo.setBase64(base64);
+                        anexo.setNombreArchivo(nombre);
+                        System.out.println();
+                        adapterExpandableAnexos.getAdapterRecycleViewItemsAnexosTemp().notifyDataSetChanged();
+                        /*RespuestaData datosRespuesta = null;
+                        for (RespuestaData respuestaData : adapterExpandableChecklist.getListRubros().get(idrubro).getListRespuestas()) {
+                            if (respuestaData.getIdPregunta() == adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).getIdPregunta()) {
+                                datosRespuesta = respuestaData;
+                                break;
+                            }
+                        }
+
+                        Evidencia evidencia = new Evidencia();
+
+                        if (datosRespuesta != null) {
+                            evidencia.setIdRegistro(datosRespuesta.getIdRegistro());
+                            evidencia.setIdPregunta(datosRespuesta.getIdPregunta());
+                            evidencia.setIdRubro(datosRespuesta.getIdRubro());
+                            evidencia.setIdChecklist(datosRespuesta.getIdChecklist());
+                            evidencia.setIdRevision(datosRespuesta.getIdRevision());
+                            evidencia.setIdEstatus(1);
+                            //evidencia.setIdEtapa(1);
+                            evidencia.setIdEtapa(usuario.getIdrol());
+                            if(usuario.getIdrol() == 3){
+                                evidencia.setAgregadoCoordinador(1);
+                            }
+                            evidencia.setContenido(base64);
+                            //evidencia.setContenidoPreview(base64Preview);
+                            //evidencia.setNombre(Utils.getDate("yyyyMMddHHmmss") + ".png");
+                            evidencia.setNombre(path);
+                            evidencia.setIdEvidencia(UUID.randomUUID().toString());
+                            CatalogoBarco barco = (CatalogoBarco) spinnerBarco.getSelectedItem();
+                            evidencia.setIdBarco(barco.getIdBarco());
+
+                            GPSTracker gps = new GPSTracker(ChecklistBarcos.this,2);
+                            if(gps.canGetLocation()) {
+                                double latitude = gps.getLatitude();
+                                double longitude = gps.getLongitude();
+                                evidencia.setLatitude(latitude);
+                                evidencia.setLongitude(longitude);
+                                gps.stopUsingGPS();
+                            }
+
+                            EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(getApplicationContext());
+                            evidenciasDBMethods.createEvidencia(evidencia);
+                            updateRespuesta(evidencia,3);
+
+                            evidencia.setContenido(null);
+
+                            if (adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).getListEvidencias() != null) {
+
+                                //evidencia.setSmallBitmap(scaledBitmap);
+                                adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).
+                                        getListEvidencias().add(evidencia);
+                                //adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
+                            } else {
+                                List<Evidencia> listEvidencias = new ArrayList<>();
+                                //listEvidencias.add(new Evidencia(scaledBitmap,bitmap,1));
+                                //evidencia.setSmallBitmap(scaledBitmap);
+                                listEvidencias.add(evidencia);
+                                adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).setListEvidencias(listEvidencias);
+                                //adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
+                            }
+                        }//*/
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return "No se pudo guardar la imagen: " + e.getMessage();
+                    }catch (IndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                        return "No se pudo guardar la imagen: " + e.getMessage();
+                    }
+                }
+            }
+            return "OK";
+        }
+    }
+}
