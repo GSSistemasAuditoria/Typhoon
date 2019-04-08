@@ -1,5 +1,6 @@
 package com.elektra.typhoon.objetos.response;
 
+import com.elektra.typhoon.objetos.request.SubAnexo;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -50,9 +51,13 @@ public class SincronizacionResponseData {
     @Expose
     private List<RespuestaData> listRespuestas;
 
-    /*@SerializedName("Anexos")
+    @SerializedName("Anexos")
     @Expose
     private List<Anexo> listAnexos;//*/
+
+    @SerializedName("TranSubAnexo")
+    @Expose
+    private List<SubAnexo> listSubAnexos;
 
     public List<ChecklistData> getListChecklist() {
         return listChecklist;
@@ -126,11 +131,19 @@ public class SincronizacionResponseData {
         this.listRespuestas = listRespuestas;
     }
 
-    /*public List<Anexo> getListAnexos() {
+    public List<Anexo> getListAnexos() {
         return listAnexos;
     }
 
     public void setListAnexos(List<Anexo> listAnexos) {
         this.listAnexos = listAnexos;
     }//*/
+
+    public List<SubAnexo> getListSubAnexos() {
+        return listSubAnexos;
+    }
+
+    public void setListSubAnexos(List<SubAnexo> listSubAnexos) {
+        this.listSubAnexos = listSubAnexos;
+    }
 }

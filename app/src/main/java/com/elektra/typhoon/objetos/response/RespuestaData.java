@@ -46,6 +46,8 @@ public class RespuestaData {
     @Expose
     private int idRubro;
 
+    private int sincronizado;
+
     public int getIdBarco() {
         return idBarco;
     }
@@ -108,5 +110,13 @@ public class RespuestaData {
 
     public void setIdRubro(int idRubro) {
         this.idRubro = idRubro;
+    }
+
+    public int getSincronizado() {
+        return sincronizado;
+    }
+
+    public void setSincronizado(int sincronizado) {
+        this.sincronizado = sincronizado;
     }
 }

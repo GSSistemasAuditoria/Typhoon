@@ -41,6 +41,7 @@ import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.json.SincronizacionJSON;
 import com.elektra.typhoon.login.MainActivity;
+import com.elektra.typhoon.notificaciones.Notifications;
 import com.elektra.typhoon.objetos.ItemCatalogo;
 import com.elektra.typhoon.objetos.request.SincronizacionData;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
@@ -233,6 +234,8 @@ public class CarteraFolios extends AppCompatActivity {
 
         //sincronizacionDialog();
 
+        //Notifications.CustomNotification(this);
+
         //boolean enZona = Utils.isPointInPolygon(new LatLng(19.30511913410018,-99.20381013535274));//fuera
 
     }
@@ -353,7 +356,7 @@ public class CarteraFolios extends AppCompatActivity {
     private void setRadioGroup(int idBarco,int idRevision,int idChecklist){
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(getApplicationContext());
         List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
-                "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_BARCO = ?",
+                "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA,SINCRONIZADO FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_BARCO = ?",
                 new String[]{String.valueOf(idRevision),String.valueOf(idChecklist),String.valueOf(idBarco)});
         int cumple = 0;
         int noCumple = 0;

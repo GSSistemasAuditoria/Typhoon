@@ -1,5 +1,6 @@
 package com.elektra.typhoon.objetos.request;
 
+import com.elektra.typhoon.objetos.response.Anexo;
 import com.elektra.typhoon.objetos.response.ChecklistData;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.google.gson.annotations.Expose;
@@ -39,6 +40,10 @@ public class SincronizacionData {
     @SerializedName("TraClRespuesta")
     @Expose
     private List<RespuestaData> listRespuestas;
+
+    @SerializedName("TranSubAnexo")
+    @Expose
+    private List<SubAnexo> listSubAnexos;//*/
 
     public int getIdRevision() {
         return idRevision;
@@ -87,4 +92,12 @@ public class SincronizacionData {
     public void setEsMovil(boolean esMovil) {
         this.esMovil = esMovil;
     }
+
+    public List<SubAnexo> getListSubAnexos() {
+        return listSubAnexos;
+    }
+
+    public void setListSubAnexos(List<SubAnexo> listSubAnexos) {
+        this.listSubAnexos = listSubAnexos;
+    }//*/
 }

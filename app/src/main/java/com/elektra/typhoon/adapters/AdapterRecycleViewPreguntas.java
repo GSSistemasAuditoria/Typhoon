@@ -48,6 +48,7 @@ import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.ResponseDescargaPdf;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.RespuestaData;
+import com.elektra.typhoon.objetos.response.RubroData;
 import com.elektra.typhoon.service.ApiInterface;
 import com.elektra.typhoon.utils.Utils;
 import com.github.barteksc.pdfviewer.PDFView;
@@ -83,6 +84,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     private AdapterRecycleViewPreguntas adapterRecycleViewPreguntas;
     private final Handler handler = new Handler();
     private AdapterRecycleViewPreguntas.MyViewHolder holderTemp;
+    private RubroData rubroData;
 
     public int getIdRubro() {
         return idRubro;
@@ -102,6 +104,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         private TextView textViewPregunta;
         private RelativeLayout relativeLayoutDescargaPdf;
         private ImageView imageViewDescargaPdf;
+        private ImageView imageViewSeleccionado;
+        private ImageView imageViewSincronizadoFlag;
 
         public MyViewHolder(View view) {
             super(view);
@@ -116,6 +120,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             textViewPregunta = (TextView) view.findViewById(R.id.textViewPregunta);
             relativeLayoutDescargaPdf = view.findViewById(R.id.relativeLayoutDescargaPdf);
             imageViewDescargaPdf = view.findViewById(R.id.imageViewDescargaPdf);
+            imageViewSeleccionado = view.findViewById(R.id.imageViewSelect);
+            imageViewSincronizadoFlag = view.findViewById(R.id.imageViewSincronizadoFlag);
             //view.setOnClickListener(this);
         }
 
@@ -126,7 +132,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     }
 
     public AdapterRecycleViewPreguntas(List<Pregunta> listPreguntas,Activity activity,int idRubro,TextView textViewCumplen,
-                                       TextView textViewNoCumplen,AdapterExpandableChecklist adapterExpandableChecklist,String fechaFolio,int idBarco){
+                                       TextView textViewNoCumplen,AdapterExpandableChecklist adapterExpandableChecklist,
+                                       String fechaFolio,int idBarco,RubroData rubroData){
         this.activity = activity;
         this.listPreguntas = listPreguntas;
         this.idRubro = idRubro;
@@ -136,6 +143,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         this.fechaFolio = fechaFolio;
         this.idBarco = idBarco;
         this.adapterRecycleViewPreguntas = this;
+        this.rubroData = rubroData;
     }
 
     @NonNull
@@ -157,9 +165,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         holder.textViewPregunta.setText(pregunta.getDescripcion());
         holderTemp = holder;
 
+        //holder.imageViewSincronizadoFlag.setVisibility(View.GONE);
+
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
         List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
-                "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA,SINCRONIZADO FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? " +
                 "AND ID_PREGUNTA = ? AND ID_RUBRO = ? AND ID_BARCO = ?",new String[]{String.valueOf(pregunta.getIdRevision()),
                 String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),String.valueOf(pregunta.getIdRubro()),
                 String.valueOf(idBarco)});
@@ -193,16 +203,18 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         holder.textViewAddEvidencias.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(Utils.validaConfiguracionApp(activity)) {
-                    String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
-                    if (flagGPS.equals("true")) {
-                        if (Utils.validaGeocerca(activity)) {
-                            agregarEvidencias(pregunta.getListEvidencias(), holder.textViewAddEvidencias, position);
+                if(Utils.checkPermission(activity)) {
+                    if (Utils.validaConfiguracionApp(activity)) {
+                        String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
+                        if (flagGPS.equals("true")) {
+                            if (Utils.validaGeocerca(activity)) {
+                                agregarEvidencias(pregunta.getListEvidencias(), holder.textViewAddEvidencias, position);
+                            } else {
+                                Utils.message(activity, "No se encuentra dentro de la zona");
+                            }
                         } else {
-                            Utils.message(activity, "No se encuentra dentro de la zona");
+                            agregarEvidencias(pregunta.getListEvidencias(), holder.textViewAddEvidencias, position);
                         }
-                    } else {
-                        agregarEvidencias(pregunta.getListEvidencias(), holder.textViewAddEvidencias, position);
                     }
                 }
                 /*if(pregunta.getListEvidencias() != null) {
@@ -221,16 +233,18 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         holder.imageViewAgregaEvidencia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(Utils.validaConfiguracionApp(activity)) {
-                    String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
-                    if (flagGPS.equals("true")) {
-                        if (Utils.validaGeocerca(activity)) {
-                            agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia, position);
+                if(Utils.checkPermission(activity)) {
+                    if (Utils.validaConfiguracionApp(activity)) {
+                        String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
+                        if (flagGPS.equals("true")) {
+                            if (Utils.validaGeocerca(activity)) {
+                                agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia, position);
+                            } else {
+                                Utils.message(activity, "No se encuentra dentro de la zona");
+                            }
                         } else {
-                            Utils.message(activity, "No se encuentra dentro de la zona");
+                            agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia, position);
                         }
-                    } else {
-                        agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia, position);
                     }
                 }
                 /*if(pregunta.getListEvidencias() != null) {
@@ -249,16 +263,18 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         holder.imageViewAddEvidencia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(Utils.validaConfiguracionApp(activity)) {
-                    String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
-                    if (flagGPS.equals("true")) {
-                        if (Utils.validaGeocerca(activity)) {
-                            agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
+                if(Utils.checkPermission(activity)) {
+                    if (Utils.validaConfiguracionApp(activity)) {
+                        String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
+                        if (flagGPS.equals("true")) {
+                            if (Utils.validaGeocerca(activity)) {
+                                agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
+                            } else {
+                                Utils.message(activity, "No se pueden agregar evidencias fuera de la zona de operación");
+                            }
                         } else {
-                            Utils.message(activity, "No se pueden agregar evidencias fuera de la zona de operación");
+                            agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
                         }
-                    } else {
-                        agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
                     }
                 }
                 /*if(pregunta.getListEvidencias() != null) {
@@ -354,7 +370,33 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 }else{
                     holder.relativeLayoutDescargaPdf.setVisibility(View.GONE);
                 }
+
+                if(respuestaData.getSincronizado() == 1){
+                    holder.imageViewSincronizadoFlag.setVisibility(View.VISIBLE);
+                }else{
+                    holder.imageViewSincronizadoFlag.setVisibility(View.GONE);
+                }
             }
+        }
+
+        holder.imageViewSeleccionado.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(pregunta.isSeleccionado()){
+                    pregunta.setSeleccionado(false);
+                    rubroData.setSeleccionado(false);
+                    adapterExpandableChecklist.notifyDataSetChanged();
+                }else{
+                    pregunta.setSeleccionado(true);
+                }
+                notifyDataSetChanged();
+            }
+        });
+
+        if(pregunta.isSeleccionado()) {
+            holder.imageViewSeleccionado.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_check_blue));
+        }else{
+            holder.imageViewSeleccionado.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_uncheck_blue));
         }
 
         //reiniciaRadioGroup(holder.radioGroup,pregunta.getListEvidencias());
@@ -512,7 +554,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     String identificador = temp[0];
                     int numeroPregunta = Integer.parseInt(temp[1]);
                     //Bitmap bitmap = listPreguntas.get(numeroPregunta).getListEvidencias().get(identificador - 1).getOriginalBitmap();
-                    Bitmap bitmap = null;
+                    //Bitmap bitmap = null;descomentar si se requiere
                     Pregunta pregunta = listPreguntas.get(numeroPregunta);
                     EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
                     Evidencia evidencia = evidenciasDBMethods.readEvidencia(
@@ -528,8 +570,9 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         }
                     }//*/
                     if(evidencia != null) {
-                        bitmap = evidencia.getOriginalBitmap();
-                        mostrarDocumento(view, identificador, numeroPregunta, activity, bitmap,evidencia.getContenido());
+                        //bitmap = evidencia.getOriginalBitmap();descomentar si se requiere
+                        //mostrarDocumento(view, identificador, numeroPregunta, activity, bitmap,evidencia.getContenido());descomentar si se requiere
+                        mostrarDocumento(view, identificador, numeroPregunta, activity, evidencia.getOriginalBitmap(),evidencia.getContenido());
                     }else{
                         Utils.message(activity,"No se pudo cargar la imagen");
                     }
@@ -642,9 +685,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         buttonBorrar.setVisibility(View.GONE);
                         buttonCumple.setVisibility(View.GONE);
                         buttonNoCumple.setVisibility(View.GONE);
-                    } else {
+                    } else if (evidencia.getIdEtapa() < usuario.getIdrol() && evidencia.getIdEstatus() == 1) {
                         //buttonCumple.setBackground(drawableCumpleGris);
                         //buttonNoCumple.setBackground(drawableNoCumpleGris);
+                        buttonCumple.setVisibility(View.GONE);
+                        buttonNoCumple.setVisibility(View.GONE);
                     }
 
                     if(evidencia.getAgregadoCoordinador() == 1){
@@ -707,7 +752,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
                 HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(activity);
                 List<Historico> listHistorico = historicoDBMethods.readHistorico(
-                        "SELECT ID_EVIDENCIA,ID_ETAPA,ID_USUARIO,MOTIVO,CONSEC,ID_REVISION,ID_CHECKLIST,FECHA_MOD FROM " + historicoDBMethods.TP_TRAN_HISTORIAL_EVIDENCIA + " WHERE ID_EVIDENCIA = ?",
+                        "SELECT ID_EVIDENCIA,ID_ETAPA,ID_USUARIO,MOTIVO,CONSEC,ID_REVISION,ID_CHECKLIST,FECHA_MOD FROM " + historicoDBMethods.TP_TRAN_HISTORIAL_EVIDENCIA + " WHERE ID_EVIDENCIA = ? ORDER BY FECHA_MOD DESC",
                         new String[]{identificador});
                 HistoricoAdapter historicoAdapter = new HistoricoAdapter(activity,listHistorico);
                 listViewHistorico.setAdapter(historicoAdapter);
@@ -1229,6 +1274,9 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         popup.setContentView(layout);
         // Set content width and height
 
+        final SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME,Activity.MODE_PRIVATE);
+        final Encryption encryption = new Encryption();
+
         Button buttonCamera = (Button) layout.findViewById(R.id.buttonCamera);
         Button buttonFiles = (Button) layout.findViewById(R.id.buttonFiles);
 
@@ -1267,9 +1315,22 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         Utils.message(activity,"No se pueden agregar evidencias ya que la fecha de revisión no corresponde al mes actual");
                     }
                 }//*/
-
-                if(Utils.checkPermission(activity)){
-                    Utils.openCamera(activity, position);
+                String flagValida = "false";
+                if(sharedPreferences.contains(Constants.SP_VALIDA_FECHA)){
+                    flagValida = encryption.decryptAES(sharedPreferences.getString(Constants.SP_VALIDA_FECHA,"false"));
+                }
+                if(flagValida.equals("true")) {
+                    if(Utils.validaFechaRevision(activity,fechaFolio)){
+                        if (Utils.checkPermission(activity)) {
+                            Utils.openCamera(activity, position);
+                        }
+                    }else{
+                        Utils.message(activity,"No se permite agregar evidencias porque la revisión no es del mes actual");
+                    }
+                }else{
+                    if (Utils.checkPermission(activity)) {
+                        Utils.openCamera(activity, position);
+                    }
                 }
 
                 popup.dismiss();
@@ -1293,9 +1354,27 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     Utils.message(activity,"Se requiere permiso para utilizar la cámara");
                 }//*/
 
-                if(Utils.checkPermission(activity)){
-                    seleccionarArchivo(position);
+                String flagValida = "false";
+                if(sharedPreferences.contains(Constants.SP_VALIDA_FECHA)){
+                    flagValida = encryption.decryptAES(sharedPreferences.getString(Constants.SP_VALIDA_FECHA,"false"));
                 }
+                if(flagValida.equals("true")) {
+                    if(Utils.validaFechaRevision(activity,fechaFolio)){
+                        if(Utils.checkPermission(activity)){
+                            seleccionarArchivo(position);
+                        }
+                    }else{
+                        Utils.message(activity,"No se permite agregar evidencias porque la revisión no es del mes actual");
+                    }
+                }else{
+                    if(Utils.checkPermission(activity)){
+                        seleccionarArchivo(position);
+                    }
+                }
+
+                /*if(Utils.checkPermission(activity)){
+                    seleccionarArchivo(position);
+                }//*/
 
                 popup.dismiss();
             }

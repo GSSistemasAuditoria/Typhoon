@@ -197,9 +197,9 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
 
     private boolean isPositionHeader(int position) {
         //if(folios.get(position).getFolio() == null){
-        if(folios.get(position).getIdUsuario() == null){
+        /*if(folios.get(position).getIdUsuario() == null){
             return true;
-        }
+        }//*/
         return false;
     }
 

@@ -261,6 +261,7 @@ public class ChecklistDBMethods {
             "ID_BARCO INTEGER, " +
             "ID_REGISTRO INTEGER, " +
             "ID_RESPUESTA INTEGER, " +
+            "SINCRONIZADO INTEGER, " +
             "PRIMARY KEY (ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_BARCO,ID_REGISTRO))";
 
     public void createRespuesta(RespuestaData respuestaData){
@@ -274,6 +275,7 @@ public class ChecklistDBMethods {
         values.put("ID_BARCO",respuestaData.getIdBarco());
         values.put("ID_REGISTRO",respuestaData.getIdRegistro());
         values.put("ID_RESPUESTA",respuestaData.getIdRespuesta());
+        values.put("SINCRONIZADO",respuestaData.getSincronizado());
         db.insertWithOnConflict(TP_TRAN_CL_RESPUESTA, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -304,6 +306,7 @@ public class ChecklistDBMethods {
                     }else{
                         respuestaData.setIdRespuesta(cursor.getInt(7));
                     }
+                    respuestaData.setSincronizado(cursor.getInt(8));
                     listRespuestas.add(respuestaData);
                 }while(cursor.moveToNext());
             }

@@ -42,7 +42,12 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_CL_RESPUESTA);
         sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_ESTATUS_REVISION);
         sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_ROLES_USUARIO);
+        sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_ETAPA_SUBANEXO);
         sqLiteDatabase.execSQL(HistoricoDBMethods.QUERY_CREATE_TABLE_TP_TRAN_HISTORIAL_EVIDENCIA);
+        sqLiteDatabase.execSQL(HistoricoDBMethods.QUERY_CREATE_TABLE_TP_TRAN_HISTORIAL_SUBANEXO);
+        sqLiteDatabase.execSQL(AnexosDBMethods.QUERY_CREATE_TABLE_TP_CAT_ANEXOS);
+        sqLiteDatabase.execSQL(AnexosDBMethods.QUERY_CREATE_TABLE_TP_REL_REVISION_ANEXOS);
+        sqLiteDatabase.execSQL(AnexosDBMethods.QUERY_CREATE_TABLE_TP_TRAN_ANEXOS);
     }
 
     public void deleteAll(){
@@ -60,7 +65,12 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
         db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_CL_RESPUESTA);
         db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_ESTATUS_REVISION);
         db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_ROLES_USUARIO);
+        db.execSQL("delete from " + CatalogosDBMethods.TP_CAT_ETAPA_SUBANEXO);
         db.execSQL("delete from " + HistoricoDBMethods.TP_TRAN_HISTORIAL_EVIDENCIA);
+        db.execSQL("delete from " + HistoricoDBMethods.TP_TRAN_HISTORIAL_SUBANEXO);
+        db.execSQL("delete from " + AnexosDBMethods.TP_TRAN_ANEXOS);
+        db.execSQL("delete from " + AnexosDBMethods.TP_REL_REVISION_ANEXOS);
+        db.execSQL("delete from " + AnexosDBMethods.TP_CAT_ANEXOS);
         db.close();
     }
 

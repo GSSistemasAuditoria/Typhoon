@@ -53,6 +53,7 @@ import com.elektra.typhoon.objetos.response.Configuracion;
 import com.elektra.typhoon.objetos.response.EstatusEvidencia;
 import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.EtapaEvidencia;
+import com.elektra.typhoon.objetos.response.EtapaSubAnexo;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.LatLng;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
@@ -201,13 +202,15 @@ public class Utils {
     }
 
     public static Bitmap resizeImageBitmap(Bitmap imageBitmap) {
-        Bitmap scaled = Bitmap.createScaledBitmap(imageBitmap, 512, 512, true);
-        return scaled;
+        //Bitmap scaled = Bitmap.createScaledBitmap(imageBitmap, 512, 512, true);
+        //return scaled;
+        return Bitmap.createScaledBitmap(imageBitmap, 512, 512, true);
     }
 
     public static Bitmap resizeImageBitmap(Bitmap imageBitmap,int ancho,int alto) {
-        Bitmap scaled = Bitmap.createScaledBitmap(imageBitmap, ancho, alto, true);
-        return scaled;
+        //Bitmap scaled = Bitmap.createScaledBitmap(imageBitmap, ancho, alto, true);
+        //return scaled;
+        return Bitmap.createScaledBitmap(imageBitmap, ancho, alto, true);
     }
 
     public static String getDateMonth(String fecha){
@@ -411,6 +414,16 @@ public class Utils {
                                             ed.putString(Constants.SP_GPS_GEOCERCA, encryption.encryptAES(configuracion.getArgumento()));
                                             ed.apply();
                                         }
+                                        if (configuracion.getConfiguracion().equals("ValidaFechaEvidencias")) {
+                                            ed.putString(Constants.SP_VALIDA_FECHA, encryption.encryptAES(configuracion.getArgumento()));
+                                            ed.apply();
+                                        }
+                                    }
+                                }
+                                if (response.body().getCatalogos().getCatalogosData().getListEtapasSubAnexo() != null) {
+                                    catalogosDBMethods.deleteEtapaSubAnexo();
+                                    for (EtapaSubAnexo etapaSubAnexo: response.body().getCatalogos().getCatalogosData().getListEtapasSubAnexo()) {
+                                        catalogosDBMethods.createEtapaSubAnexo(etapaSubAnexo);
                                     }
                                 }
                                 progressDialog.dismiss();
@@ -999,5 +1012,22 @@ public class Utils {
         } finally {
             if (process != null) {process.destroy();}
         }
+    }
+
+    public static boolean validaFechaRevision(Context context,String fechaFolio){
+        Calendar calendarActual = Utils.getCalendarDate(Utils.getDate(Constants.DATE_FORMAT_FULL));
+        Calendar calendarFolio = Utils.getCalendarDate(fechaFolio);
+        if(calendarActual != null && calendarFolio != null) {
+            int mesActual = calendarActual.get(Calendar.MONTH) + 1;
+            int anioActual = calendarActual.get(Calendar.YEAR);
+            int mesFolio = calendarFolio.get(Calendar.MONTH) + 1;
+            int anioFolio = calendarFolio.get(Calendar.YEAR);
+            if ((mesActual == mesFolio) && (anioActual == anioFolio)) {
+                return true;
+            }
+        }else{
+            message(context,"No se pudo validar la fecha de revisión");
+        }
+        return false;
     }
 }

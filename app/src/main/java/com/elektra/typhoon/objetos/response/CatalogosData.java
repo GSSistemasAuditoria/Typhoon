@@ -42,6 +42,10 @@ public class CatalogosData {
     @Expose
     private List<Configuracion> listConfiguracion;
 
+    @SerializedName("CatalogoEtapaSubAnexo")
+    @Expose
+    private List<EtapaSubAnexo> listEtapasSubAnexo;
+
     public List<Barco> getListBarcos() {
         return listBarcos;
     }
@@ -96,5 +100,13 @@ public class CatalogosData {
 
     public void setListConfiguracion(List<Configuracion> listConfiguracion) {
         this.listConfiguracion = listConfiguracion;
+    }
+
+    public List<EtapaSubAnexo> getListEtapasSubAnexo() {
+        return listEtapasSubAnexo;
+    }
+
+    public void setListEtapasSubAnexo(List<EtapaSubAnexo> listEtapasSubAnexo) {
+        this.listEtapasSubAnexo = listEtapasSubAnexo;
     }
 }

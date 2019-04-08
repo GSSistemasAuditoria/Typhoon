@@ -28,6 +28,7 @@ public class Pregunta {
     private int idChecklist;
     private int idBarco;
     private boolean tierra;
+    private boolean seleccionado;
 
     public Pregunta(){
 
@@ -134,5 +135,13 @@ public class Pregunta {
 
     public void setTierra(boolean tierra) {
         this.tierra = tierra;
+    }
+
+    public boolean isSeleccionado() {
+        return seleccionado;
+    }
+
+    public void setSeleccionado(boolean seleccionado) {
+        this.seleccionado = seleccionado;
     }
 }

@@ -94,15 +94,15 @@ public class AnexosDBMethods {
         db.close();
     }
 
-    public int readRelacionRevisionAnexo(int idRevision){
+    public List<Integer> readRelacionRevisionAnexo(int idRevision){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
-        int relacion = 0;
+        List<Integer> relacion = new ArrayList<>();
         String query = "SELECT ID_ANEXO FROM " + TP_REL_REVISION_ANEXOS + " WHERE ID_REVISION = ?";
         Cursor cursor = db.rawQuery(query,new String[]{String.valueOf(idRevision)});
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
-                    relacion = cursor.getInt(0);
+                    relacion.add(cursor.getInt(0));
                 }while(cursor.moveToNext());
             }
         }
@@ -123,27 +123,30 @@ public class AnexosDBMethods {
             "ID_REVISION INTEGER, " +
             "ID_ANEXO INTEGER, " +
             "ID_SUBANEXO INTEGER, " +
-            "ID_DOCUMENTO INTEGER, " +
+            "ID_DOCUMENTO TEXT, " +
             "ID_ETAPA INTEGER, " +
             "DOCUMENTO TEXT, " +
             "NOMBRE TEXT, " +
-            "PRIMARY KEY (ID_ANEXO,ID_REVISION,ID_SUBANEXO,ID_DOCUMENTO))";
+            "SUBANEXO_FCH_SINC DATE, " +
+            "PRIMARY KEY (ID_REVISION,ID_SUBANEXO))";
 
     public void createAnexo(Anexo anexo){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ContentValues values = new ContentValues();
         values.put("ID_REVISION",anexo.getIdRevision());
-        values.put("ID_ANEXO",anexo.getIdAnexo());
+        //values.put("ID_ANEXO",anexo.getIdAnexo());
         values.put("ID_SUBANEXO",anexo.getIdSubAnexo());
-        values.put("ID_DOCUMENTO",anexo.getIdDocumento());
+        //values.put("ID_DOCUMENTO",anexo.getIdDocumento());
         values.put("ID_ETAPA",anexo.getIdEtapa());
         values.put("DOCUMENTO",anexo.getBase64());
         values.put("NOMBRE",anexo.getNombreArchivo());
+        values.put("SUBANEXO_FCH_SINC",anexo.getFechaSinc());
         db.insertWithOnConflict(TP_TRAN_ANEXOS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
 
     public List<Anexo> readAnexos(String query,String[] args){
+        CursorWindowFixer.fix();
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<Anexo> listAnexos = new ArrayList<>();
         Cursor cursor = db.rawQuery(query,args);
@@ -152,12 +155,13 @@ public class AnexosDBMethods {
                 do{
                     Anexo anexo = new Anexo();
                     anexo.setIdRevision(cursor.getInt(0));
-                    anexo.setIdAnexo(cursor.getInt(1));
+                    //anexo.setIdAnexo(cursor.getInt(1));
                     anexo.setIdSubAnexo(cursor.getInt(2));
-                    anexo.setIdDocumento(cursor.getInt(3));
+                    anexo.setIdDocumento(cursor.getString(3));
                     anexo.setIdEtapa(cursor.getInt(4));
                     anexo.setBase64(cursor.getString(5));
                     anexo.setNombreArchivo(cursor.getString(6));
+                    anexo.setFechaSinc(cursor.getString(7));
                     listAnexos.add(anexo);
                 }while(cursor.moveToNext());
             }

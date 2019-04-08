@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.elektra.typhoon.adapters.AdapterExpandableChecklist;
 import com.elektra.typhoon.checklist.ChecklistBarcos;
 import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.database.AnexosDBMethods;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.FoliosDBMethods;
@@ -23,11 +24,14 @@ import com.elektra.typhoon.json.SincronizacionJSON;
 import com.elektra.typhoon.objetos.Folio;
 import com.elektra.typhoon.objetos.request.SincronizacionData;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
+import com.elektra.typhoon.objetos.request.SubAnexo;
+import com.elektra.typhoon.objetos.response.Anexo;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.ChecklistData;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.FolioRevision;
 import com.elektra.typhoon.objetos.response.Historico;
+import com.elektra.typhoon.objetos.response.HistoricoAnexo;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.PreguntaData;
 import com.elektra.typhoon.objetos.response.RespuestaData;
@@ -103,11 +107,14 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                 ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(context);
                                 EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(context);
                                 HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(context);
+                                AnexosDBMethods anexosDBMethods = new AnexosDBMethods(context);
                                 for (ChecklistData checklistData : response.body().getSincronizacion().getSincronizacionResponseData().getListChecklist()) {
                                     evidenciasDBMethods.deleteEvidencia("ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_ESTATUS != 1 AND ID_ETAPA != 1",
                                             new String[]{String.valueOf(idRevision), String.valueOf(checklistData.getIdChecklist())});
                                     historicoDBMethods.deleteHistorico("ID_REVISION = ? AND ID_CHECKLIST = ?",
-                                            new String[]{String.valueOf(checklistData.getIdRevision()),String.valueOf(checklistData.getIdChecklist())});//TODO: cambiar para borrar por folio y checklist
+                                            new String[]{String.valueOf(idRevision),String.valueOf(checklistData.getIdChecklist())});
+                                    historicoDBMethods.deleteHistoricoAnexo("ID_REVISION = ?",new String[]{String.valueOf(idRevision)});
+                                    anexosDBMethods.deleteAnexo("ID_REVISION = ?",new String[]{String.valueOf(idRevision)});
                                     checklistData.setIdRevision(idRevision);
                                     checklistDBMethods.createChecklist(checklistData);
                                     if (checklistData.getListRubros() != null) {
@@ -146,6 +153,34 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                 if (response.body().getSincronizacion().getSincronizacionResponseData().getListRespuestas() != null) {
                                     for (RespuestaData respuestaData : response.body().getSincronizacion().getSincronizacionResponseData().getListRespuestas()) {
                                         checklistDBMethods.createRespuesta(respuestaData);
+                                    }
+                                }
+                                if (response.body().getSincronizacion().getSincronizacionResponseData().getListAnexos() != null) {
+                                    for (Anexo anexo : response.body().getSincronizacion().getSincronizacionResponseData().getListAnexos()) {
+                                        anexosDBMethods.createCatalogoAnexo(anexo);
+                                        anexosDBMethods.createRelacionRevisionAnexo(anexo.getIdAnexo(),folio.getIdRevision());
+                                        if(anexo.getListSubAnexos() != null){
+                                            for(Anexo subAnexo:anexo.getListSubAnexos()){
+                                                anexosDBMethods.createCatalogoAnexo(subAnexo);
+                                            }
+                                        }
+                                    }
+                                }
+                                if (response.body().getSincronizacion().getSincronizacionResponseData().getListSubAnexos() != null) {
+                                    for (SubAnexo subAnexo : response.body().getSincronizacion().getSincronizacionResponseData().getListSubAnexos()) {
+                                        Anexo anexo = new Anexo();
+                                        anexo.setIdRevision(subAnexo.getIdRevision());
+                                        anexo.setIdSubAnexo(subAnexo.getIdSubAnexo());
+                                        anexo.setNombreArchivo(subAnexo.getFileName());
+                                        anexo.setBase64(subAnexo.getContenido());
+                                        anexo.setIdEtapa(subAnexo.getIdEtapa());
+                                        anexo.setFechaSinc(subAnexo.getFechaSincronizacion());
+                                        new AnexosDBMethods(activity).createAnexo(anexo);
+                                        if(subAnexo.getListHistorico() != null){
+                                            for(HistoricoAnexo historicoAnexo:subAnexo.getListHistorico()){
+                                                historicoDBMethods.createHistoricoAnexo(historicoAnexo);
+                                            }
+                                        }
                                     }
                                 }
                             }

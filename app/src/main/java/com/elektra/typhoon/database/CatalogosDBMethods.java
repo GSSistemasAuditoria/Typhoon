@@ -9,6 +9,7 @@ import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.objetos.response.EstatusEvidencia;
 import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.EtapaEvidencia;
+import com.elektra.typhoon.objetos.response.EtapaSubAnexo;
 import com.elektra.typhoon.objetos.response.RolUsuario;
 import com.elektra.typhoon.objetos.response.TipoRespuesta;
 
@@ -35,6 +36,7 @@ public class CatalogosDBMethods {
     public static final String TP_CAT_CL_RESPUESTA = "TP_CAT_CL_RESPUESTA";
     public static final String TP_CAT_ESTATUS_REVISION = "TP_CAT_ESTATUS_REVISION";
     public static final String TP_CAT_ROLES_USUARIO = "TP_CAT_ROLES_USUARIO";
+    public static final String TP_CAT_ETAPA_SUBANEXO = "TP_CAT_ETAPA_SUBANEXO";
 
     public static String QUERY_CREATE_TABLE_TP_CAT_CL_ESTATUS_EVIDENCIA = "CREATE TABLE " + TP_CAT_CL_ESTATUS_EVIDENCIA + " (" +
             "ID_ESTATUS INTEGER PRIMARY KEY, " +
@@ -270,6 +272,49 @@ public class CatalogosDBMethods {
     public void deleteRolesUsuario(){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         db.execSQL("delete from "+ TP_CAT_ROLES_USUARIO);
+        db.close();
+    }
+
+    //**********************************************************************************************
+
+    public static String QUERY_CREATE_TABLE_TP_CAT_ETAPA_SUBANEXO = "CREATE TABLE " + TP_CAT_ETAPA_SUBANEXO + " (" +
+            "ID_ETAPA INTEGER PRIMARY KEY, " +
+            "ID_USUARIO INTEGER, " +
+            "DESCRIPCION TEXT)";
+
+    public void createEtapaSubAnexo(EtapaSubAnexo etapaSubAnexo){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        ContentValues values = new ContentValues();
+        values.put("ID_ETAPA",etapaSubAnexo.getIdEtapa());
+        values.put("ID_USUARIO",etapaSubAnexo.getIdUsuario());
+        values.put("DESCRIPCION",etapaSubAnexo.getDescripcion());
+        db.insertWithOnConflict(TP_CAT_ETAPA_SUBANEXO, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        db.close();
+    }
+
+    public List<EtapaSubAnexo> readEtapaSubAnexo(String condition, String[] args){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        List<EtapaSubAnexo> listEtapas = new ArrayList<>();
+        Cursor cursor = db.rawQuery(condition,args);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    EtapaSubAnexo etapaSubAnexo = new EtapaSubAnexo();
+                    etapaSubAnexo.setIdEtapa(cursor.getInt(0));
+                    etapaSubAnexo.setIdUsuario(cursor.getInt(1));
+                    etapaSubAnexo.setDescripcion(cursor.getString(2));
+                    listEtapas.add(etapaSubAnexo);
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return listEtapas;
+    }
+
+    public void deleteEtapaSubAnexo(){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        db.execSQL("delete from "+ TP_CAT_ETAPA_SUBANEXO);
         db.close();
     }
 }

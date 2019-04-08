@@ -13,7 +13,9 @@ import android.widget.TextView;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.database.ChecklistDBMethods;
+import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.objetos.response.Anexo;
+import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.RubroData;
 
@@ -32,10 +34,18 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
     private Activity activity;
     private int header;
     private AdapterRecycleViewItemsAnexos adapterRecycleViewItemsAnexosTemp;
+    private TextView textViewCumplen;
+    private TextView textViewNoCumplen;
+    private TextView textViewTotal;
+    private String fechaRevision;
 
-    public AdapterExpandableAnexos(List<Anexo> listAnexosHeader, Activity activity){
+    public AdapterExpandableAnexos(List<Anexo> listAnexosHeader, Activity activity,TextView textViewCumplen,TextView textViewNoCumplen,TextView textViewTotal,String fechaRevision){
         this.listAnexosHeader = listAnexosHeader;
         this.activity = activity;
+        this.textViewCumplen = textViewCumplen;
+        this.textViewNoCumplen = textViewNoCumplen;
+        this.textViewTotal = textViewTotal;
+        this.fechaRevision = fechaRevision;
     }
 
     public List<Anexo> getListAnexosHeader() {
@@ -87,7 +97,7 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
 
     @Override
     public View getGroupView(int i, boolean b, View view, ViewGroup viewGroup) {
-        Anexo anexoHeader = listAnexosHeader.get(i);
+        final Anexo anexoHeader = listAnexosHeader.get(i);
         if (view == null) {
             LayoutInflater layoutInflater = (LayoutInflater) activity.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -96,7 +106,8 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
 
         TextView textViewTituloEncabezado = view.findViewById(R.id.textViewTituloHeader);
         ImageView imageView =  view.findViewById(R.id.imageViewIconoGrupo);
-        textViewTituloEncabezado.setText(anexoHeader.getTitulo());
+        ImageView imageViewSelect = view.findViewById(R.id.imageViewSelect);
+        textViewTituloEncabezado.setText(anexoHeader.getDescripcion());
 
         header = i;
 
@@ -104,6 +115,30 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
             imageView.setImageResource(R.mipmap.ic_group_close);
         } else {
             imageView.setImageResource(R.mipmap.ic_group_open);
+        }
+
+        imageViewSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(anexoHeader.isSeleccionado()){
+                    anexoHeader.setSeleccionado(false);
+                    for(Anexo subanexo:anexoHeader.getListSubAnexos()){
+                        subanexo.setSeleccionado(false);
+                    }//*/
+                }else{
+                    anexoHeader.setSeleccionado(true);
+                    for(Anexo subanexo:anexoHeader.getListSubAnexos()){
+                        subanexo.setSeleccionado(true);
+                    }
+                }
+                notifyDataSetChanged();
+            }
+        });
+
+        if(anexoHeader.isSeleccionado()) {
+            imageViewSelect.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_check_white));
+        }else{
+            imageViewSelect.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_uncheck_white));
         }
 
         return view;
@@ -119,7 +154,7 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
         }
 
         RecyclerView recyclerViewItemsAnexos = view.findViewById(R.id.recyclerViewPreguntas);
-        AdapterRecycleViewItemsAnexos adapterRecycleViewItemsAnexos = new AdapterRecycleViewItemsAnexos(anexoHeader.getListAnexos(),activity,i);
+        AdapterRecycleViewItemsAnexos adapterRecycleViewItemsAnexos = new AdapterRecycleViewItemsAnexos(anexoHeader.getListSubAnexos(),activity,i,this,fechaRevision,anexoHeader);
         recyclerViewItemsAnexos.setAdapter(adapterRecycleViewItemsAnexos);
         LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
         recyclerViewItemsAnexos.setLayoutManager(layoutManager);
@@ -132,5 +167,30 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
     @Override
     public boolean isChildSelectable(int i, int i1) {
         return false;
+    }
+
+    public void contarAnexosValidados(){
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
+        int aplica = 0;
+        int noAplica = 0;
+        int total = 0;
+        for(Anexo anexo:listAnexosHeader){
+            for(Anexo subanexo:anexo.getListSubAnexos()){
+                if(subanexo.getIdEtapa() == -1 || subanexo.getIdEtapa() == usuario.getIdrol()-1){
+                    //noAplica++;
+                }else{
+                    if(subanexo.getIdEtapa() >= usuario.getIdrol()){
+                        aplica++;
+                    }
+                }
+                total++;
+            }
+        }
+
+        noAplica = total - aplica;
+
+        textViewCumplen.setText(String.valueOf(aplica));
+        textViewNoCumplen.setText(String.valueOf(noAplica));
+        textViewTotal.setText(String.valueOf(total));
     }
 }

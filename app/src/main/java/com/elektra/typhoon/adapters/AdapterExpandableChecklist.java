@@ -1,6 +1,7 @@
 package com.elektra.typhoon.adapters;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,9 +14,14 @@ import android.widget.TextView;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.database.ChecklistDBMethods;
+import com.elektra.typhoon.database.EvidenciasDBMethods;
+import com.elektra.typhoon.objetos.response.Evidencia;
+import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.RubroData;
+import com.elektra.typhoon.utils.Utils;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -94,7 +100,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
 
     @Override
     public View getGroupView(int i, boolean b, View view, ViewGroup viewGroup) {
-        RubroData rubro = listRubros.get(i);
+        final RubroData rubro = listRubros.get(i);
         if (view == null) {
             LayoutInflater layoutInflater = (LayoutInflater) activity.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -103,6 +109,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
 
         TextView textViewTituloEncabezado = view.findViewById(R.id.textViewTituloHeader);
         ImageView imageView =  view.findViewById(R.id.imageViewIconoGrupo);
+        ImageView imageViewSelect = view.findViewById(R.id.imageViewSelect);
         textViewTituloEncabezado.setText(rubro.getNombre());
 
         rubroPosition = i;
@@ -113,7 +120,40 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
             imageView.setImageResource(R.mipmap.ic_group_open);
         }
 
+        imageViewSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(rubro.isSeleccionado()){
+                    rubro.setSeleccionado(false);
+                    for(Pregunta pregunta:rubro.getListPreguntasTemp()){
+                        pregunta.setSeleccionado(false);
+                    }
+                }else{
+                    rubro.setSeleccionado(true);
+                    for(Pregunta pregunta:rubro.getListPreguntasTemp()){
+                        pregunta.setSeleccionado(true);
+                    }
+                }
+                notifyDataSetChanged();
+            }
+        });
+
+        if(rubro.isSeleccionado()) {
+            imageViewSelect.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_check_white));
+        }else{
+            imageViewSelect.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_uncheck_white));
+        }
+
         return view;
+    }
+
+    private boolean cuentaPreguntasDeshabilitadas(List<Pregunta> preguntas){
+        for(Pregunta pregunta:preguntas){
+            if(pregunta.isSeleccionado()){
+               return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -131,9 +171,30 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         TextView textViewValorTotal = view.findViewById(R.id.textViewValorTotal);
         RecyclerView recyclerViewPreguntas = view.findViewById(R.id.recyclerViewPreguntas);
 
+        EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
+
+        //ProgressDialog progressDialog = Utils.typhoonLoader(activity,"Cargando datos...");
+
+        for(Pregunta pregunta:rubro.getListPreguntasTemp()){
+            try {
+                List<Evidencia> listEvidencias = evidenciasDBMethods.readEvidencias("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
+                                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
+                                " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?" +
+                                " AND ID_ESTATUS != 2",
+                        new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
+                                String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),
+                                String.valueOf(idBarco)},false);
+                pregunta.setListEvidencias(listEvidencias);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        //progressDialog.dismiss();
+
         //textViewTituloRubro.setText("Rubro " + i);
         AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntasTemp(),activity,i,
-                textViewCumplen,textViewNoCumplen,this,fechaFolio,idBarco);
+                textViewCumplen,textViewNoCumplen,this,fechaFolio,idBarco,rubro);
         recyclerViewPreguntas.setAdapter(adapterRecycleViewPreguntas);
         LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
         recyclerViewPreguntas.setLayoutManager(layoutManager);
@@ -168,7 +229,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
 
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
         List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
-                "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_BARCO = ?",
+                "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA,SINCRONIZADO FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_BARCO = ?",
                 new String[]{String.valueOf(folio),String.valueOf(checklist),String.valueOf(idBarco)});
         int cumple = 0;
         int noCumple = 0;

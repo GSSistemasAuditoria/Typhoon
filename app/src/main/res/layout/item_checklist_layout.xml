@@ -24,13 +24,44 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textViewPregunta"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:textColor="@color/azul"
-                />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textViewPregunta"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="5dp"
+                    android:textColor="@color/azul"
+                    />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/imageViewSelect"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginTop="5dp"
+                        android:src="@mipmap/ic_uncheck_blue"/>
+
+                    <ImageView
+                        android:id="@+id/imageViewSincronizadoFlag"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginTop="5dp"
+                        android:src="@drawable/status_1"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <RadioGroup
                 android:id="@+id/myRadioGroup"

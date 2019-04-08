@@ -11,6 +11,14 @@
         android:layout_margin="5dp"
         android:orientation="horizontal">
 
+        <ImageView
+            android:id="@+id/imageViewEtapa"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@mipmap/ic_documento_pendiente"
+            android:layout_marginEnd="5dp"
+            android:layout_gravity="center_vertical"/>
+
         <TextView
             android:id="@+id/textViewTituloAnexo"
             android:layout_width="0dp"
@@ -21,18 +29,25 @@
 
         <ImageView
             android:id="@+id/imageViewSubirArchivo"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:src="@mipmap/ic_subir_gris"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="5dp"/>
 
         <ImageView
             android:id="@+id/imageViewDescargarArchivo"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:src="@mipmap/ic_descargar_gris"
             android:layout_gravity="center_vertical"/>
+
+        <ImageView
+            android:id="@+id/imageViewSelect"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="center_vertical"
+            android:src="@mipmap/ic_uncheck_blue"/>
 
     </LinearLayout>
 

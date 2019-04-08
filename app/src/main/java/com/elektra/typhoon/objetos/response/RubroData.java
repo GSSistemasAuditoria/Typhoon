@@ -34,6 +34,7 @@ public class RubroData {
     private int idRevision;
     private List<Pregunta> listPreguntasTemp;
     private List<RespuestaData> listRespuestas;
+    private boolean seleccionado;
 
     public int getEstatus() {
         return estatus;
@@ -97,5 +98,13 @@ public class RubroData {
 
     public void setListRespuestas(List<RespuestaData> listRespuestas) {
         this.listRespuestas = listRespuestas;
+    }
+
+    public boolean isSeleccionado() {
+        return seleccionado;
+    }
+
+    public void setSeleccionado(boolean seleccionado) {
+        this.seleccionado = seleccionado;
     }
 }

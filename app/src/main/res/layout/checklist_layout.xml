@@ -21,23 +21,28 @@
                 android:layout_height="50dp"
                 android:src="@drawable/typhoone_logo_bn" />
 
-            <Button
-                android:id="@+id/buttonSincronizarChecklist"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="10dp"
-                android:background="@mipmap/ic_sincronizacion_blanco"/>
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/buttonAnexos"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_toStartOf="@+id/buttonSincronizarChecklist"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="10dp"
-                android:background="@mipmap/ic_anexos"/>
+                <Button
+                    android:id="@+id/buttonAnexos"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@mipmap/ic_anexos"/>
+
+                <Button
+                    android:id="@+id/buttonSincronizarChecklist"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@mipmap/ic_sincronizacion_blanco"/>
+
+            </LinearLayout>
 
         </RelativeLayout>
 
@@ -236,7 +241,7 @@
             android:layout_centerVertical="true"
             style="@style/spinner_style"
             android:layout_toEndOf="@+id/linearLayout1"
-             />
+            />
 
     </RelativeLayout>
 

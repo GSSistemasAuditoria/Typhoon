@@ -26,13 +26,20 @@ public class Anexo {
     @Expose
     private int idSubAnexo;
 
+    @SerializedName("SubAnexos")
+    @Expose
+    private List<Anexo> listSubAnexos;
+
+    private String fechaSinc;
+
     private String titulo;
     private List<Anexo> listAnexos;
     private String base64;
     private String nombreArchivo;
     private int idEtapa;
-    private int idDocumento;
+    private String idDocumento;
     private int idRevision;
+    private boolean seleccionado;
 
     public Anexo(){
 
@@ -111,11 +118,11 @@ public class Anexo {
         this.idEtapa = idEtapa;
     }
 
-    public int getIdDocumento() {
+    public String getIdDocumento() {
         return idDocumento;
     }
 
-    public void setIdDocumento(int idDocumento) {
+    public void setIdDocumento(String idDocumento) {
         this.idDocumento = idDocumento;
     }
 
@@ -125,5 +132,29 @@ public class Anexo {
 
     public void setIdRevision(int idRevision) {
         this.idRevision = idRevision;
+    }
+
+    public List<Anexo> getListSubAnexos() {
+        return listSubAnexos;
+    }
+
+    public void setListSubAnexos(List<Anexo> listSubAnexos) {
+        this.listSubAnexos = listSubAnexos;
+    }
+
+    public String getFechaSinc() {
+        return fechaSinc;
+    }
+
+    public void setFechaSinc(String fechaSinc) {
+        this.fechaSinc = fechaSinc;
+    }
+
+    public boolean isSeleccionado() {
+        return seleccionado;
+    }
+
+    public void setSeleccionado(boolean seleccionado) {
+        this.seleccionado = seleccionado;
     }
 }

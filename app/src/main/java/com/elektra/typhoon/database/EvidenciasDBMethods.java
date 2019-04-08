@@ -64,6 +64,8 @@ public class EvidenciasDBMethods {
                             Bitmap bitmapResize = Utils.resizeImageBitmap(bitmap);
                             String base64 = Utils.bitmapToBase64(bitmapResize);
                             values.put("CONTENIDO_PREVIEW", base64);
+                            bitmap.recycle();
+                            bitmapResize.recycle();
                         }
                     }
                 }
