@@ -194,6 +194,7 @@ public class ChecklistDBMethods {
             "ESTATUS INTEGER, " +
             "DESCRIPCION TEXT, " +
             "IS_TIERRA INTEGER, " +
+            "SELECCIONADO INTEGER, " +
             "PRIMARY KEY (ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA))";
 
     public void createPregunta(PreguntaData preguntaData){
@@ -211,6 +212,7 @@ public class ChecklistDBMethods {
         }else{
             values.put("IS_TIERRA",0);
         }
+        values.put("SELECCIONADO",0);
         db.insertWithOnConflict(TP_CAT_CL_PREGUNTA, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -241,6 +243,11 @@ public class ChecklistDBMethods {
                     }else{
                         pregunta.setTierra(false);
                     }
+                    if(cursor.getInt(8) == 1){
+                        pregunta.setSeleccionado(true);
+                    }else{
+                        pregunta.setSeleccionado(false);
+                    }
                     listPreguntas.add(pregunta);
                 }while(cursor.moveToNext());
             }
@@ -248,6 +255,12 @@ public class ChecklistDBMethods {
         cursor.close();
         db.close();
         return listPreguntas;
+    }
+
+    public void updatePregunta(ContentValues values,String condition,String[] args){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        db.update(TP_CAT_CL_PREGUNTA,values,condition,args);
+        db.close();
     }
 
     //**********************************************************************************************

@@ -188,7 +188,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                                         "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ? AND ID_DOCUMENTO = ?"
                                 , new String[]{String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdAnexo()), String.valueOf(anexo.getIdSubAnexo()), anexo.getIdDocumento()});//*/
 
-                        List<Anexo> anexoGuardado = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC " +
+                        List<Anexo> anexoGuardado = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO " +
                                         "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                                 , new String[]{String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdSubAnexo())});
 
@@ -232,15 +232,19 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
             }
         }
 
+        holder.imageViewSeleccionado.setVisibility(View.GONE);
+
         holder.imageViewSeleccionado.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(anexo.isSeleccionado()){
                     anexo.setSeleccionado(false);
                     anexoHeader.setSeleccionado(false);
+                    Utils.updateAnexo(activity,String.valueOf(anexo.getIdRevision()),String.valueOf(anexo.getIdSubAnexo()),0);
                     adapterExpandableAnexos.notifyDataSetChanged();
                 }else{
                     anexo.setSeleccionado(true);
+                    Utils.updateAnexo(activity,String.valueOf(anexo.getIdRevision()),String.valueOf(anexo.getIdSubAnexo()),1);
                 }
                 notifyDataSetChanged();
             }
@@ -423,6 +427,8 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                 new HistoricoDBMethods(activity).createHistoricoAnexo(historicoAnexo);
 
                 Utils.message(activity,"Validado");
+                Utils.updateAnexo(activity,String.valueOf(anexo.getIdRevision()),String.valueOf(anexo.getIdSubAnexo()),1);
+                anexo.setSeleccionado(true);
                 adapterExpandableAnexos.contarAnexosValidados();
                 adapterExpandableAnexos.getAdapterRecycleViewItemsAnexosTemp().notifyDataSetChanged();
                 alertDialog.dismiss();
@@ -485,6 +491,8 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                             historicoAnexo.setIdRol(usuario.getIdrol());
                             new HistoricoDBMethods(activity).createHistoricoAnexo(historicoAnexo);
                             Utils.message(activity,"Rechazado");
+                            Utils.updateAnexo(activity,String.valueOf(anexo.getIdRevision()),String.valueOf(anexo.getIdSubAnexo()),1);
+                            anexo.setSeleccionado(true);
                             adapterExpandableAnexos.contarAnexosValidados();
                             adapterExpandableAnexos.getAdapterRecycleViewItemsAnexosTemp().notifyDataSetChanged();
                             alertDialogMotivo.dismiss();

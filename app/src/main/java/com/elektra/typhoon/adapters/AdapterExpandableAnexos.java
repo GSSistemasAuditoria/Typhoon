@@ -18,6 +18,7 @@ import com.elektra.typhoon.objetos.response.Anexo;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.RubroData;
+import com.elektra.typhoon.utils.Utils;
 
 import java.util.List;
 
@@ -117,6 +118,8 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
             imageView.setImageResource(R.mipmap.ic_group_open);
         }
 
+        imageViewSelect.setVisibility(View.GONE);
+
         imageViewSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -124,11 +127,13 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
                     anexoHeader.setSeleccionado(false);
                     for(Anexo subanexo:anexoHeader.getListSubAnexos()){
                         subanexo.setSeleccionado(false);
+                        Utils.updateAnexo(activity,String.valueOf(subanexo.getIdRevision()),String.valueOf(subanexo.getIdSubAnexo()),0);
                     }//*/
                 }else{
                     anexoHeader.setSeleccionado(true);
                     for(Anexo subanexo:anexoHeader.getListSubAnexos()){
                         subanexo.setSeleccionado(true);
+                        Utils.updateAnexo(activity,String.valueOf(subanexo.getIdRevision()),String.valueOf(subanexo.getIdSubAnexo()),1);
                     }
                 }
                 notifyDataSetChanged();

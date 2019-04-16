@@ -77,7 +77,7 @@ public class SincronizacionJSON {
             checklistData.setListRubros(listRubroPost);
             for(Rubro rubro:listRubroPost){
                 List<Pregunta> listPreguntas = checklistDBMethods.readPregunta(
-                        "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA FROM " +
+                        "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA,SELECCIONADO FROM " +
                                 checklistDBMethods.TP_CAT_CL_PREGUNTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ?",
                         new String[]{String.valueOf(checklistData.getIdRevision()), String.valueOf(checklistData.getIdChecklist()),
                                 String.valueOf(rubro.getIdRubro())});
@@ -132,7 +132,7 @@ public class SincronizacionJSON {
                     "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA,SINCRONIZADO FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ?"
                 , new String[]{String.valueOf(checklistData.getIdRevision()), String.valueOf(checklistData.getIdChecklist())});
 
-            List<Anexo> listAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC FROM " +
+            List<Anexo> listAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO FROM " +
              anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND (ID_ETAPA = ? OR ID_ETAPA = -1) ",new String[]{String.valueOf(folio),String.valueOf(usuario.getIdrol())});
 
             List<SubAnexo> listSubAnexo = new ArrayList<>();
@@ -196,7 +196,7 @@ public class SincronizacionJSON {
                 checklistData.setListRubros(listRubroPost);
                 for (Rubro rubro : listRubroPost) {
                     List<Pregunta> listPreguntas = checklistDBMethods.readPregunta(
-                            "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA FROM " +
+                            "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA,SELECCIONADO FROM " +
                                     checklistDBMethods.TP_CAT_CL_PREGUNTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ?",
                             new String[]{String.valueOf(checklistData.getIdRevision()), String.valueOf(checklistData.getIdChecklist()),
                                     String.valueOf(rubro.getIdRubro()), String.valueOf(idPregunta)});
@@ -215,7 +215,7 @@ public class SincronizacionJSON {
                             listEvidencias = evidenciasDBMethods.readEvidencias("" +
                                             "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
                                             "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
-                                            " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND (ID_ETAPA = 2) OR (ID_ETAPA = 1 AND ID_ESTATUS = 2) AND ID_BARCO = ?",
+                                            " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ((ID_ETAPA = 2) OR (ID_ETAPA = 1 AND ID_ESTATUS = 2)) AND ID_BARCO = ?",
                                     new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
                                             String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),String.valueOf(idBarco)}, true);
                             //}if(usuario.getIdrol() == 2){
@@ -274,7 +274,7 @@ public class SincronizacionJSON {
                 checklistData.setListRubros(listRubroPost);
                 for (Rubro rubro : listRubroPost) {
                     List<Pregunta> listPreguntas = checklistDBMethods.readPregunta(
-                            "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA FROM " +
+                            "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA,SELECCIONADO FROM " +
                                     checklistDBMethods.TP_CAT_CL_PREGUNTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ?",
                             new String[]{String.valueOf(checklistData.getIdRevision()), String.valueOf(checklistData.getIdChecklist()),
                                     String.valueOf(rubro.getIdRubro()), String.valueOf(idPregunta)});
@@ -292,7 +292,7 @@ public class SincronizacionJSON {
                     rubro.setListPreguntas(listPreguntasPost);
                 }
 
-                List<Anexo> listAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC FROM " +
+                List<Anexo> listAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO FROM " +
                         anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND (ID_ETAPA = ? OR ID_ETAPA = -1) AND ID_SUBANEXO = ?",
                         new String[]{String.valueOf(folio), String.valueOf(usuario.getIdrol()),String.valueOf(idSubanexo)});
 

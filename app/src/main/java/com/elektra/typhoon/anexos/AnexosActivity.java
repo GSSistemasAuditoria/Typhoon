@@ -131,11 +131,12 @@ public class AnexosActivity extends AppCompatActivity {
                     "ID_SUBANEXO != 0 AND ID_ANEXO = ?",new String[]{String.valueOf(anexo.getIdAnexo())});
             anexo.setListSubAnexos(listSubAnexos);
             for(Anexo subanexo:listSubAnexos){
+                subanexo.setSeleccionado(true);
                 /*List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdAnexo()), String.valueOf(subanexo.getIdSubAnexo())});//*/
 
-                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC " +
+                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdSubAnexo())});
 
@@ -388,7 +389,7 @@ public class AnexosActivity extends AppCompatActivity {
         LinearLayout linearLayoutCancelar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCancelar);
         LinearLayout linearLayoutSincronizar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutSincronizar);
 
-        textViewTituloDialogoSincronizacion.setText("¿Deseas sincronizar tus anexos?");
+        //textViewTituloDialogoSincronizacion.setText("¿Deseas sincronizar tus anexos?");
 
         final AlertDialog dialog = new AlertDialog.Builder(activity)
                 .setView(layoutDialog)
@@ -411,9 +412,9 @@ public class AnexosActivity extends AppCompatActivity {
         textViewSincronizar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //new SincronizacionRequestService(activity,activity,idRevision).execute();
+                new SincronizacionRequestService(activity,activity,idRevision).execute();
                 //new SincronizacionIndividualRequestService(activity,activity,idRevision,listCatalogoBarcos,null).execute();
-                new SincronizacionIndividualRequestService(AnexosActivity.this,AnexosActivity.this,folio,null,listAnexos,null,AnexosActivity.this).execute();
+                //new SincronizacionIndividualRequestService(AnexosActivity.this,AnexosActivity.this,folio,null,listAnexos,null,AnexosActivity.this).execute();
                 dialog.dismiss();
             }
         });
@@ -421,8 +422,8 @@ public class AnexosActivity extends AppCompatActivity {
         linearLayoutSincronizar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //new SincronizacionRequestService(activity,activity,idRevision).execute();
-                new SincronizacionIndividualRequestService(AnexosActivity.this,AnexosActivity.this,folio,null,listAnexos,null,AnexosActivity.this).execute();
+                new SincronizacionRequestService(activity,activity,idRevision).execute();
+                //new SincronizacionIndividualRequestService(AnexosActivity.this,AnexosActivity.this,folio,null,listAnexos,null,AnexosActivity.this).execute();
                 dialog.dismiss();
             }
         });
@@ -451,7 +452,7 @@ public class AnexosActivity extends AppCompatActivity {
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdAnexo()), String.valueOf(subanexo.getIdSubAnexo())});//*/
 
-                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC " +
+                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdSubAnexo())});
 

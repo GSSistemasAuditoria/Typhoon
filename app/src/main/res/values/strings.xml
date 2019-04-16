@@ -49,4 +49,5 @@
     <string name="historial_de_validaciones_y_rechazos_tag">Historial de validaciones y rechazos:</string>
     <string name="cerrar_tag">Cerrar</string>
     <string name="anexos_tag">Anexos</string>
+    <string name="por_cargar_tag">Por cargar</string>
 </resources>

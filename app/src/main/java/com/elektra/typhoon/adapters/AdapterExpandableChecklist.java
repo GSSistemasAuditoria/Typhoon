@@ -15,8 +15,10 @@ import android.widget.TextView;
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
+import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.Pregunta;
+import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.RubroData;
 import com.elektra.typhoon.utils.Utils;
@@ -41,6 +43,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
     private TextView textViewNoCumplen;
     private String fechaFolio;
     private int idBarco;
+    private ProgressDialog progressDialog;
 
     public AdapterRecycleViewPreguntas getAdapterRecycleViewPreguntasTemp() {
         return adapterRecycleViewPreguntasTemp;
@@ -120,6 +123,8 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
             imageView.setImageResource(R.mipmap.ic_group_open);
         }
 
+        imageViewSelect.setVisibility(View.GONE);
+
         imageViewSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -127,11 +132,17 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
                     rubro.setSeleccionado(false);
                     for(Pregunta pregunta:rubro.getListPreguntasTemp()){
                         pregunta.setSeleccionado(false);
+                        Utils.updatePregunta(activity,String.valueOf(pregunta.getIdRevision()),
+                                String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),
+                                String.valueOf(pregunta.getIdRubro()),0);//*/
                     }
                 }else{
                     rubro.setSeleccionado(true);
                     for(Pregunta pregunta:rubro.getListPreguntasTemp()){
                         pregunta.setSeleccionado(true);
+                        Utils.updatePregunta(activity,String.valueOf(pregunta.getIdRevision()),
+                                String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),
+                                String.valueOf(pregunta.getIdRubro()),1);//*/
                     }
                 }
                 notifyDataSetChanged();
@@ -142,6 +153,10 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
             imageViewSelect.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_check_white));
         }else{
             imageViewSelect.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_uncheck_white));
+        }
+
+        if(b) {
+            progressDialog = Utils.typhoonLoader(activity, "Cargando datos...");
         }
 
         return view;
@@ -173,8 +188,6 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
 
         EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
 
-        //ProgressDialog progressDialog = Utils.typhoonLoader(activity,"Cargando datos...");
-
         for(Pregunta pregunta:rubro.getListPreguntasTemp()){
             try {
                 List<Evidencia> listEvidencias = evidenciasDBMethods.readEvidencias("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
@@ -190,7 +203,9 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
             }
         }
 
-        //progressDialog.dismiss();
+        if(b) {
+            progressDialog.dismiss();
+        }
 
         //textViewTituloRubro.setText("Rubro " + i);
         AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntasTemp(),activity,i,
@@ -228,21 +243,43 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         }
 
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
+
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
+
+        String query = "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA,SELECCIONADO FROM " +
+                checklistDBMethods.TP_CAT_CL_PREGUNTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ?";
+
+        List<Pregunta> listPreguntas = checklistDBMethods.readPregunta(query,
+                new String[]{String.valueOf(folio),String.valueOf(checklist)});
+
         List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
                 "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA,SINCRONIZADO FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_BARCO = ?",
                 new String[]{String.valueOf(folio),String.valueOf(checklist),String.valueOf(idBarco)});
         int cumple = 0;
         int noCumple = 0;
         for(RespuestaData respuestaData:listRespuestas){
-            if(respuestaData.getIdRespuesta() != null) {
-                if (respuestaData.getIdRespuesta() == 2) {
-                    cumple++;
-                }
-                if (respuestaData.getIdRespuesta() == 3) {
-                    noCumple++;
+            if(usuario.getIdrol() != 3) {
+                if (!Utils.respuestaIsTierra(listPreguntas, respuestaData)) {
+                    if (respuestaData.getIdRespuesta() != null) {
+                        if (respuestaData.getIdRespuesta() == 2) {
+                            cumple++;
+                        }
+                        if (respuestaData.getIdRespuesta() == 3) {
+                            noCumple++;
+                        }
+                    } else {
+                        //noCumple++;
+                    }
                 }
             }else{
-                noCumple++;
+                if (respuestaData.getIdRespuesta() != null) {
+                    if (respuestaData.getIdRespuesta() == 2) {
+                        cumple++;
+                    }
+                    if (respuestaData.getIdRespuesta() == 3) {
+                        noCumple++;
+                    }
+                }
             }
         }
 

@@ -158,21 +158,21 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     public void onBindViewHolder(@NonNull final AdapterRecycleViewPreguntas.MyViewHolder holder, final int position) {
         //acciones
         final Pregunta pregunta = listPreguntas.get(position);
-        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
+        final ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
         holder.linearLayout.setVisibility(View.GONE);
         holder.radioGroup.setEnabled(false);
         pregunta.setRadioGroup(holder.radioGroup);
         holder.textViewPregunta.setText(pregunta.getDescripcion());
         holderTemp = holder;
 
-        //holder.imageViewSincronizadoFlag.setVisibility(View.GONE);
+        holder.imageViewSincronizadoFlag.setVisibility(View.GONE);
 
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
         List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
                 "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA,SINCRONIZADO FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? " +
-                "AND ID_PREGUNTA = ? AND ID_RUBRO = ? AND ID_BARCO = ?",new String[]{String.valueOf(pregunta.getIdRevision()),
-                String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),String.valueOf(pregunta.getIdRubro()),
-                String.valueOf(idBarco)});
+                        "AND ID_PREGUNTA = ? AND ID_RUBRO = ? AND ID_BARCO = ?",new String[]{String.valueOf(pregunta.getIdRevision()),
+                        String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),String.valueOf(pregunta.getIdRubro()),
+                        String.valueOf(idBarco)});
 
         if(usuario.getIdrol() == 1){
             holder.imageViewAddEvidencia.setVisibility(View.VISIBLE);
@@ -196,7 +196,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         holder.imageViewDescargaPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                descargaPDF(pregunta.getIdPregunta());
+                if(usuario.getIdrol() == 3) {
+                    descargaPDF(pregunta.getIdPregunta());
+                }else{
+                    Utils.message(activity,"No cuenta con el permiso para visualizar el documento");
+                }
             }
         });
 
@@ -371,13 +375,15 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     holder.relativeLayoutDescargaPdf.setVisibility(View.GONE);
                 }
 
-                if(respuestaData.getSincronizado() == 1){
+                /*if(respuestaData.getSincronizado() == 1){
                     holder.imageViewSincronizadoFlag.setVisibility(View.VISIBLE);
                 }else{
                     holder.imageViewSincronizadoFlag.setVisibility(View.GONE);
-                }
+                }//*/
             }
         }
+
+        holder.imageViewSeleccionado.setVisibility(View.GONE);
 
         holder.imageViewSeleccionado.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -385,9 +391,15 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 if(pregunta.isSeleccionado()){
                     pregunta.setSeleccionado(false);
                     rubroData.setSeleccionado(false);
+                    Utils.updatePregunta(activity,String.valueOf(pregunta.getIdRevision()),
+                            String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),
+                            String.valueOf(pregunta.getIdRubro()),0);//*/
                     adapterExpandableChecklist.notifyDataSetChanged();
                 }else{
                     pregunta.setSeleccionado(true);
+                    Utils.updatePregunta(activity,String.valueOf(pregunta.getIdRevision()),
+                            String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),
+                            String.valueOf(pregunta.getIdRubro()),1);//*/
                 }
                 notifyDataSetChanged();
             }
@@ -787,42 +799,48 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                             evidencia.setIdEtapa(usuario.getIdrol() + 1);
                         }
                         //try {
-                            ContentValues contentValues = new ContentValues();
-                            //contentValues.put("ID_ETAPA", getEtapaValidado(evidencia.getIdEtapa()));
-                            if(usuario.getIdrol() == 1) {
-                                contentValues.put("ID_ETAPA", 2);
-                                //}else if(usuario.getIdrol() == 2) {
-                            }else {
-                                //contentValues.put("ID_ETAPA", 3);
-                                contentValues.put("ID_ETAPA", usuario.getIdrol() + 1);
-                            }
-                            contentValues.put("ID_ESTATUS",1);
-                            new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
-                                    "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
-                                            "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
-                                    new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
-                                            String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
-                                            String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
-                                            String.valueOf(evidencia.getIdBarco())});
+                        ContentValues contentValues = new ContentValues();
+                        //contentValues.put("ID_ETAPA", getEtapaValidado(evidencia.getIdEtapa()));
+                        if(usuario.getIdrol() == 1) {
+                            contentValues.put("ID_ETAPA", 2);
+                            //}else if(usuario.getIdrol() == 2) {
+                        }else {
+                            //contentValues.put("ID_ETAPA", 3);
+                            contentValues.put("ID_ETAPA", usuario.getIdrol() + 1);
+                        }
+                        contentValues.put("ID_ESTATUS",1);
+                        new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
+                                "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                                        "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
+                                new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
+                                        String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
+                                        String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
+                                        String.valueOf(evidencia.getIdBarco())});
 
-                            Utils.message(activity,"Validada");
-                            crearHistorico(evidencia,usuario,"Validada por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
+                        Utils.message(activity,"Validada");
+                        crearHistorico(evidencia,usuario,"Validada por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
 
-                            if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
-                                listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
-                                updateRespuesta(evidencia,2);
-                                listPreguntas.get(numeroPregunta).setCumple(true);
-                            }else{
-                                listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
-                                updateRespuesta(evidencia,3);
-                                listPreguntas.get(numeroPregunta).setCumple(false);
-                            }
-                            adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
-                            buttonCumple.setBackground(drawableCumpleVerde);
-                            buttonNoCumple.setBackground(drawableNoCumpleGris);
-                            alertDialog.dismiss();
-                            notifyDataSetChanged();
-                            break;
+                        listPreguntas.get(numeroPregunta).setSeleccionado(true);
+                        Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
+                        Utils.updatePregunta(activity,String.valueOf(preguntaTemp.getIdRevision()),
+                                String.valueOf(preguntaTemp.getIdChecklist()),String.valueOf(preguntaTemp.getIdPregunta()),
+                                String.valueOf(preguntaTemp.getIdRubro()),1);//*/
+
+                        if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
+                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
+                            updateRespuesta(evidencia,2);
+                            listPreguntas.get(numeroPregunta).setCumple(true);
+                        }else{
+                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
+                            updateRespuesta(evidencia,3);
+                            listPreguntas.get(numeroPregunta).setCumple(false);
+                        }
+                        adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
+                        buttonCumple.setBackground(drawableCumpleVerde);
+                        buttonNoCumple.setBackground(drawableNoCumpleGris);
+                        alertDialog.dismiss();
+                        notifyDataSetChanged();
+                        break;
 
                         /*}catch (NullPointerException e){
                             e.printStackTrace();
@@ -967,7 +985,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                 }
                             }//*/
                             //********************************************************************
-
+                            listPreguntas.get(numeroPregunta).setSeleccionado(true);
+                            Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
+                            Utils.updatePregunta(activity,String.valueOf(preguntaTemp.getIdRevision()),
+                                    String.valueOf(preguntaTemp.getIdChecklist()),String.valueOf(preguntaTemp.getIdPregunta()),
+                                    String.valueOf(preguntaTemp.getIdRubro()),1);//*/
                             adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
                             alertDialogMotivo.dismiss();
 
@@ -1022,45 +1044,32 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             @Override
             public void onClick(View view) {
                 //try {
-                    Evidencia evidenciaTemp = null;
-                    for (Evidencia evidencia : listPreguntas.get(numeroPregunta).getListEvidencias()) {
-                        if (evidencia.getIdEvidencia().equals(identificador)) {
-                            evidenciaTemp = evidencia;
-                            if(usuario.getIdrol()==1) {
-                                //si esta rechazada la evidencia
-                                if(evidencia.getIdEstatus() == 3){
-                                    //borrado lógico
-                                    evidencia.setIdEstatus(2);
-                                    evidencia.setIdEtapa(usuario.getIdrol());
-                                    ContentValues contentValues = new ContentValues();
-                                    contentValues.put("ID_ETAPA",usuario.getIdrol());
-                                    contentValues.put("ID_ESTATUS",2);
-                                    String base64 = null;
-                                    contentValues.put("CONTENIDO",base64);
+                Evidencia evidenciaTemp = null;
+                for (Evidencia evidencia : listPreguntas.get(numeroPregunta).getListEvidencias()) {
+                    if (evidencia.getIdEvidencia().equals(identificador)) {
+                        evidenciaTemp = evidencia;
+                        if(usuario.getIdrol()==1) {
+                            //si esta rechazada la evidencia
+                            if(evidencia.getIdEstatus() == 3){
+                                //borrado lógico
+                                evidencia.setIdEstatus(2);
+                                evidencia.setIdEtapa(usuario.getIdrol());
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put("ID_ETAPA",usuario.getIdrol());
+                                contentValues.put("ID_ESTATUS",2);
+                                String base64 = null;
+                                contentValues.put("CONTENIDO",base64);
 
-                                    new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
-                                            "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
-                                                    "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
-                                            new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
-                                                    String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
-                                                    String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
-                                                    String.valueOf(evidencia.getIdBarco())});
+                                new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
+                                        "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                                                "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
+                                        new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
+                                                String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
+                                                String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
+                                                String.valueOf(evidencia.getIdBarco())});
 
-                                    crearHistorico(evidencia,usuario,"Borrado por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
-                                }else{
-                                    //borrado físico
-                                    new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
-                                            "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
-                                            identificador,
-                                            String.valueOf(evidencia.getIdRevision()),
-                                            String.valueOf(evidencia.getIdChecklist()),
-                                            String.valueOf(evidencia.getIdRubro()),
-                                            String.valueOf(evidencia.getIdPregunta()),
-                                            String.valueOf(evidencia.getIdBarco())
-                                    });
-                                }
-                                listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
-                            }else if(usuario.getIdrol()==3) {
+                                crearHistorico(evidencia,usuario,"Borrado por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
+                            }else{
                                 //borrado físico
                                 new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
                                         "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
@@ -1071,33 +1080,46 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                         String.valueOf(evidencia.getIdPregunta()),
                                         String.valueOf(evidencia.getIdBarco())
                                 });
-                                listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
                             }
-                            break;
+                            listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
+                        }else if(usuario.getIdrol()==3) {
+                            //borrado físico
+                            new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
+                                    "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
+                                    identificador,
+                                    String.valueOf(evidencia.getIdRevision()),
+                                    String.valueOf(evidencia.getIdChecklist()),
+                                    String.valueOf(evidencia.getIdRubro()),
+                                    String.valueOf(evidencia.getIdPregunta()),
+                                    String.valueOf(evidencia.getIdBarco())
+                            });
+                            listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
                         }
+                        break;
                     }
-                    LinearLayout linearLayoutParent = (LinearLayout) viewImagen.getParent().getParent();
-                    //linearLayoutParent.removeView(viewImagen.getParent());
-                    Utils.message(activity, "Evidencia borrada");
-                    if (listPreguntas.get(numeroPregunta).getListEvidencias() != null) {
-                        if (listPreguntas.get(numeroPregunta).getListEvidencias().size() != 0) {
-                            if (validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())) {
-                                listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
-                                updateRespuesta(evidenciaTemp,2);
-                                listPreguntas.get(numeroPregunta).setCumple(true);
-                            } else {
-                                listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
-                                updateRespuesta(evidenciaTemp,3);
-                                listPreguntas.get(numeroPregunta).setCumple(false);
-                            }
-                            adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
+                }
+                LinearLayout linearLayoutParent = (LinearLayout) viewImagen.getParent().getParent();
+                //linearLayoutParent.removeView(viewImagen.getParent());
+                Utils.message(activity, "Evidencia borrada");
+
+                listPreguntas.get(numeroPregunta).setSeleccionado(true);
+                Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
+                Utils.updatePregunta(activity,String.valueOf(preguntaTemp.getIdRevision()),
+                        String.valueOf(preguntaTemp.getIdChecklist()),String.valueOf(preguntaTemp.getIdPregunta()),
+                        String.valueOf(preguntaTemp.getIdRubro()),1);//*/
+
+                if (listPreguntas.get(numeroPregunta).getListEvidencias() != null) {
+                    if (listPreguntas.get(numeroPregunta).getListEvidencias().size() != 0) {
+                        if (validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())) {
+                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
+                            updateRespuesta(evidenciaTemp,2);
+                            listPreguntas.get(numeroPregunta).setCumple(true);
                         } else {
-                            listPreguntas.get(numeroPregunta).getRadioGroup().clearCheck();
-                            //updateRespuesta(evidenciaTemp,3);
-                            updateRespuesta(evidenciaTemp,null);
+                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
+                            updateRespuesta(evidenciaTemp,3);
                             listPreguntas.get(numeroPregunta).setCumple(false);
-                            adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
                         }
+                        adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
                     } else {
                         listPreguntas.get(numeroPregunta).getRadioGroup().clearCheck();
                         //updateRespuesta(evidenciaTemp,3);
@@ -1105,8 +1127,15 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         listPreguntas.get(numeroPregunta).setCumple(false);
                         adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
                     }
-                    notifyDataSetChanged();
-                    alertDialog.dismiss();
+                } else {
+                    listPreguntas.get(numeroPregunta).getRadioGroup().clearCheck();
+                    //updateRespuesta(evidenciaTemp,3);
+                    updateRespuesta(evidenciaTemp,null);
+                    listPreguntas.get(numeroPregunta).setCumple(false);
+                    adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
+                }
+                notifyDataSetChanged();
+                alertDialog.dismiss();
                 /*}catch (NullPointerException e){
                     e.printStackTrace();
                     Utils.message(activity,"Error al borrar evidencia: " + e.getMessage());
@@ -1166,35 +1195,35 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 contentValues.put("ID_ETAPA",1);
                 contentValues.put("ID_ESTATUS",3);
                 //try {
-                    new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
-                            "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
-                                    "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
-                            new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
-                                    String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
-                                    String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
-                                    String.valueOf(evidencia.getIdBarco())});
+                new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
+                        "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                                "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
+                        new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
+                                String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
+                                String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
+                                String.valueOf(evidencia.getIdBarco())});
 
-                    Utils.message(activity,"Rechazada");
-                    crearHistorico(evidencia,usuario,"Rechazado por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre() + "\nMotivo: " +
-                            motivoRechazo);
+                Utils.message(activity,"Rechazada");
+                crearHistorico(evidencia,usuario,"Rechazado por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre() + "\nMotivo: " +
+                        motivoRechazo);
 
-                    if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
-                        listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
-                        updateRespuesta(evidencia,2);
-                        listPreguntas.get(numeroPregunta).setCumple(true);
-                    }else{
-                        listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
-                        updateRespuesta(evidencia,3);
-                        listPreguntas.get(numeroPregunta).setCumple(false);
-                    }
-                    adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
-                    buttonCumple.setBackground(drawableCumpleGris);
-                    buttonNoCumple.setBackground(drawableNoCumpleRojo);
-                    alertDialog.dismiss();
-                    //notifyDataSetChanged();
-                    //adapterRecycleViewPreguntas.notifyDataSetChanged();
-                    //evidenciaTemp = evidencia;
-                    break;
+                if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
+                    listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
+                    updateRespuesta(evidencia,2);
+                    listPreguntas.get(numeroPregunta).setCumple(true);
+                }else{
+                    listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
+                    updateRespuesta(evidencia,3);
+                    listPreguntas.get(numeroPregunta).setCumple(false);
+                }
+                adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
+                buttonCumple.setBackground(drawableCumpleGris);
+                buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                alertDialog.dismiss();
+                //notifyDataSetChanged();
+                //adapterRecycleViewPreguntas.notifyDataSetChanged();
+                //evidenciaTemp = evidencia;
+                break;
                 /*}catch (NullPointerException e){
                     e.printStackTrace();
                     Utils.message(activity,"Error al rechazar evidencia: " + e.getMessage());
@@ -1416,31 +1445,31 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
         //try {
 
-            SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
+        SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
 
-            ApiInterface mApiService = Utils.getInterfaceService();
-            Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(sharedPrefs.getString(Constants.SP_JWT_TAG, ""), idPregunta);
-            mService.enqueue(new Callback<ResponseDescargaPdf>() {
-                @Override
-                public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {
-                    progressDialog.dismiss();
-                    if(response != null) {
-                        if (response.body() != null) {
-                            if (response.body().getDescargaPDF().getExito()) {
-                                //try {
-                                if (response.body().getDescargaPDF().getDocumentoPDF() != null) {
-                                    String base64 = response.body().getDescargaPDF().getDocumentoPDF().getBase64();
-                                    if (base64 != null) {
-                                        if (!base64.equals("")) {
-                                            String nombre = response.body().getDescargaPDF().getDocumentoPDF().getNombre();
-                                            LayoutInflater inflater = LayoutInflater.from(activity);
-                                            View dialogLayout = null;
-                                            dialogLayout = inflater.inflate(R.layout.mostrar_descarga_pdf_layout, null, false);
+        ApiInterface mApiService = Utils.getInterfaceService();
+        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(sharedPrefs.getString(Constants.SP_JWT_TAG, ""), idPregunta);
+        mService.enqueue(new Callback<ResponseDescargaPdf>() {
+            @Override
+            public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {
+                progressDialog.dismiss();
+                if(response != null) {
+                    if (response.body() != null) {
+                        if (response.body().getDescargaPDF().getExito()) {
+                            //try {
+                            if (response.body().getDescargaPDF().getDocumentoPDF() != null) {
+                                String base64 = response.body().getDescargaPDF().getDocumentoPDF().getBase64();
+                                if (base64 != null) {
+                                    if (!base64.equals("")) {
+                                        String nombre = response.body().getDescargaPDF().getDocumentoPDF().getNombre();
+                                        LayoutInflater inflater = LayoutInflater.from(activity);
+                                        View dialogLayout = null;
+                                        dialogLayout = inflater.inflate(R.layout.mostrar_descarga_pdf_layout, null, false);
 
-                                            DisplayMetrics displayMetrics = new DisplayMetrics();
-                                            activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                                            int height = displayMetrics.heightPixels;
-                                            int width = displayMetrics.widthPixels;
+                                        DisplayMetrics displayMetrics = new DisplayMetrics();
+                                        activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                                        int height = displayMetrics.heightPixels;
+                                        int width = displayMetrics.widthPixels;
 
                                             /*LinearLayout layout = dialogLayout.findViewById(R.id.linearLayoutMostrarDescargaPdf);
                                             ViewGroup.LayoutParams params = layout.getLayoutParams();
@@ -1448,67 +1477,67 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                             params.width = width - 20;
                                             layout.setLayoutParams(params);//*/
 
-                                            PDFView pdfView = dialogLayout.findViewById(R.id.pdfViewDocumento);
-                                            byte[] pdf = Utils.base64ToFile(base64);
-                                            pdfView.fromBytes(pdf).load();
+                                        PDFView pdfView = dialogLayout.findViewById(R.id.pdfViewDocumento);
+                                        byte[] pdf = Utils.base64ToFile(base64);
+                                        pdfView.fromBytes(pdf).load();
 
-                                            TextView textViewNombreDocumento = (TextView) dialogLayout.findViewById(R.id.textViewNombreDocumento);
-                                            ImageView imageViewCerrarDialog = dialogLayout.findViewById(R.id.imageViewCloseDialog);
+                                        TextView textViewNombreDocumento = (TextView) dialogLayout.findViewById(R.id.textViewNombreDocumento);
+                                        ImageView imageViewCerrarDialog = dialogLayout.findViewById(R.id.imageViewCloseDialog);
 
-                                            textViewNombreDocumento.setText(nombre);
+                                        textViewNombreDocumento.setText(nombre);
 
-                                            final AlertDialog alertDialog = new AlertDialog.Builder(activity)
-                                                    .setView(dialogLayout)
-                                                    //.setPositiveButton("Cerrar", null)
-                                                    .create();
+                                        final AlertDialog alertDialog = new AlertDialog.Builder(activity)
+                                                .setView(dialogLayout)
+                                                //.setPositiveButton("Cerrar", null)
+                                                .create();
 
-                                            alertDialog.show();
+                                        alertDialog.show();
 
-                                            imageViewCerrarDialog.setOnClickListener(new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View view) {
-                                                    alertDialog.dismiss();
-                                                }
-                                            });
-                                        } else {
-                                            Utils.message(activity, "No se pudo descargar el informe");
-                                        }
+                                        imageViewCerrarDialog.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                alertDialog.dismiss();
+                                            }
+                                        });
                                     } else {
                                         Utils.message(activity, "No se pudo descargar el informe");
                                     }
                                 } else {
                                     Utils.message(activity, "No se pudo descargar el informe");
                                 }
+                            } else {
+                                Utils.message(activity, "No se pudo descargar el informe");
+                            }
                             /*} catch (NullPointerException e) {
                                 Utils.message(activity, "No se pudo descargar el informe: " + e.getMessage());
                                 e.printStackTrace();
                             }//*/
-                            } else {
-                                Utils.message(activity, response.body().getDescargaPDF().getError());
+                        } else {
+                            Utils.message(activity, response.body().getDescargaPDF().getError());
+                        }
+                    } else {
+                        if (response.errorBody() != null) {
+                            try {
+                                Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Utils.message(activity, "Error al descargar informe: " + e.getMessage());
                             }
                         } else {
-                            if (response.errorBody() != null) {
-                                try {
-                                    Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    Utils.message(activity, "Error al descargar informe: " + e.getMessage());
-                                }
-                            } else {
-                                Utils.message(activity, "Error al descargar informe");
-                            }
+                            Utils.message(activity, "Error al descargar informe");
                         }
-                    }else{
-                        Utils.message(activity, "Error al descargar informe");
                     }
+                }else{
+                    Utils.message(activity, "Error al descargar informe");
                 }
+            }
 
-                @Override
-                public void onFailure(Call<ResponseDescargaPdf> call, Throwable t) {
-                    progressDialog.dismiss();
-                    Utils.message(activity, Constants.MSG_ERR_CONN);
-                }
-            });
+            @Override
+            public void onFailure(Call<ResponseDescargaPdf> call, Throwable t) {
+                progressDialog.dismiss();
+                Utils.message(activity, Constants.MSG_ERR_CONN);
+            }
+        });
         /*}catch (NullPointerException e){
             progressDialog.dismiss();
             e.printStackTrace();

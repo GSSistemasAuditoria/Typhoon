@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.KeyguardManager;
 import android.app.ProgressDialog;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -40,8 +41,10 @@ import com.bumptech.glide.Glide;
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.carteraFolios.CarteraFolios;
 import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.database.AnexosDBMethods;
 import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.CatalogosDBMethods;
+import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
@@ -56,7 +59,9 @@ import com.elektra.typhoon.objetos.response.EtapaEvidencia;
 import com.elektra.typhoon.objetos.response.EtapaSubAnexo;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.LatLng;
+import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
+import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.RolUsuario;
 import com.elektra.typhoon.objetos.response.TipoRespuesta;
 import com.elektra.typhoon.service.ApiInterface;
@@ -347,7 +352,7 @@ public class Utils {
 
         final Encryption encryption = new Encryption();
 
-        //try {
+        try {
             ApiInterface mApiService = getInterfaceService();
             SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
             Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(sharedPreferences.getString(Constants.SP_JWT_TAG, ""));
@@ -466,10 +471,13 @@ public class Utils {
                     Utils.message(activity, Constants.MSG_ERR_CONN);
                 }
             });
-        /*}catch (NullPointerException e){
+        }catch (Exception e){
             e.printStackTrace();
             progressDialog.dismiss();
             Utils.message(activity, "Error al descargar catálogos: " + e.getMessage());
+        }catch (Error e){
+            progressDialog.dismiss();
+            Utils.message(activity, "Error al descargar catálogos: ");
         }//*/
     }
 
@@ -1027,6 +1035,32 @@ public class Utils {
             }
         }else{
             message(context,"No se pudo validar la fecha de revisión");
+        }
+        return false;
+    }
+
+    public static void updatePregunta(Activity activity,String idRevision,String idChecklist,String idPregunta,String idRubro,int seleccionado){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("SELECCIONADO",seleccionado);
+        new ChecklistDBMethods(activity).updatePregunta(contentValues,"ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_PREGUNTA = ? AND ID_RUBRO = ?",
+                new String[]{idRevision,idChecklist,idPregunta,idRubro});
+    }
+
+    public static void updateAnexo(Activity activity,String idRevision,String idSubanexo,int seleccionado){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("SELECCIONADO",seleccionado);
+        new AnexosDBMethods(activity).updateAnexo(contentValues,"ID_REVISION = ? AND ID_SUBANEXO = ?",
+                new String[]{idRevision,idSubanexo});
+    }
+
+    public static boolean respuestaIsTierra(List<Pregunta> listPreguntas, RespuestaData respuestaData){
+        for(Pregunta pregunta:listPreguntas){
+            if(respuestaData.getIdRevision() == pregunta.getIdRevision() && respuestaData.getIdChecklist() == pregunta.getIdChecklist()
+                    && respuestaData.getIdPregunta() == pregunta.getIdPregunta()){
+                if(pregunta.isTierra()){
+                    return true;
+                }
+            }
         }
         return false;
     }

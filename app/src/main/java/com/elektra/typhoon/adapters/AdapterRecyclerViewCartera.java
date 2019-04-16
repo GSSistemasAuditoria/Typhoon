@@ -320,4 +320,8 @@ public class AdapterRecyclerViewCartera extends RecyclerView.Adapter<RecyclerVie
             }
         });
     }
+
+    private void getSincronizacionData(){
+
+    }
 }

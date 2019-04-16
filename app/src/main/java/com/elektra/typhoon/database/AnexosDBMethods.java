@@ -128,6 +128,7 @@ public class AnexosDBMethods {
             "DOCUMENTO TEXT, " +
             "NOMBRE TEXT, " +
             "SUBANEXO_FCH_SINC DATE, " +
+            "SELECCIONADO INTEGER, " +
             "PRIMARY KEY (ID_REVISION,ID_SUBANEXO))";
 
     public void createAnexo(Anexo anexo){
@@ -141,6 +142,7 @@ public class AnexosDBMethods {
         values.put("DOCUMENTO",anexo.getBase64());
         values.put("NOMBRE",anexo.getNombreArchivo());
         values.put("SUBANEXO_FCH_SINC",anexo.getFechaSinc());
+        values.put("SELECCIONADO",0);
         db.insertWithOnConflict(TP_TRAN_ANEXOS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -162,6 +164,11 @@ public class AnexosDBMethods {
                     anexo.setBase64(cursor.getString(5));
                     anexo.setNombreArchivo(cursor.getString(6));
                     anexo.setFechaSinc(cursor.getString(7));
+                    if(cursor.getInt(8) == 0){
+                        anexo.setSeleccionado(false);
+                    }else{
+                        anexo.setSeleccionado(true);
+                    }
                     listAnexos.add(anexo);
                 }while(cursor.moveToNext());
             }
