@@ -46,6 +46,10 @@ public class CatalogosData {
     @Expose
     private List<EtapaSubAnexo> listEtapasSubAnexo;
 
+    @SerializedName("CatalogoAniosRevision")
+    @Expose
+    private CatalogoAnios catalogoAnios;
+
     public List<Barco> getListBarcos() {
         return listBarcos;
     }
@@ -108,5 +112,13 @@ public class CatalogosData {
 
     public void setListEtapasSubAnexo(List<EtapaSubAnexo> listEtapasSubAnexo) {
         this.listEtapasSubAnexo = listEtapasSubAnexo;
+    }
+
+    public CatalogoAnios getCatalogoAnios() {
+        return catalogoAnios;
+    }
+
+    public void setCatalogoAnios(CatalogoAnios catalogoAnios) {
+        this.catalogoAnios = catalogoAnios;
     }
 }

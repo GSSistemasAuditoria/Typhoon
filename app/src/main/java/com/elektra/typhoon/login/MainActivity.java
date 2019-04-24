@@ -521,6 +521,14 @@ public class MainActivity extends AppCompatActivity {
                                         catalogosDBMethods.createEtapaSubAnexo(etapaSubAnexo);
                                     }
                                 }
+                                if (response.body().getCatalogos().getCatalogosData().getCatalogoAnios() != null) {
+                                    if (response.body().getCatalogos().getCatalogosData().getCatalogoAnios().getAnios() != null) {
+                                        catalogosDBMethods.deleteAnios();
+                                        for (Integer integer : response.body().getCatalogos().getCatalogosData().getCatalogoAnios().getAnios()) {
+                                            catalogosDBMethods.createAnio(integer);
+                                        }
+                                    }
+                                }
                                 progressDialog.dismiss();
                                 Utils.message(MainActivity.this, "Catálogos descargados");
                                 if (opcion == 1) {

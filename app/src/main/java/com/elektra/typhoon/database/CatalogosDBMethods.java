@@ -37,6 +37,7 @@ public class CatalogosDBMethods {
     public static final String TP_CAT_ESTATUS_REVISION = "TP_CAT_ESTATUS_REVISION";
     public static final String TP_CAT_ROLES_USUARIO = "TP_CAT_ROLES_USUARIO";
     public static final String TP_CAT_ETAPA_SUBANEXO = "TP_CAT_ETAPA_SUBANEXO";
+    public static final String TP_CAT_ANIOS = "TP_CAT_ANIOS";
 
     public static String QUERY_CREATE_TABLE_TP_CAT_CL_ESTATUS_EVIDENCIA = "CREATE TABLE " + TP_CAT_CL_ESTATUS_EVIDENCIA + " (" +
             "ID_ESTATUS INTEGER PRIMARY KEY, " +
@@ -315,6 +316,43 @@ public class CatalogosDBMethods {
     public void deleteEtapaSubAnexo(){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         db.execSQL("delete from "+ TP_CAT_ETAPA_SUBANEXO);
+        db.close();
+    }
+
+    //**********************************************************************************************
+
+    public static String QUERY_CREATE_TABLE_TP_CAT_ANIOS = "CREATE TABLE " + TP_CAT_ANIOS + " (" +
+            "ID_ANIO INTEGER PRIMARY KEY)";
+
+    public void createAnio(int anio){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        ContentValues values = new ContentValues();
+        values.put("ID_ANIO",anio);
+        db.insertWithOnConflict(TP_CAT_ANIOS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        db.close();
+    }
+
+    public List<Integer> readAnios(){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        List<Integer> listAnios = new ArrayList<>();
+        String[] args = null;
+        String query = "SELECT ID_ANIO FROM " + TP_CAT_ANIOS;
+        Cursor cursor = db.rawQuery(query,args);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    listAnios.add(cursor.getInt(0));
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return listAnios;
+    }
+
+    public void deleteAnios(){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        db.execSQL("delete from "+ TP_CAT_ANIOS);
         db.close();
     }
 }

@@ -129,11 +129,16 @@ public class CarteraFolios extends AppCompatActivity {
         List<ItemCatalogo> listItemsAnio = new ArrayList<>();
         List<ItemCatalogo> listItemsMes = new ArrayList<>();
 
+        List<Integer> listAnios = new CatalogosDBMethods(this).readAnios();
+
         listItemsAnio.add(new ItemCatalogo(-1,"Año"));
-        listItemsAnio.add(new ItemCatalogo(2019,"2019"));
-        listItemsAnio.add(new ItemCatalogo(2018,"2018"));
-        listItemsAnio.add(new ItemCatalogo(2017,"2017"));
-        listItemsAnio.add(new ItemCatalogo(2016,"2016"));
+        for(Integer integer:listAnios){
+            listItemsAnio.add(new ItemCatalogo(integer,String.valueOf(integer)));
+        }
+        //listItemsAnio.add(new ItemCatalogo(2019,"2019"));
+        //listItemsAnio.add(new ItemCatalogo(2018,"2018"));
+        //listItemsAnio.add(new ItemCatalogo(2017,"2017"));
+        //listItemsAnio.add(new ItemCatalogo(2016,"2016"));
 
         listItemsMes.add(new ItemCatalogo(-1,"Mes"));
         listItemsMes.add(new ItemCatalogo(1,"1"));
@@ -436,6 +441,14 @@ public class CarteraFolios extends AppCompatActivity {
                                 catalogosDBMethods.deleteEtapaSubAnexo();
                                 for (EtapaSubAnexo etapaSubAnexo: response.body().getCatalogos().getCatalogosData().getListEtapasSubAnexo()) {
                                     catalogosDBMethods.createEtapaSubAnexo(etapaSubAnexo);
+                                }
+                            }
+                            if (response.body().getCatalogos().getCatalogosData().getCatalogoAnios() != null) {
+                                if (response.body().getCatalogos().getCatalogosData().getCatalogoAnios().getAnios() != null) {
+                                    catalogosDBMethods.deleteAnios();
+                                    for (Integer integer : response.body().getCatalogos().getCatalogosData().getCatalogoAnios().getAnios()) {
+                                        catalogosDBMethods.createAnio(integer);
+                                    }
                                 }
                             }
                             progressDialog.dismiss();
