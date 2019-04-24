@@ -52,6 +52,11 @@
             android:label=""
             android:theme="@style/AppThemeNoBar">
         </activity>
+        <activity android:name=".notificaciones.TyphoonNotificationActivity"
+            android:screenOrientation="portrait"
+            android:label=""
+            android:theme="@style/ThemeTransparent">
+        </activity>
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/AppTheme"/>
 
@@ -64,6 +69,18 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+
+        <service android:name=".firebase.NotificationService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+
+        <service android:name=".firebase.NotificationIdService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
 
     </application>
 

@@ -40,7 +40,8 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:src="@mipmap/ic_descargar_gris"
-            android:layout_gravity="center_vertical"/>
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="5dp"/>
 
         <ImageView
             android:id="@+id/imageViewSelect"

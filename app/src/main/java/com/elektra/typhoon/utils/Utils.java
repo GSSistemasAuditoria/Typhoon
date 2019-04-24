@@ -1046,6 +1046,13 @@ public class Utils {
                 new String[]{idRevision,idChecklist,idPregunta,idRubro});
     }
 
+    public static void updatePregunta(Activity activity,String idRevision,String idChecklist,String idPregunta,String idRubro,String idBarco,int seleccionado){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("SINCRONIZADO",seleccionado);
+        new ChecklistDBMethods(activity).updateRespuesta(contentValues,"ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_PREGUNTA = ? AND ID_RUBRO = ? AND ID_BARCO = ?",
+                new String[]{idRevision,idChecklist,idPregunta,idRubro,idBarco});
+    }
+
     public static void updateAnexo(Activity activity,String idRevision,String idSubanexo,int seleccionado){
         ContentValues contentValues = new ContentValues();
         contentValues.put("SELECCIONADO",seleccionado);
@@ -1059,6 +1066,23 @@ public class Utils {
                     && respuestaData.getIdPregunta() == pregunta.getIdPregunta()){
                 if(pregunta.isTierra()){
                     return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isPreguntaSeleccionada(List<RespuestaData> listRespuestas,Pregunta pregunta){
+        for(RespuestaData respuestaData:listRespuestas){
+            if(respuestaData.getIdRevision() == pregunta.getIdRevision() &&
+                    respuestaData.getIdChecklist() == pregunta.getIdChecklist() &&
+                    respuestaData.getIdRubro() == pregunta.getIdRubro() &&
+                    respuestaData.getIdPregunta() == pregunta.getIdPregunta() &&
+                    respuestaData.getIdBarco() == pregunta.getIdBarco()){
+                if(respuestaData.getSincronizado() == 1){
+                    return true;
+                }else{
+                    return false;
                 }
             }
         }

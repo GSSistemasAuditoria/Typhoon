@@ -118,7 +118,7 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
             imageView.setImageResource(R.mipmap.ic_group_open);
         }
 
-        imageViewSelect.setVisibility(View.GONE);
+        imageViewSelect.setEnabled(false);
 
         imageViewSelect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -181,8 +181,8 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
         int total = 0;
         for(Anexo anexo:listAnexosHeader){
             for(Anexo subanexo:anexo.getListSubAnexos()){
-                if(subanexo.getIdEtapa() == -1 || subanexo.getIdEtapa() == usuario.getIdrol()-1){
-                    //noAplica++;
+                if(subanexo.getIdEtapa() == -1){
+                    noAplica++;
                 }else{
                     if(subanexo.getIdEtapa() >= usuario.getIdrol()){
                         aplica++;
@@ -192,7 +192,7 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
             }
         }
 
-        noAplica = total - aplica;
+        //noAplica = total - aplica;
 
         textViewCumplen.setText(String.valueOf(aplica));
         textViewNoCumplen.setText(String.valueOf(noAplica));

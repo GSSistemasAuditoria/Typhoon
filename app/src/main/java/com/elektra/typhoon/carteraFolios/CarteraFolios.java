@@ -51,6 +51,7 @@ import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.response.Barco;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
 import com.elektra.typhoon.objetos.response.Configuracion;
+import com.elektra.typhoon.objetos.response.DatosPorValidarResponse;
 import com.elektra.typhoon.objetos.response.EstatusEvidencia;
 import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.EtapaEvidencia;
@@ -252,6 +253,8 @@ public class CarteraFolios extends AppCompatActivity {
 
         //boolean enZona = Utils.isPointInPolygon(new LatLng(19.30511913410018,-99.20381013535274));//fuera
 
+        //obtenerDatosPorValidar(5,1);
+
     }
 
     @Override
@@ -323,50 +326,6 @@ public class CarteraFolios extends AppCompatActivity {
         });
     }
 
-    /*private void nuevaInstalacionDialog(final Activity activity){
-        LayoutInflater li = LayoutInflater.from(activity);
-        LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_nueva_instalacion_layout, null);
-
-        TextView textViewCancelar = (TextView) layoutDialog.findViewById(R.id.buttonCancelar);
-        TextView textViewAceptar = (TextView) layoutDialog.findViewById(R.id.buttonAceptar);
-        LinearLayout linearLayoutCancelar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCancelar);
-        LinearLayout linearLayoutAceptar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutAceptar);
-
-        final AlertDialog dialog = new AlertDialog.Builder(activity)
-                .setView(layoutDialog)
-                .show();
-
-        textViewCancelar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
-
-        linearLayoutCancelar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
-
-        textViewAceptar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new NuevaInstalacion(CarteraFolios.this).execute();
-                dialog.dismiss();
-            }
-        });
-
-        linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new NuevaInstalacion(CarteraFolios.this).execute();
-                dialog.dismiss();
-            }
-        });
-    }//*/
-
     private void setRadioGroup(int idBarco,int idRevision,int idChecklist){
         ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(getApplicationContext());
         List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
@@ -401,132 +360,135 @@ public class CarteraFolios extends AppCompatActivity {
 
         final Encryption encryption = new Encryption();
 
-        try {
-            ApiInterface mApiService = Utils.getInterfaceService();
-            SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-            Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(sharedPreferences.getString(Constants.SP_JWT_TAG, ""));
-            mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
-                @Override
-                public void onResponse(Call<CatalogosTyphoonResponse> call, Response<CatalogosTyphoonResponse> response) {
-                    if(response != null) {
-                        if (response.body() != null) {
-                            if (response.body().getCatalogos().getExito()) {
-                                //try {
-                                BarcoDBMethods barcoDBMethods = new BarcoDBMethods(CarteraFolios.this);
-                                CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(CarteraFolios.this);
-                                if (response.body().getCatalogos().getCatalogosData().getListBarcos() != null) {
-                                    barcoDBMethods.deleteBarco();
-                                    for (Barco catalogoBarco : response.body().getCatalogos().getCatalogosData().getListBarcos()) {
-                                        barcoDBMethods.createBarco(catalogoBarco);
+        ApiInterface mApiService = Utils.getInterfaceService();
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(sharedPreferences.getString(Constants.SP_JWT_TAG, ""));
+        mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
+            @Override
+            public void onResponse(Call<CatalogosTyphoonResponse> call, Response<CatalogosTyphoonResponse> response) {
+                if(response != null) {
+                    if (response.body() != null) {
+                        if (response.body().getCatalogos().getExito()) {
+                            //try {
+                            BarcoDBMethods barcoDBMethods = new BarcoDBMethods(CarteraFolios.this);
+                            CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(CarteraFolios.this);
+                            if (response.body().getCatalogos().getCatalogosData().getListBarcos() != null) {
+                                barcoDBMethods.deleteBarco();
+                                for (Barco catalogoBarco : response.body().getCatalogos().getCatalogosData().getListBarcos()) {
+                                    barcoDBMethods.createBarco(catalogoBarco);
+                                }
+                            }
+                            if (response.body().getCatalogos().getCatalogosData().getListEstatusEvidencia() != null) {
+                                catalogosDBMethods.deleteEstatusEvidencia();
+                                for (EstatusEvidencia estatusEvidencia : response.body().getCatalogos().getCatalogosData().getListEstatusEvidencia()) {
+                                    catalogosDBMethods.createEstatusEvidencia(estatusEvidencia);
+                                }
+                            }
+                            if (response.body().getCatalogos().getCatalogosData().getListEtapasEvidencia() != null) {
+                                catalogosDBMethods.deleteEtapaEvidencia();
+                                for (EtapaEvidencia etapaEvidencia : response.body().getCatalogos().getCatalogosData().getListEtapasEvidencia()) {
+                                    catalogosDBMethods.createEtapaEvidencia(etapaEvidencia);
+                                }
+                            }
+                            if (response.body().getCatalogos().getCatalogosData().getListTiposRespuesta() != null) {
+                                catalogosDBMethods.deleteTipoRespuesta();
+                                for (TipoRespuesta tipoRespuesta : response.body().getCatalogos().getCatalogosData().getListTiposRespuesta()) {
+                                    catalogosDBMethods.createTipoRespuesta(tipoRespuesta);
+                                }
+                            }
+                            if (response.body().getCatalogos().getCatalogosData().getListEstatusRevision() != null) {
+                                catalogosDBMethods.deleteEstatusRevision();
+                                for (EstatusRevision estatusRevision : response.body().getCatalogos().getCatalogosData().getListEstatusRevision()) {
+                                    catalogosDBMethods.createEstatusRevision(estatusRevision);
+                                }
+                            }
+                            if (response.body().getCatalogos().getCatalogosData().getListRolesUsuario() != null) {
+                                catalogosDBMethods.deleteRolesUsuario();
+                                for (RolUsuario rolUsuario : response.body().getCatalogos().getCatalogosData().getListRolesUsuario()) {
+                                    catalogosDBMethods.createRolUsuario(rolUsuario);
+                                }
+                            }
+                            if (response.body().getCatalogos().getCatalogosData().getListConfiguracion() != null) {
+                                //catalogosDBMethods.deleteRolesUsuario();
+                                SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+                                SharedPreferences.Editor ed;
+                                ed = sharedPrefs.edit();
+                                for (Configuracion configuracion : response.body().getCatalogos().getCatalogosData().getListConfiguracion()) {
+                                    if (configuracion.getConfiguracion().equals("LimiteEvidencias")) {
+                                        ed.putString(Constants.SP_LIMITE_EVIDENCIAS, encryption.encryptAES(configuracion.getArgumento()));
+                                        ed.apply();
+                                    }
+                                    if (configuracion.getConfiguracion().equals("Gps")) {
+                                        ed.putString(Constants.SP_GPS_FLAG, encryption.encryptAES(configuracion.getArgumento()));
+                                        ed.apply();
+                                    }
+                                    if (configuracion.getConfiguracion().equals("GpsConfig")) {
+                                        ed.putString(Constants.SP_GPS_GEOCERCA, encryption.encryptAES(configuracion.getArgumento()));
+                                        ed.apply();
+                                    }
+                                    if (configuracion.getConfiguracion().equals("ValidaFechaEvidencias")) {
+                                        ed.putString(Constants.SP_VALIDA_FECHA, encryption.encryptAES(configuracion.getArgumento()));
+                                        ed.apply();
                                     }
                                 }
-                                if (response.body().getCatalogos().getCatalogosData().getListEstatusEvidencia() != null) {
-                                    catalogosDBMethods.deleteEstatusEvidencia();
-                                    for (EstatusEvidencia estatusEvidencia : response.body().getCatalogos().getCatalogosData().getListEstatusEvidencia()) {
-                                        catalogosDBMethods.createEstatusEvidencia(estatusEvidencia);
-                                    }
+                            }
+                            if (response.body().getCatalogos().getCatalogosData().getListEtapasSubAnexo() != null) {
+                                catalogosDBMethods.deleteEtapaSubAnexo();
+                                for (EtapaSubAnexo etapaSubAnexo: response.body().getCatalogos().getCatalogosData().getListEtapasSubAnexo()) {
+                                    catalogosDBMethods.createEtapaSubAnexo(etapaSubAnexo);
                                 }
-                                if (response.body().getCatalogos().getCatalogosData().getListEtapasEvidencia() != null) {
-                                    catalogosDBMethods.deleteEtapaEvidencia();
-                                    for (EtapaEvidencia etapaEvidencia : response.body().getCatalogos().getCatalogosData().getListEtapasEvidencia()) {
-                                        catalogosDBMethods.createEtapaEvidencia(etapaEvidencia);
-                                    }
-                                }
-                                if (response.body().getCatalogos().getCatalogosData().getListTiposRespuesta() != null) {
-                                    catalogosDBMethods.deleteTipoRespuesta();
-                                    for (TipoRespuesta tipoRespuesta : response.body().getCatalogos().getCatalogosData().getListTiposRespuesta()) {
-                                        catalogosDBMethods.createTipoRespuesta(tipoRespuesta);
-                                    }
-                                }
-                                if (response.body().getCatalogos().getCatalogosData().getListEstatusRevision() != null) {
-                                    catalogosDBMethods.deleteEstatusRevision();
-                                    for (EstatusRevision estatusRevision : response.body().getCatalogos().getCatalogosData().getListEstatusRevision()) {
-                                        catalogosDBMethods.createEstatusRevision(estatusRevision);
-                                    }
-                                }
-                                if (response.body().getCatalogos().getCatalogosData().getListRolesUsuario() != null) {
-                                    catalogosDBMethods.deleteRolesUsuario();
-                                    for (RolUsuario rolUsuario : response.body().getCatalogos().getCatalogosData().getListRolesUsuario()) {
-                                        catalogosDBMethods.createRolUsuario(rolUsuario);
-                                    }
-                                }
-                                if (response.body().getCatalogos().getCatalogosData().getListConfiguracion() != null) {
-                                    //catalogosDBMethods.deleteRolesUsuario();
-                                    SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-                                    SharedPreferences.Editor ed;
-                                    ed = sharedPrefs.edit();
-                                    for (Configuracion configuracion : response.body().getCatalogos().getCatalogosData().getListConfiguracion()) {
-                                        if (configuracion.getConfiguracion().equals("LimiteEvidencias")) {
-                                            ed.putString(Constants.SP_LIMITE_EVIDENCIAS, encryption.encryptAES(configuracion.getArgumento()));
-                                            ed.apply();
-                                        }
-                                        if (configuracion.getConfiguracion().equals("Gps")) {
-                                            ed.putString(Constants.SP_GPS_FLAG, encryption.encryptAES(configuracion.getArgumento()));
-                                            ed.apply();
-                                        }
-                                        if (configuracion.getConfiguracion().equals("GpsConfig")) {
-                                            ed.putString(Constants.SP_GPS_GEOCERCA, encryption.encryptAES(configuracion.getArgumento()));
-                                            ed.apply();
-                                        }
-                                        if (configuracion.getConfiguracion().equals("ValidaFechaEvidencias")) {
-                                            ed.putString(Constants.SP_VALIDA_FECHA, encryption.encryptAES(configuracion.getArgumento()));
-                                            ed.apply();
-                                        }
-                                    }
-                                }
-                                if (response.body().getCatalogos().getCatalogosData().getListEtapasSubAnexo() != null) {
-                                    catalogosDBMethods.deleteEtapaSubAnexo();
-                                    for (EtapaSubAnexo etapaSubAnexo: response.body().getCatalogos().getCatalogosData().getListEtapasSubAnexo()) {
-                                        catalogosDBMethods.createEtapaSubAnexo(etapaSubAnexo);
-                                    }
-                                }
-                                progressDialog.dismiss();
-                                Utils.message(CarteraFolios.this, "Catálogos descargados");
-                                if (opcion == 1) {
-                                    Intent intent = new Intent(CarteraFolios.this, CarteraFolios.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
+                            }
+                            progressDialog.dismiss();
+                            Utils.message(CarteraFolios.this, "Catálogos descargados");
+                            if (opcion == 1) {
+                                Intent intent = new Intent(CarteraFolios.this, CarteraFolios.class);
+                                startActivity(intent);
+                                finish();
+                            }
                             /*} catch (NullPointerException e) {
                                 progressDialog.dismiss();
                                 Utils.message(activity, "Error al guardar los catálogos: " + e.getMessage());
                                 e.printStackTrace();
                             }//*/
-                            } else {
-                                progressDialog.dismiss();
-                                Utils.message(CarteraFolios.this, response.body().getCatalogos().getError());
-                            }
                         } else {
                             progressDialog.dismiss();
-                            if (response.errorBody() != null) {
-                                try {
-                                    Utils.message(CarteraFolios.this, "Error al descargar catálogos: " + response.errorBody().string());
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    Utils.message(CarteraFolios.this, "Error al descargar catálogos: " + e.getMessage());
-                                }
-                            } else {
-                                Utils.message(CarteraFolios.this, "Error al descargar catálogos");
-                            }
+                            Utils.message(CarteraFolios.this, response.body().getCatalogos().getError());
                         }
-                    }else{
-                        Utils.message(CarteraFolios.this, "Error al descargar catálogos");
+                    } else {
+                        progressDialog.dismiss();
+                        if (response.errorBody() != null) {
+                            try {
+                                Utils.message(CarteraFolios.this, "Error al descargar catálogos: " + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Utils.message(CarteraFolios.this, "Error al descargar catálogos: " + e.getMessage());
+                            }
+                        } else {
+                            Utils.message(CarteraFolios.this, "Error al descargar catálogos");
+                        }
                     }
+                }else{
+                    Utils.message(CarteraFolios.this, "Error al descargar catálogos");
                 }
+            }
 
-                @Override
-                public void onFailure(Call<CatalogosTyphoonResponse> call, Throwable t) {
-                    progressDialog.dismiss();
-                    Utils.message(CarteraFolios.this, Constants.MSG_ERR_CONN);
-                }
-            });
-        }catch (Exception e){
-            e.printStackTrace();
-            progressDialog.dismiss();
-            Utils.message(CarteraFolios.this, "Error al descargar catálogos: " + e.getMessage());
-        }catch (Error e){
-            progressDialog.dismiss();
-            Utils.message(CarteraFolios.this, "Error al descargar catálogos: ");
-        }//*/
+            @Override
+            public void onFailure(Call<CatalogosTyphoonResponse> call, Throwable t) {
+                progressDialog.dismiss();
+                Utils.message(CarteraFolios.this, Constants.MSG_ERR_CONN);
+            }
+        });
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        List<FolioRevision> listFolios = new FoliosDBMethods(getApplicationContext()).readFolios();
+        if(listFolios.size() == 0) {
+            obtenerFolios(-1, -1, -1);
+        }else{
+            adapterRecyclerViewCartera = new AdapterRecyclerViewCartera(CarteraFolios.this,CarteraFolios.this,listFolios);
+            recyclerView.setAdapter(adapterRecyclerViewCartera);
+        }
     }
 }

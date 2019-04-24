@@ -2,6 +2,7 @@ package com.elektra.typhoon.service;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,25 +36,30 @@ import com.elektra.typhoon.objetos.request.SubAnexo;
 import com.elektra.typhoon.objetos.response.Anexo;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.ChecklistData;
+import com.elektra.typhoon.objetos.response.DatosPorValidarResponse;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.FolioRevision;
 import com.elektra.typhoon.objetos.response.Historico;
 import com.elektra.typhoon.objetos.response.HistoricoAnexo;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.PreguntaData;
+import com.elektra.typhoon.objetos.response.PreguntasPorValidar;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
 import com.elektra.typhoon.objetos.response.SincronizacionResponse;
+import com.elektra.typhoon.objetos.response.SincronizacionResponseData;
 import com.elektra.typhoon.utils.Utils;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -76,6 +82,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
     private List<Anexo> listAnexos;
     private List<CatalogoBarco> listBarcos;
     private TextView textViewDialog;
+    private String sincronizacionMensaje;
 
     public SincronizacionRequestService(Activity activity,Context context,int idRevision){
         this.activity = activity;
@@ -128,6 +135,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 "SELECT ID_REVISION,ID_CHECKLIST,ID_ESTATUS,ID_LOGO,ID_TIPO_REVISION,NOMBRE,PONDERACION FROM " + checklistDBMethods.TP_CAT_CHEKLIST + " WHERE ID_REVISION = ?",
                 new String[]{String.valueOf(idRevision)});
 
+        //Primer sincronización
         if (listChecklist.size() == 0) {
             SincronizacionData sincronizacionData = null;
             try {
@@ -228,28 +236,51 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                             }
 
                             updateDialogText("Checklist descargado");
-                            loadDataSincronizacion();
-                            String result = executeSincronizacionCompleta();
-                            //progressDialog.dismiss();
-
-                            /*if (checklistBarcos == null) {descomentar
-                                Intent intent = new Intent(activity, ChecklistBarcos.class);
-
-                                Encryption encryption = new Encryption();
-
-                                intent.putExtra(Constants.INTENT_FOLIO_TAG, encryption.encryptAES(String.valueOf(folio.getIdRevision())));
-                                intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG, encryption.encryptAES(folio.getFechaInicio()));
-                                intent.putExtra(Constants.INTENT_ESTATUS_TAG, encryption.encryptAES(String.valueOf(folio.getEstatus())));
-
-                                activity.startActivity(intent);
-                            }//*/
-                            return result;
-                            //return "Checklist descargado";
-                        /*} catch (NullPointerException e) {
-                            progressDialog.dismiss();
-                            e.printStackTrace();
-                            return "Error al guardar datos: " + e.getMessage();
-                        }//*/
+                            //**********************************************************************************************************
+                            ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
+                            Call<DatosPorValidarResponse> mServiceValidar = mApiService.datosPorValidar(sharedPreferences.getString(Constants.SP_JWT_TAG,""),idRevision,0);
+                            try {
+                                Response<DatosPorValidarResponse> responseValidar = mServiceValidar.execute();
+                                if(responseValidar != null) {
+                                    if (responseValidar.body() != null) {
+                                        if (responseValidar.body().getDatos() != null) {
+                                            if (responseValidar.body().getDatos().getExito()) {
+                                                loadDataSincronizacion();
+                                                return executeSincronizacionCompleta(responseValidar);
+                                                //return "Sincronizado correctamente";
+                                            } else {
+                                                //Utils.message(activity, responseValidar.body().getDatos().getError());
+                                                return responseValidar.body().getDatos().getError();
+                                            }
+                                        } else {
+                                            //Utils.message(activity, "Error al descargar datos por validar");
+                                            return "Error al descargar datos por validar";
+                                        }
+                                    } else {
+                                        if (responseValidar.errorBody() != null) {
+                                            try {
+                                                //Utils.message(activity, "Error al descargar datos por validar: " + responseValidar.errorBody().string());
+                                                return "Error al descargar datos por validar: " + responseValidar.errorBody().string();
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                                //Utils.message(activity, "Error al descargar datos por validar: " + e.getMessage());
+                                                return "Error al descargar datos por validar: " + e.getMessage();
+                                            }
+                                        } else {
+                                            //Utils.message(activity, "Error al descargar datos por validar");
+                                            return "Error al descargar datos por validar";
+                                        }
+                                    }
+                                }else{
+                                    //Utils.message(activity, "Error al descargar datos por validar");
+                                    return "Error al descargar datos por validar";
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                return "Error al descargar datos por validar: " + e.getMessage();
+                            }
+                            //*********************************************************************************************************
+                            //return "Sincronizado correctamente";
                         } else {
                             //progressDialog.dismiss();
                             return response.body().getSincronizacion().getError();
@@ -274,13 +305,74 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 return "Error al sincronizar: " + e.getMessage();
             }
         }else{
-            loadDataSincronizacion();
-            return executeSincronizacionCompleta();
+            ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
+            Call<DatosPorValidarResponse> mService = mApiService.datosPorValidar(sharedPreferences.getString(Constants.SP_JWT_TAG,""),idRevision,usuario.getIdrol());
+            try {
+                Response<DatosPorValidarResponse> response = mService.execute();
+                if(response != null) {
+                    if (response.body() != null) {
+                        if (response.body().getDatos() != null) {
+                            if (response.body().getDatos().getExito()) {
+                                loadDataSincronizacion();
+                                return executeSincronizacionCompleta(response);
+                                //return "Sincronizado correctamente";
+                            } else {
+                                //Utils.message(activity, response.body().getDatos().getError());
+                                return response.body().getDatos().getError();
+                            }
+                        } else {
+                            //Utils.message(activity, "Error al descargar datos por validar");
+                            return "Error al descargar datos por validar";
+                        }
+                    } else {
+                        if (response.errorBody() != null) {
+                            try {
+                                //Utils.message(activity, "Error al descargar datos por validar: " + response.errorBody().string());
+                                return "Error al descargar datos por validar: " + response.errorBody().string();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                //Utils.message(activity, "Error al descargar datos por validar: " + e.getMessage());
+                                return "Error al descargar datos por validar: " + e.getMessage();
+                            }
+                        } else {
+                            //Utils.message(activity, "Error al descargar datos por validar");
+                            return "Error al descargar datos por validar";
+                        }
+                    }
+                }else{
+                    //Utils.message(activity, "Error al descargar datos por validar");
+                    return "Error al descargar datos por validar";
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "Error al descargar datos por validar: " + e.getMessage();
+            }
+
+            //loadDataSincronizacion();
+            //return executeSincronizacionCompleta();
         }
         //return "OK";
     }
 
-    private String executeSincronizacionCompleta(){
+    private boolean preguntaPorDescargar(Response<DatosPorValidarResponse> responseData,int idPregunta,int idBarco){
+        for(PreguntasPorValidar preguntasPorValidar:responseData.body().getDatos().getDatosPorValidar().getListPreguntas()){
+            if(preguntasPorValidar.getIdPregunta() == idPregunta && existeId(preguntasPorValidar.getListIdBarco(),idBarco)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean existeId(List<Integer> listId,int idValidar){
+        for(int id:listId){
+            if(id == idValidar){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String executeSincronizacionCompleta(Response<DatosPorValidarResponse> responseData){
         SincronizacionData sincronizacionData = null;
         try {
             int totalActualizar = 0;
@@ -294,7 +386,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 for (CatalogoBarco catalogoBarco : listBarcos) {
                     for (RubroData rubroDataTemp : catalogoBarco.getListRubros()) {
                         for (Pregunta preguntaTemp : rubroDataTemp.getListPreguntasTemp()) {
-                            if (preguntaTemp.isSeleccionado()) {
+                            if (preguntaTemp.isSeleccionado() || preguntaPorDescargar(responseData,preguntaTemp.getIdPregunta(),catalogoBarco.getIdBarco())) {
                                 totalActualizar++;
                             }
                         }
@@ -306,7 +398,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                     for (CatalogoBarco catalogoBarco : listBarcos) {
                         for (RubroData rubroDataTemp : catalogoBarco.getListRubros()) {
                             for (Pregunta preguntaTemp : rubroDataTemp.getListPreguntasTemp()) {
-                                if (preguntaTemp.isSeleccionado()) {
+                                if (preguntaTemp.isSeleccionado() || preguntaPorDescargar(responseData,preguntaTemp.getIdPregunta(),catalogoBarco.getIdBarco())) {
                                     SincronizacionPost sincronizacionPost = new SincronizacionPost();
                                     sincronizacionData = new SincronizacionJSON().generateRequestDataIndividual(activity, context, idRevision, preguntaTemp.getIdRubro()
                                             , preguntaTemp.getIdPregunta(), 0, preguntaTemp.getIdBarco());
@@ -315,14 +407,14 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                     if (response.equals("Sincronizado correctamente")) {
                                         contador++;
                                         System.out.println("Rubro: " + preguntaTemp.getIdRubro() + " Pregunta: " + preguntaTemp.getIdPregunta() + " Barco: " + preguntaTemp.getIdBarco());
-                                    }
+                                    }//*/
                                     updateDialogText("Sincronizado: " + (totalActualizar - (totalActualizar - contador)) + " de: " + totalActualizar);
                                 }
                             }
                         }
                     }
                 }else{
-                    return "Debe seleccionar al menos una pregunta para sincronizar";
+                    return "No hay preguntas para sincronizar";
                 }
 
                 /*Intent intent = new Intent(activity, ChecklistBarcos.class);
@@ -338,7 +430,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 contador = 0;
                 for(Anexo anexo:listAnexos) {
                     for(Anexo subanexo:anexo.getListSubAnexos()) {
-                        if (subanexo.isSeleccionado()) {
+                        if (subanexo.isSeleccionado() || existeId(responseData.body().getDatos().getDatosPorValidar().getListIdSubanexos(),subanexo.getIdSubAnexo())) {
                             totalActualizar++;
                         }
                     }
@@ -348,7 +440,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                     updateDialogText("Sincronizando anexos...");
                     for (Anexo anexo : listAnexos) {
                         for (Anexo subanexo : anexo.getListSubAnexos()) {
-                            if (subanexo.isSeleccionado()) {
+                            if (subanexo.isSeleccionado() || existeId(responseData.body().getDatos().getDatosPorValidar().getListIdSubanexos(),subanexo.getIdSubAnexo())) {
                                 SincronizacionPost sincronizacionPost = new SincronizacionPost();
                                 sincronizacionData = new SincronizacionJSON().generateRequestDataIndividual(activity, context, idRevision, 0, 0, subanexo.getIdSubAnexo(), 0);
                                 sincronizacionPost.setSincronizacionData(sincronizacionData);
@@ -356,13 +448,13 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                 if(response.equals("Sincronizado correctamente")) {
                                     contador++;
                                     System.out.println("Anexo: " + anexo.getIdAnexo() + " Subanexo: " + subanexo.getIdSubAnexo());
-                                }
+                                }//*/
                                 updateDialogText("Sincronizado: " + (totalActualizar - (totalActualizar - contador)) + " de: " + totalActualizar);
                             }
                         }
                     }
                 }else{
-                    return "Debe seleccionar al menos un anexo para sincronizar";
+                    return "No hay anexos para sincronizar";
                 }
             }
         } catch (OutOfMemoryError e) {
@@ -371,7 +463,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
         } catch (IOException e) {
             e.printStackTrace();
             return "Error al sincronizar: " + e.getMessage();
-        }
+        }//*/
         return "Sincronizado correctamente";
     }
 
@@ -388,16 +480,27 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
     protected void onPostExecute(String result) {
         //ocultar dialogo
         Utils.message(activity,result);
+
+        if(sincronizacionMensaje != null){
+            if(!sincronizacionMensaje.equals("")){
+                Utils.message(activity,sincronizacionMensaje);
+            }
+        }
+
         if(checklistBarcos != null){
             checklistBarcos.reloadData();
         }else{
             Intent intent = new Intent(activity, ChecklistBarcos.class);
 
             Encryption encryption = new Encryption();
+            FoliosDBMethods foliosDBMethods = new FoliosDBMethods(context);
+            FolioRevision folioIntent = foliosDBMethods.readFolio(
+                    "SELECT ID_REVISION,NOMBRE,ID_TIPO_REVISION,ID_USUARIO,FECHA_INICIO,FECHA_FIN,ESTATUS FROM " + foliosDBMethods.TP_TRAN_REVISION + " WHERE ID_REVISION = ?",
+                    new String[]{String.valueOf(idRevision)});
 
-            intent.putExtra(Constants.INTENT_FOLIO_TAG, encryption.encryptAES(String.valueOf(folio.getIdRevision())));
-            intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG, encryption.encryptAES(folio.getFechaInicio()));
-            intent.putExtra(Constants.INTENT_ESTATUS_TAG, encryption.encryptAES(String.valueOf(folio.getEstatus())));
+            intent.putExtra(Constants.INTENT_FOLIO_TAG, encryption.encryptAES(String.valueOf(folioIntent.getIdRevision())));
+            intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG, encryption.encryptAES(folioIntent.getFechaInicio()));
+            intent.putExtra(Constants.INTENT_ESTATUS_TAG, encryption.encryptAES(String.valueOf(folioIntent.getEstatus())));
 
             activity.startActivity(intent);
         }
@@ -417,6 +520,11 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                             EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(context);
                             HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(context);
                             AnexosDBMethods anexosDBMethods = new AnexosDBMethods(context);
+
+                            if(response.body().getSincronizacion().getError() != null) {
+                                sincronizacionMensaje = response.body().getSincronizacion().getError();
+                            }
+
                             if(opcion == 1){
 
                                 //Borrado de evidencias y su histórico
@@ -486,7 +594,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                                     respuestaData.getIdRevision() == respuestaDataTemp.getIdRevision() &&
                                                     respuestaData.getIdChecklist() == respuestaDataTemp.getIdChecklist() &&
                                                     respuestaData.getIdRubro() == respuestaDataTemp.getIdRubro()){
-                                                respuestaData.setSincronizado(1);
+                                                //respuestaData.setSincronizado(1);
                                                 checklistDBMethods.createRespuesta(respuestaData);
                                             }
                                         }else{
@@ -541,6 +649,20 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                             intent.putExtra(Constants.INTENT_ESTATUS_TAG, encryption.encryptAES(String.valueOf(folio.getEstatus())));
                             activity.startActivity(intent);
                         }//*/
+
+                        SincronizacionResponseData sincronizacionResponseData = response.body().getSincronizacion().getSincronizacionResponseData();
+
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put("ID_REVISION",sincronizacionResponseData.getIdRevision());
+                        contentValues.put("NOMBRE",sincronizacionResponseData.getNombre());
+                        contentValues.put("ID_TIPO_REVISION",sincronizacionResponseData.getIdTipoRevision());
+                        contentValues.put("ID_USUARIO",sincronizacionResponseData.getIdUsuario());
+                        contentValues.put("FECHA_INICIO",sincronizacionResponseData.getFechaInicio());
+                        contentValues.put("FECHA_FIN",sincronizacionResponseData.getFechaFin());
+                        contentValues.put("ESTATUS",sincronizacionResponseData.getEstatus());
+
+                        new FoliosDBMethods(activity).updateFolio(contentValues,"ID_REVISION = ?",new String[]{String.valueOf(sincronizacionResponseData.getIdRevision())});
+
                         updateDialogText("Sincronizado correctamente");
                         return "Sincronizado correctamente";
                     } else {
@@ -577,6 +699,23 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 textViewDialog.setText(texto);
             }
         });
+    }
+
+    private boolean isPreguntaSeleccionada(List<RespuestaData> listRespuestas,Pregunta pregunta){
+        for(RespuestaData respuestaData:listRespuestas){
+            if(respuestaData.getIdRevision() == pregunta.getIdRevision() &&
+                    respuestaData.getIdChecklist() == pregunta.getIdChecklist() &&
+                    respuestaData.getIdRubro() == pregunta.getIdRubro() &&
+                    respuestaData.getIdPregunta() == pregunta.getIdPregunta() &&
+                    respuestaData.getIdBarco() == pregunta.getIdBarco()){
+                if(respuestaData.getSincronizado() == 1){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     private void loadDataSincronizacion(){
@@ -624,7 +763,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
 
                     //try {
                     for (Pregunta pregunta : listPreguntas) {
-                        pregunta.setSeleccionado(true);
+                        //pregunta.setSeleccionado(true);
                             /*List<Evidencia> listEvidencias = evidenciasDBMethods.readEvidencias("" +
                                             "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
                                             "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
@@ -635,6 +774,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                             String.valueOf(catalogoBarco.getIdBarco())},false);
                             pregunta.setListEvidencias(listEvidencias);//*/
                         pregunta.setIdBarco(catalogoBarco.getIdBarco());
+                        pregunta.setSeleccionado(Utils.isPreguntaSeleccionada(listRespuestas,pregunta));
                     }
                     /*} catch (IOException e) {
                         e.printStackTrace();
@@ -674,7 +814,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                     "ID_SUBANEXO != 0 AND ID_ANEXO = ?",new String[]{String.valueOf(anexo.getIdAnexo())});
             anexo.setListSubAnexos(listSubAnexos);
             for(Anexo subanexo:listSubAnexos){
-                subanexo.setSeleccionado(true);
+                //subanexo.setSeleccionado(true);
                 /*List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdAnexo()), String.valueOf(subanexo.getIdSubAnexo())});//*/
@@ -688,6 +828,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                     subanexo.setNombreArchivo(listDatosAnexos.get(0).getNombreArchivo());
                     subanexo.setIdEtapa(listDatosAnexos.get(0).getIdEtapa());
                     subanexo.setIdRevision(idRevision);
+                    subanexo.setSeleccionado(listDatosAnexos.get(0).isSeleccionado());
                 }
             }
         }

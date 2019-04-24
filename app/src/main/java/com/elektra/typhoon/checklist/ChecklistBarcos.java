@@ -245,7 +245,7 @@ public class ChecklistBarcos extends AppCompatActivity{
 
                     //try {
                         for (Pregunta pregunta : listPreguntas) {
-                            pregunta.setSeleccionado(true);
+                            //pregunta.setSeleccionado(true);
                             /*List<Evidencia> listEvidencias = evidenciasDBMethods.readEvidencias("" +
                                             "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
                                             "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
@@ -256,6 +256,7 @@ public class ChecklistBarcos extends AppCompatActivity{
                                             String.valueOf(catalogoBarco.getIdBarco())},false);
                             pregunta.setListEvidencias(listEvidencias);//*/
                             pregunta.setIdBarco(catalogoBarco.getIdBarco());
+                            pregunta.setSeleccionado(Utils.isPreguntaSeleccionada(listRespuestas,pregunta));
                         }
                     /*} catch (IOException e) {
                         e.printStackTrace();
@@ -1560,7 +1561,7 @@ public class ChecklistBarcos extends AppCompatActivity{
 
                     //try {
                         for (Pregunta pregunta : listPreguntas) {
-                            pregunta.setSeleccionado(true);
+                            //pregunta.setSeleccionado(true);
                             /*List<Evidencia> listEvidencias = evidenciasDBMethods.readEvidencias("" +
                                     "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
                                     "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
@@ -1571,6 +1572,7 @@ public class ChecklistBarcos extends AppCompatActivity{
                                             String.valueOf(catalogoBarco.getIdBarco())},false);
                             pregunta.setListEvidencias(listEvidencias);//*/
                             pregunta.setIdBarco(catalogoBarco.getIdBarco());
+                            pregunta.setSeleccionado(Utils.isPreguntaSeleccionada(listRespuestas,pregunta));
                         }
                     /*} catch (IOException e) {
                         e.printStackTrace();

@@ -131,7 +131,7 @@ public class AnexosActivity extends AppCompatActivity {
                     "ID_SUBANEXO != 0 AND ID_ANEXO = ?",new String[]{String.valueOf(anexo.getIdAnexo())});
             anexo.setListSubAnexos(listSubAnexos);
             for(Anexo subanexo:listSubAnexos){
-                subanexo.setSeleccionado(true);
+                //subanexo.setSeleccionado(true);
                 /*List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdAnexo()), String.valueOf(subanexo.getIdSubAnexo())});//*/
@@ -145,6 +145,7 @@ public class AnexosActivity extends AppCompatActivity {
                     subanexo.setNombreArchivo(listDatosAnexos.get(0).getNombreArchivo());
                     subanexo.setIdEtapa(listDatosAnexos.get(0).getIdEtapa());
                     subanexo.setIdRevision(folio);
+                    subanexo.setSeleccionado(listDatosAnexos.get(0).isSeleccionado());
                 }
             }
         }
@@ -198,8 +199,8 @@ public class AnexosActivity extends AppCompatActivity {
         int total = 0;
         for(Anexo anexo:listAnexosHeader){
             for(Anexo subanexo:anexo.getListSubAnexos()){
-                if(subanexo.getIdEtapa() == -1 || subanexo.getIdEtapa() == usuario.getIdrol()-1){
-                    //noAplica++;
+                if(subanexo.getIdEtapa() == -1){
+                    noAplica++;
                 }else{
                     if(subanexo.getIdEtapa() >= usuario.getIdrol()){
                         aplica++;
@@ -209,7 +210,7 @@ public class AnexosActivity extends AppCompatActivity {
             }
         }
 
-        noAplica = total - aplica;
+        //noAplica = total - aplica;
 
         textViewCumplen.setText(String.valueOf(aplica));
         textViewNoCumplen.setText(String.valueOf(noAplica));
@@ -461,6 +462,7 @@ public class AnexosActivity extends AppCompatActivity {
                     subanexo.setNombreArchivo(listDatosAnexos.get(0).getNombreArchivo());
                     subanexo.setIdEtapa(listDatosAnexos.get(0).getIdEtapa());
                     subanexo.setIdRevision(folio);
+                    subanexo.setSeleccionado(listDatosAnexos.get(0).isSeleccionado());
                 }
             }
         }

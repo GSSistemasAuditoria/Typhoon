@@ -232,7 +232,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
             }
         }
 
-        holder.imageViewSeleccionado.setVisibility(View.GONE);
+        holder.imageViewSeleccionado.setEnabled(false);
 
         holder.imageViewSeleccionado.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -190,5 +190,4 @@ public class EvidenciasDBMethods {
         db.delete(TP_TRAN_CL_EVIDENCIA, condition,args);
         db.close();
     }
-
 }

@@ -383,7 +383,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             }
         }
 
-        holder.imageViewSeleccionado.setVisibility(View.GONE);
+        holder.imageViewSeleccionado.setEnabled(false);
 
         holder.imageViewSeleccionado.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -815,7 +815,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                 new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
                                         String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
                                         String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
-                                        String.valueOf(evidencia.getIdBarco())});
+                                        String.valueOf(idBarco)});
 
                         Utils.message(activity,"Validada");
                         crearHistorico(evidencia,usuario,"Validada por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
@@ -824,7 +824,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
                         Utils.updatePregunta(activity,String.valueOf(preguntaTemp.getIdRevision()),
                                 String.valueOf(preguntaTemp.getIdChecklist()),String.valueOf(preguntaTemp.getIdPregunta()),
-                                String.valueOf(preguntaTemp.getIdRubro()),1);//*/
+                                String.valueOf(preguntaTemp.getIdRubro()),String.valueOf(evidencia.getIdBarco()),1);//*/
 
                         if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
                             listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
@@ -989,7 +989,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                             Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
                             Utils.updatePregunta(activity,String.valueOf(preguntaTemp.getIdRevision()),
                                     String.valueOf(preguntaTemp.getIdChecklist()),String.valueOf(preguntaTemp.getIdPregunta()),
-                                    String.valueOf(preguntaTemp.getIdRubro()),1);//*/
+                                    String.valueOf(preguntaTemp.getIdRubro()),String.valueOf(idBarco),1);//*/
                             adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
                             alertDialogMotivo.dismiss();
 
@@ -1106,7 +1106,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
                 Utils.updatePregunta(activity,String.valueOf(preguntaTemp.getIdRevision()),
                         String.valueOf(preguntaTemp.getIdChecklist()),String.valueOf(preguntaTemp.getIdPregunta()),
-                        String.valueOf(preguntaTemp.getIdRubro()),1);//*/
+                        String.valueOf(preguntaTemp.getIdRubro()),String.valueOf(idBarco),1);//*/
 
                 if (listPreguntas.get(numeroPregunta).getListEvidencias() != null) {
                     if (listPreguntas.get(numeroPregunta).getListEvidencias().size() != 0) {

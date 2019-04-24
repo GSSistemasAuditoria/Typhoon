@@ -50,4 +50,5 @@
     <string name="cerrar_tag">Cerrar</string>
     <string name="anexos_tag">Anexos</string>
     <string name="por_cargar_tag">Por cargar</string>
+    <string name="ok_tag">OK</string>
 </resources>

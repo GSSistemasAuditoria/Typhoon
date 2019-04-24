@@ -123,7 +123,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
             imageView.setImageResource(R.mipmap.ic_group_open);
         }
 
-        imageViewSelect.setVisibility(View.GONE);
+        imageViewSelect.setEnabled(false);
 
         imageViewSelect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,9 +155,9 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
             imageViewSelect.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_uncheck_white));
         }
 
-        if(b) {
+        /*if(b) {
             progressDialog = Utils.typhoonLoader(activity, "Cargando datos...");
-        }
+        }//*/
 
         return view;
     }
@@ -203,9 +203,9 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
             }
         }
 
-        if(b) {
+        /*if(b) {
             progressDialog.dismiss();
-        }
+        }//*/
 
         //textViewTituloRubro.setText("Rubro " + i);
         AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntasTemp(),activity,i,

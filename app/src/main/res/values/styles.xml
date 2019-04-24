@@ -59,4 +59,10 @@
         <item name="android:popupBackground">@color/background_popup</item>
     </style>
 
+    <style name="ThemeTransparent" parent="Theme.AppCompat">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@color/transparente02</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
 </resources>

@@ -3,6 +3,7 @@ package com.elektra.typhoon.service;
 import com.elektra.typhoon.objetos.request.RequestCartera;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
+import com.elektra.typhoon.objetos.response.DatosPorValidarResponse;
 import com.elektra.typhoon.objetos.response.ResponseCartera;
 import com.elektra.typhoon.objetos.response.ResponseDescargaPdf;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
@@ -39,4 +40,7 @@ public interface ApiInterface {
 
     @GET("DownloadInformePregunta")
     Call<ResponseDescargaPdf> descargaPDF(@Header("Authorization") String jwt,@Query("idPregunta") int idPregunta);
+
+    @GET("GetDatosPorValidar")
+    Call<DatosPorValidarResponse> datosPorValidar(@Header("Authorization") String jwt, @Query("idRevision") int idRevision, @Query("idRol") int idRol);
 }
