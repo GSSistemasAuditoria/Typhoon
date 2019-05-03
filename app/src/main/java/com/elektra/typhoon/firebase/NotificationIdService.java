@@ -3,6 +3,7 @@ package com.elektra.typhoon.firebase;
 import android.content.SharedPreferences;
 
 import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.encryption.Encryption;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
@@ -21,13 +22,14 @@ public class NotificationIdService extends FirebaseInstanceIdService {
     @Override
     public void onTokenRefresh() {
         // Get updated InstanceID token.
+        Encryption encryption = new Encryption();
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         System.out.println("Token dispositivo: " + refreshedToken);
         SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
         if (!sharedPrefs.contains(Constants.SP_FIREBASE_TOKEN)) {
             SharedPreferences.Editor ed;
             ed = sharedPrefs.edit();
-            ed.putString(Constants.SP_FIREBASE_TOKEN, refreshedToken);
+            ed.putString(Constants.SP_FIREBASE_TOKEN, encryption.encryptAES(refreshedToken));
             ed.commit();
         }
         //Toast.makeText(this,"Refreshed token: " + refreshedToken,Toast.LENGTH_SHORT).show();

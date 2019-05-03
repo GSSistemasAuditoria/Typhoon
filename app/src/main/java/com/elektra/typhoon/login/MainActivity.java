@@ -30,6 +30,8 @@ import com.elektra.typhoon.database.TyphoonDataBase;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.gps.GPSTracker;
+import com.elektra.typhoon.objetos.request.Login;
+import com.elektra.typhoon.objetos.request.RequestLogin;
 import com.elektra.typhoon.objetos.response.Barco;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
@@ -51,6 +53,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import com.elektra.typhoon.utils.Utils;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.io.IOException;
 import java.text.Normalizer;
@@ -75,6 +78,8 @@ public class MainActivity extends AppCompatActivity {
     private ConstraintLayout layoutDialog;
     private String usuario;
     private String contrasena;
+    private String firebaseToken;
+    private SharedPreferences sharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         float scale = getResources().getConfiguration().fontScale;
         System.out.println("Escala del texto: " + scale);
 
-        SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
         if (sharedPrefs.contains(Constants.SP_LOGIN_TAG)) {
             if (sharedPrefs.getBoolean(Constants.SP_LOGIN_TAG, false)) {
                 Intent intent = new Intent(getApplicationContext(), CarteraFolios.class);
@@ -117,19 +122,25 @@ public class MainActivity extends AppCompatActivity {
                 ResponseLogin.Usuario usuarioDB = new UsuarioDBMethods(getApplicationContext()).readUsuario();
                 usuario = Normalizer.normalize(editTextUsuario.getText().toString(), Normalizer.Form.NFD);
                 contrasena = Normalizer.normalize(editTextContrasena.getText().toString(), Normalizer.Form.NFD);
+                if(sharedPrefs.contains(Constants.SP_FIREBASE_TOKEN)){
+                    String firebase = new Encryption().decryptAES(sharedPrefs.getString(Constants.SP_FIREBASE_TOKEN,""));
+                    if(!firebase.equals("")){
+                        firebaseToken = firebase;
+                    }
+                }
                 //usuario = editTextUsuario.getText().toString();
                 //contrasena = editTextContrasena.getText().toString();
                 if(!usuario.equals("")){
                     if(usuarioDB == null){
                         if (!contrasena.equals("")) {
-                            iniciarSesion(usuario, contrasena);
+                            iniciarSesion(usuario, contrasena,firebaseToken);
                         } else {
                             Utils.message(getApplicationContext(), "Debe introducir la contraseña");
                         }
                     }else {
                         if (usuarioDB.getCorreo().equals(usuario) || usuarioDB.getIdUsuario().equals(usuario)) {
                             if (!contrasena.equals("")) {
-                                iniciarSesion(usuario, contrasena);
+                                iniciarSesion(usuario, contrasena,firebaseToken);
                             } else {
                                 Utils.message(getApplicationContext(), "Debe introducir la contraseña");
                             }
@@ -211,6 +222,44 @@ public class MainActivity extends AppCompatActivity {
 
         }//*/
         //checkAndRequestPermissions();
+
+        Encryption encryption = new Encryption();
+
+        if (!sharedPrefs.contains(Constants.SP_FIREBASE_TOKEN)) {
+            String newToken = FirebaseInstanceId.getInstance().getToken();
+            if(newToken != null) {
+                if(!newToken.equals("")) {
+                    SharedPreferences.Editor ed;
+                    ed = sharedPrefs.edit();
+                    ed.putString(Constants.SP_FIREBASE_TOKEN, encryption.encryptAES(newToken));
+                    ed.commit();
+                    System.out.println("Recuperar token: " + newToken);
+                }
+            }
+        }else{
+            String firebase = new Encryption().decryptAES(sharedPrefs.getString(Constants.SP_FIREBASE_TOKEN,""));
+            System.out.println("Token firebase: " + firebase);
+            if(firebase != null) {
+                if(firebase.equals("")) {
+                    String newToken = FirebaseInstanceId.getInstance().getToken();
+                    SharedPreferences.Editor ed;
+                    ed = sharedPrefs.edit();
+                    ed.putString(Constants.SP_FIREBASE_TOKEN, encryption.encryptAES(newToken));
+                    ed.commit();
+                    System.out.println("Recuperar token: " + newToken);
+                }
+            }else{
+                String newToken = FirebaseInstanceId.getInstance().getToken();
+                if(newToken != null) {
+                    if (!newToken.equals("")) {
+                        SharedPreferences.Editor ed;
+                        ed = sharedPrefs.edit();
+                        ed.putString(Constants.SP_FIREBASE_TOKEN, encryption.encryptAES(newToken));
+                        ed.commit();
+                    }
+                }
+            }
+        }
     }
 
     private ApiInterface getInterfaceService() {
@@ -222,12 +271,21 @@ public class MainActivity extends AppCompatActivity {
         return mInterfaceService;
     }
 
-    private void iniciarSesion(final String usuario, String contrasena){
+    private void iniciarSesion(final String usuario, String contrasena, String token){
 
         final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this,"Iniciando sesión...");
 
         ApiInterface mApiService = this.getInterfaceService();
-        Call<ResponseLogin> mService = mApiService.authenticate(usuario, new Encryption().encryptAES(contrasena));
+
+        Login login = new Login();
+        login.setUserName(usuario);
+        login.setPassword(new Encryption().encryptAES(contrasena));
+        login.setFbToken(token);
+
+        RequestLogin requestLogin = new RequestLogin();
+        requestLogin.setLogin(login);
+
+        Call<ResponseLogin> mService = mApiService.authenticate(requestLogin);
         mService.enqueue(new Callback<ResponseLogin>() {
             @Override
             public void onResponse(Call<ResponseLogin> call, Response<ResponseLogin> response) {

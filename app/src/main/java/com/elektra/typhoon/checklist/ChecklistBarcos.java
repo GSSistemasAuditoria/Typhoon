@@ -119,7 +119,7 @@ public class ChecklistBarcos extends AppCompatActivity{
         expandableListView = (ExpandableListView) findViewById(R.id.expandableListViewChecklist);
 
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-            int previousItem = -1;
+            private int previousItem = -1;
 
             @Override
             public void onGroupExpand(int groupPosition) {
@@ -293,7 +293,7 @@ public class ChecklistBarcos extends AppCompatActivity{
         });
     }
 
-    private void timerDelayRunForScroll(long time) {
+    /*private void timerDelayRunForScroll(long time) {
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
@@ -302,7 +302,7 @@ public class ChecklistBarcos extends AppCompatActivity{
                 } catch (Exception e) {}
             }
         }, time);
-    }
+    }//*/
 
     public void reloadData(){
         loadData();

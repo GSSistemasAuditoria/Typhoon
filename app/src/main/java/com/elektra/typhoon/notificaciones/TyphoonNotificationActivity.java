@@ -8,6 +8,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.elektra.typhoon.R;
+import com.elektra.typhoon.encryption.Encryption;
 
 /**
  * Proyecto:
@@ -26,8 +27,14 @@ public class TyphoonNotificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_notification_layout);
 
-        title = getIntent().getStringExtra("title");
-        message = getIntent().getStringExtra("message");
+        Encryption encryption = new Encryption();
+
+        if(getIntent().getStringExtra("title") != null){
+            title = encryption.decryptAES(getIntent().getStringExtra("title"));
+        }
+        if(getIntent().getStringExtra("message") != null){
+            message = encryption.decryptAES(getIntent().getStringExtra("message"));
+        }
 
         TextView textViewCancelar = findViewById(R.id.buttonCancelar);
         TextView textViewAceptar = findViewById(R.id.buttonAceptar);

@@ -83,6 +83,8 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
     private List<CatalogoBarco> listBarcos;
     private TextView textViewDialog;
     private String sincronizacionMensaje;
+    private String jwt;
+    private boolean flagCambios;
 
     public SincronizacionRequestService(Activity activity,Context context,int idRevision){
         this.activity = activity;
@@ -126,7 +128,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
     protected String doInBackground(String... params) {
         mApiService = Utils.getInterfaceService();
         sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
-
+        jwt = Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD);
         /*SincronizacionData sincronizacionData = new SincronizacionData();
         sincronizacionData.setIdRevision(idRevision);//*/
 
@@ -147,7 +149,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 SincronizacionPost sincronizacionPost = new SincronizacionPost();
                 sincronizacionPost.setSincronizacionData(sincronizacionData);
 
-                Call<SincronizacionResponse> mService = mApiService.sincronizacion(Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD), sincronizacionPost);
+                Call<SincronizacionResponse> mService = mApiService.sincronizacion(jwt, sincronizacionPost);
                 Response<SincronizacionResponse> response = mService.execute();
                 if (response != null) {
                     if (response.body() != null) {
@@ -238,7 +240,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                             updateDialogText("Checklist descargado");
                             //**********************************************************************************************************
                             ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
-                            Call<DatosPorValidarResponse> mServiceValidar = mApiService.datosPorValidar(sharedPreferences.getString(Constants.SP_JWT_TAG,""),idRevision,0);
+                            Call<DatosPorValidarResponse> mServiceValidar = mApiService.datosPorValidar(jwt,idRevision,0);
                             try {
                                 Response<DatosPorValidarResponse> responseValidar = mServiceValidar.execute();
                                 if(responseValidar != null) {
@@ -246,7 +248,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                         if (responseValidar.body().getDatos() != null) {
                                             if (responseValidar.body().getDatos().getExito()) {
                                                 loadDataSincronizacion();
-                                                return executeSincronizacionCompleta(responseValidar);
+                                                return executeSincronizacionCompleta(responseValidar,false);
                                                 //return "Sincronizado correctamente";
                                             } else {
                                                 //Utils.message(activity, responseValidar.body().getDatos().getError());
@@ -306,7 +308,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
             }
         }else{
             ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
-            Call<DatosPorValidarResponse> mService = mApiService.datosPorValidar(sharedPreferences.getString(Constants.SP_JWT_TAG,""),idRevision,usuario.getIdrol());
+            Call<DatosPorValidarResponse> mService = mApiService.datosPorValidar(jwt,idRevision,usuario.getIdrol());
             try {
                 Response<DatosPorValidarResponse> response = mService.execute();
                 if(response != null) {
@@ -314,7 +316,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                         if (response.body().getDatos() != null) {
                             if (response.body().getDatos().getExito()) {
                                 loadDataSincronizacion();
-                                return executeSincronizacionCompleta(response);
+                                return executeSincronizacionCompleta(response,true);
                                 //return "Sincronizado correctamente";
                             } else {
                                 //Utils.message(activity, response.body().getDatos().getError());
@@ -372,11 +374,60 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
         return false;
     }
 
-    private String executeSincronizacionCompleta(Response<DatosPorValidarResponse> responseData){
+    private int condicionNotificaciones(Response<DatosPorValidarResponse> responseData){
+        int condicion = 0;
+        int totalActualizar = 0;
+        int totalActualizarAnexos = 0;
+        if(listBarcos != null) {
+
+            for (CatalogoBarco catalogoBarco : listBarcos) {
+                for (RubroData rubroDataTemp : catalogoBarco.getListRubros()) {
+                    for (Pregunta preguntaTemp : rubroDataTemp.getListPreguntasTemp()) {
+                        if (preguntaTemp.isSeleccionado() || preguntaPorDescargar(responseData, preguntaTemp.getIdPregunta(), catalogoBarco.getIdBarco())) {
+                            totalActualizar++;
+                        }
+                        if(preguntaTemp.isSeleccionado()){
+                            flagCambios = true;
+                        }
+                    }
+                }
+            }
+
+        }
+
+        if(listAnexos != null) {
+            for (Anexo anexo : listAnexos) {
+                for (Anexo subanexo : anexo.getListSubAnexos()) {
+                    if (subanexo.isSeleccionado() || existeId(responseData.body().getDatos().getDatosPorValidar().getListIdSubanexos(), subanexo.getIdSubAnexo())) {
+                        totalActualizarAnexos++;
+                    }
+                    if(subanexo.isSeleccionado()){
+                        flagCambios = true;
+                    }
+                }
+            }
+        }
+
+        //si solo se envian anexos
+        if (totalActualizar == 0 && totalActualizarAnexos != 0) {
+            condicion = 1;
+            //si solo se envian evidencias
+        }else if (totalActualizar != 0 && totalActualizarAnexos == 0) {
+            condicion = 2;
+            //si se envían evidencias y anexos
+        }else if (totalActualizar != 0 && totalActualizarAnexos != 0) {
+            condicion = 3;
+        }
+
+        return condicion;
+    }
+
+    private String executeSincronizacionCompleta(Response<DatosPorValidarResponse> responseData,boolean notificar){
         SincronizacionData sincronizacionData = null;
         try {
             int totalActualizar = 0;
             int contador = 0;
+            int flagNotificaciones = condicionNotificaciones(responseData);
             FoliosDBMethods foliosDBMethods = new FoliosDBMethods(context);
             folio = foliosDBMethods.readFolio(
                     "SELECT ID_REVISION,NOMBRE,ID_TIPO_REVISION,ID_USUARIO,FECHA_INICIO,FECHA_FIN,ESTATUS FROM " + foliosDBMethods.TP_TRAN_REVISION + " WHERE ID_REVISION = ?",
@@ -397,12 +448,23 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                     updateDialogText("Sincronizando evidencias...");
                     for (CatalogoBarco catalogoBarco : listBarcos) {
                         for (RubroData rubroDataTemp : catalogoBarco.getListRubros()) {
-                            for (Pregunta preguntaTemp : rubroDataTemp.getListPreguntasTemp()) {
+                            //for (Pregunta preguntaTemp : rubroDataTemp.getListPreguntasTemp()) {
+                            for (int i=0;i<rubroDataTemp.getListPreguntasTemp().size();i++) {
+                                Pregunta preguntaTemp = rubroDataTemp.getListPreguntasTemp().get(i);
                                 if (preguntaTemp.isSeleccionado() || preguntaPorDescargar(responseData,preguntaTemp.getIdPregunta(),catalogoBarco.getIdBarco())) {
                                     SincronizacionPost sincronizacionPost = new SincronizacionPost();
                                     sincronizacionData = new SincronizacionJSON().generateRequestDataIndividual(activity, context, idRevision, preguntaTemp.getIdRubro()
                                             , preguntaTemp.getIdPregunta(), 0, preguntaTemp.getIdBarco());
                                     sincronizacionPost.setSincronizacionData(sincronizacionData);
+                                    if(notificar) {
+                                        if(flagCambios) {
+                                            if (i == totalActualizar - 1) {
+                                                if (flagNotificaciones == 2) {
+                                                    sincronizacionData.setUltimaSincronizacion(true);
+                                                }
+                                            }
+                                        }
+                                    }
                                     String response = sincronizaDatos(sincronizacionPost, 1);
                                     if (response.equals("Sincronizado correctamente")) {
                                         contador++;
@@ -439,11 +501,22 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 if(totalActualizar != 0) {
                     updateDialogText("Sincronizando anexos...");
                     for (Anexo anexo : listAnexos) {
-                        for (Anexo subanexo : anexo.getListSubAnexos()) {
+                        //for (Anexo subanexo : anexo.getListSubAnexos()) {
+                        for (int i=0;i<anexo.getListSubAnexos().size();i++) {
+                            Anexo subanexo = anexo.getListSubAnexos().get(i);
                             if (subanexo.isSeleccionado() || existeId(responseData.body().getDatos().getDatosPorValidar().getListIdSubanexos(),subanexo.getIdSubAnexo())) {
                                 SincronizacionPost sincronizacionPost = new SincronizacionPost();
                                 sincronizacionData = new SincronizacionJSON().generateRequestDataIndividual(activity, context, idRevision, 0, 0, subanexo.getIdSubAnexo(), 0);
                                 sincronizacionPost.setSincronizacionData(sincronizacionData);
+                                if(notificar) {
+                                    if(flagCambios) {
+                                        if (i == totalActualizar - 1) {
+                                            if (flagNotificaciones == 1 || flagNotificaciones == 3) {
+                                                sincronizacionData.setUltimaSincronizacion(true);
+                                            }
+                                        }
+                                    }
+                                }
                                 String response = sincronizaDatos(sincronizacionPost,2);
                                 if(response.equals("Sincronizado correctamente")) {
                                     contador++;
@@ -508,7 +581,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
     }
 
     private String sincronizaDatos(SincronizacionPost sincronizacionPost,int opcion){
-        Call<SincronizacionResponse> mService = mApiService.sincronizacion(Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD), sincronizacionPost);
+        Call<SincronizacionResponse> mService = mApiService.sincronizacion(jwt, sincronizacionPost);
         try {
             Response<SincronizacionResponse> response = mService.execute();
             if (response != null) {

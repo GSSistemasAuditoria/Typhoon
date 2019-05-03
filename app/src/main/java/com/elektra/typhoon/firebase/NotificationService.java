@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.notificaciones.TyphoonNotificationActivity;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -34,14 +35,21 @@ public class NotificationService extends FirebaseMessagingService {
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated.
         //displayMessage("From: " + remoteMessage.getFrom());
+
+        Encryption encryption = new Encryption();
+
+        Context context01 = getApplicationContext();
+        Context context02 = getApplication();
+        Context context03 = getBaseContext();
+
         if(remoteMessage.getNotification() != null){
             RemoteMessage.Notification notification = remoteMessage.getNotification();
             if(notification.getBody() != null){
                 //displayMessage("Titulo: " + notification.getTitle() + " Mensaje: " + notification.getBody());
                 //notificationDialog(NotificationService.this.getBaseContext(),notification.getTitle(),notification.getBody());
                 Intent intent = new Intent(NotificationService.this, TyphoonNotificationActivity.class);
-                intent.putExtra("title",notification.getTitle());
-                intent.putExtra("message",notification.getBody());
+                intent.putExtra("title",encryption.encryptAES(notification.getTitle()));
+                intent.putExtra("message",encryption.encryptAES(notification.getBody()));
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
@@ -53,11 +61,13 @@ public class NotificationService extends FirebaseMessagingService {
     public void onNewToken(String token) {
         System.out.println("Token dispositivo: " + token);
 
+        Encryption encryption = new Encryption();
+
         SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
         if (!sharedPrefs.contains(Constants.SP_FIREBASE_TOKEN)) {
             SharedPreferences.Editor ed;
             ed = sharedPrefs.edit();
-            ed.putString(Constants.SP_FIREBASE_TOKEN, token);
+            ed.putString(Constants.SP_FIREBASE_TOKEN, encryption.encryptAES(token));
             ed.commit();
         }
 

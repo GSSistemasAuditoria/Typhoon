@@ -45,6 +45,14 @@ public class SincronizacionData {
     @Expose
     private List<SubAnexo> listSubAnexos;//*/
 
+    @SerializedName("ULTIMA_SYNC")
+    @Expose
+    private boolean ultimaSincronizacion;
+
+    @SerializedName("ID_USUARIO_SESION")
+    @Expose
+    private String idUsuarioSesion;
+
     public int getIdRevision() {
         return idRevision;
     }
@@ -100,4 +108,20 @@ public class SincronizacionData {
     public void setListSubAnexos(List<SubAnexo> listSubAnexos) {
         this.listSubAnexos = listSubAnexos;
     }//*/
+
+    public boolean isUltimaSincronizacion() {
+        return ultimaSincronizacion;
+    }
+
+    public void setUltimaSincronizacion(boolean ultimaSincronizacion) {
+        this.ultimaSincronizacion = ultimaSincronizacion;
+    }
+
+    public String getIdUsuarioSesion() {
+        return idUsuarioSesion;
+    }
+
+    public void setIdUsuarioSesion(String idUsuarioSesion) {
+        this.idUsuarioSesion = idUsuarioSesion;
+    }
 }

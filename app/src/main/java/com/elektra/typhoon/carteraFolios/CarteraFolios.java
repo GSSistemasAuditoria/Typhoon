@@ -39,6 +39,7 @@ import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.CatalogosDBMethods;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.FoliosDBMethods;
+import com.elektra.typhoon.database.NotificacionesDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.gps.GPSTracker;
@@ -58,7 +59,9 @@ import com.elektra.typhoon.objetos.response.EtapaEvidencia;
 import com.elektra.typhoon.objetos.response.EtapaSubAnexo;
 import com.elektra.typhoon.objetos.response.FolioRevision;
 import com.elektra.typhoon.objetos.response.LatLng;
+import com.elektra.typhoon.objetos.response.Notificacion;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
+import com.elektra.typhoon.objetos.response.ResponseNotificaciones;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.RolUsuario;
 import com.elektra.typhoon.objetos.response.SincronizacionResponse;
@@ -96,7 +99,8 @@ public class CarteraFolios extends AppCompatActivity {
     private RecyclerView recyclerView;
     //private ArrayList<Folio> folios;
     private AdapterRecyclerViewCartera adapterRecyclerViewCartera;
-
+    private TextView textViewNotificaciones;
+    private ResponseLogin.Usuario usuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,13 +120,16 @@ public class CarteraFolios extends AppCompatActivity {
         final EditText editTextBuscar = (EditText) findViewById(R.id.editTextBuscar);
         TextView textViewNombreUsuario = (TextView) findViewById(R.id.textViewNombreUsuario);
         TextView textViewRol = findViewById(R.id.textViewRol);
+        textViewNotificaciones = findViewById(R.id.textViewNotificaciones);
 
         UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(this);
-        ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario();
+        usuario = usuarioDBMethods.readUsuario();
         if(usuario != null){
             textViewNombreUsuario.setText(usuario.getNombre());
             textViewRol.setText(Utils.getRol(this,usuario.getIdrol()));
         }
+
+        //loadNotificaciones(usuario.getIdrol());
 
         final ImageView imageViewMenuCartera = (ImageView) findViewById(R.id.imageViewMenuCartera);
 
@@ -259,7 +266,7 @@ public class CarteraFolios extends AppCompatActivity {
         //boolean enZona = Utils.isPointInPolygon(new LatLng(19.30511913410018,-99.20381013535274));//fuera
 
         //obtenerDatosPorValidar(5,1);
-
+        //obtenerNotificaciones(usuario.getIdrol());
     }
 
     @Override
@@ -502,6 +509,75 @@ public class CarteraFolios extends AppCompatActivity {
         }else{
             adapterRecyclerViewCartera = new AdapterRecyclerViewCartera(CarteraFolios.this,CarteraFolios.this,listFolios);
             recyclerView.setAdapter(adapterRecyclerViewCartera);
+        }
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+    }
+
+    private void obtenerNotificaciones(int idRol){
+
+        final ProgressDialog progressDialog = Utils.typhoonLoader(CarteraFolios.this,"Descargando notificaciones...");
+
+        ApiInterface mApiService = Utils.getInterfaceService();
+
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+
+        final NotificacionesDBMethods notificacionesDBMethods = new NotificacionesDBMethods(CarteraFolios.this);
+
+        //Call<ResponseCartera> mService = mApiService.carteraRevisiones(requestCartera);
+        Call<ResponseNotificaciones> mService = mApiService.getNotificaciones(sharedPreferences.getString(Constants.SP_JWT_TAG,""),idRol);
+        mService.enqueue(new Callback<ResponseNotificaciones>() {
+
+            @Override
+            public void onResponse(Call<ResponseNotificaciones> call, Response<ResponseNotificaciones> response) {
+                progressDialog.dismiss();
+                if(response != null) {
+                    if (response.body() != null) {
+                        if (response.body().getNotificaciones().getExito()) {
+                            if(response.body().getNotificaciones().getNotificaciones() != null){
+                                for(Notificacion notificacion:response.body().getNotificaciones().getNotificaciones()){
+                                    notificacionesDBMethods.createNotificacion(notificacion);
+                                }
+                                //loadNotificaciones(usuario.getIdrol());
+                            }
+                        } else {
+                            Utils.message(getApplicationContext(), response.body().getNotificaciones().getError());
+                        }
+                    } else {
+                        if (response.errorBody() != null) {
+                            try {
+                                Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + e.getMessage());
+                            }
+                        } else {
+                            Utils.message(getApplicationContext(), "Error al descargar notificaciones");
+                        }
+                    }
+                }else{
+                    Utils.message(getApplicationContext(), "Error al descargar notificaciones");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseNotificaciones> call, Throwable t) {
+                progressDialog.dismiss();
+                Utils.message(CarteraFolios.this, Constants.MSG_ERR_CONN);
+            }
+        });
+    }
+
+    private void loadNotificaciones(int idRol){
+        List<Notificacion> notificaciones = new NotificacionesDBMethods(CarteraFolios.this).readNotificaciones(idRol);
+        if(notificaciones.size() == 0){
+            textViewNotificaciones.setVisibility(View.GONE);
+        }else{
+            textViewNotificaciones.setVisibility(View.VISIBLE);
+            textViewNotificaciones.setText(String.valueOf(notificaciones.size()));
         }
     }
 }

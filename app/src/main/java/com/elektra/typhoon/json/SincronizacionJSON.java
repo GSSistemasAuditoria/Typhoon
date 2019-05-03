@@ -154,6 +154,7 @@ public class SincronizacionJSON {
             sincronizacionData.setListChecklist(listChecklists);
             sincronizacionData.setListRespuestas(listRespuestas);
             sincronizacionData.setListSubAnexos(listSubAnexo);
+            sincronizacionData.setIdUsuarioSesion(usuario.getIdUsuario());
             sincronizacionData.setRevisionFechaMod(Utils.getDate(Constants.DATE_FORMAT_FULL));
         }else{
             sincronizacionData.setIdRevision(folio);
@@ -324,6 +325,7 @@ public class SincronizacionJSON {
             List<ChecklistData> listChecklists = new ArrayList<>();
             listChecklists.add(checklistData);
             sincronizacionData.setListChecklist(listChecklists);
+            sincronizacionData.setIdUsuarioSesion(usuario.getIdUsuario());
             //sincronizacionData.setListRespuestas(listRespuestas);
             sincronizacionData.setRevisionFechaMod(Utils.getDate(Constants.DATE_FORMAT_FULL));
         }else{

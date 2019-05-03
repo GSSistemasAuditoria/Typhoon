@@ -1,12 +1,14 @@
 package com.elektra.typhoon.service;
 
 import com.elektra.typhoon.objetos.request.RequestCartera;
+import com.elektra.typhoon.objetos.request.RequestLogin;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
 import com.elektra.typhoon.objetos.response.DatosPorValidarResponse;
 import com.elektra.typhoon.objetos.response.ResponseCartera;
 import com.elektra.typhoon.objetos.response.ResponseDescargaPdf;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
+import com.elektra.typhoon.objetos.response.ResponseNotificaciones;
 import com.elektra.typhoon.objetos.response.ResponseNuevoUsuario;
 import com.elektra.typhoon.objetos.response.ResponseValidaUsuario;
 import com.elektra.typhoon.objetos.response.SincronizacionResponse;
@@ -20,8 +22,10 @@ import retrofit2.http.Query;
 
 public interface ApiInterface {
 
-    @GET("ValidarEmpleado")
-    Call<ResponseLogin> authenticate(@Query("idUsuario") String usuario, @Query("password") String contrasena);
+    //@GET("ValidarEmpleado")
+    //Call<ResponseLogin> authenticate(@Query("idUsuario") String usuario, @Query("password") String contrasena);
+    @POST("ValidarEmpleado")
+    Call<ResponseLogin> authenticate(@Body RequestLogin requestLogin);
 
     @POST("GetCarteraRevisiones")
     Call<ResponseCartera> carteraRevisiones(@Header("Authorization") String jwt, @Body RequestCartera requestCartera);
@@ -43,4 +47,7 @@ public interface ApiInterface {
 
     @GET("GetDatosPorValidar")
     Call<DatosPorValidarResponse> datosPorValidar(@Header("Authorization") String jwt, @Query("idRevision") int idRevision, @Query("idRol") int idRol);
+
+    @GET("GetTranNotificaciones")
+    Call<ResponseNotificaciones> getNotificaciones(@Header("Authorization") String jwt, @Query("idRol") int idRol);
 }

@@ -49,6 +49,7 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(AnexosDBMethods.QUERY_CREATE_TABLE_TP_REL_REVISION_ANEXOS);
         sqLiteDatabase.execSQL(AnexosDBMethods.QUERY_CREATE_TABLE_TP_TRAN_ANEXOS);
         sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_ANIOS);
+        sqLiteDatabase.execSQL(NotificacionesDBMethods.QUERY_CREATE_TABLE_TP_TRAN_NOTIFICACIONES);
     }
 
     public void deleteAll(){
@@ -73,6 +74,7 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
         db.execSQL("delete from " + AnexosDBMethods.TP_TRAN_ANEXOS);
         db.execSQL("delete from " + AnexosDBMethods.TP_REL_REVISION_ANEXOS);
         db.execSQL("delete from " + AnexosDBMethods.TP_CAT_ANEXOS);
+        db.execSQL("delete from " + NotificacionesDBMethods.TP_TRAN_NOTIFICACIONES);
         db.close();
     }
 

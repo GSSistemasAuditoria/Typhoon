@@ -97,12 +97,13 @@ public class AnexosActivity extends AppCompatActivity {
         expandableListView = findViewById(R.id.expandableListViewAnexos);
 
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-            int previousItem = -1;
+            private int previousItem = -1;
 
             @Override
             public void onGroupExpand(int groupPosition) {
-                if(groupPosition != previousItem )
-                    expandableListView.collapseGroup(previousItem );
+                if(groupPosition != previousItem ) {
+                    expandableListView.collapseGroup(previousItem);
+                }
                 previousItem = groupPosition;
             }
         });

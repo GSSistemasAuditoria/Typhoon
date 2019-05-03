@@ -32,12 +32,39 @@
                     android:src="@drawable/typhoone_logo_bn" />
 
                 <ImageView
+                    android:id="@+id/imageViewNotificaciones"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@mipmap/ic_notificaciones_blanco"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="10dp"
+                    android:visibility="gone"
+                    android:layout_toStartOf="@+id/imageViewMenuCartera"/>
+
+                <ImageView
                     android:id="@+id/imageViewMenuCartera"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:src="@mipmap/ic_menu_options" />
+
+                <TextView
+                    android:id="@+id/textViewNotificaciones"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_toStartOf="@+id/imageViewMenuCartera"
+                    android:background="@drawable/notificacion_layout_style"
+                    android:paddingBottom="2dp"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="2dp"
+                    android:text="1"
+                    android:layout_marginEnd="3dp"
+                    android:layout_marginTop="3dp"
+                    android:visibility="gone"
+                    android:textColor="@android:color/white" />
 
             </RelativeLayout>
 
