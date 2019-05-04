@@ -182,7 +182,7 @@ public class AnexosActivity extends AppCompatActivity {
             }
         });
 
-        if(listAnexos != null){
+        /*if(listAnexos != null){
             if(listAnexos.size() != 0){
                 buttonSincronizarAnexos.setVisibility(View.VISIBLE);
             }else{
@@ -190,7 +190,7 @@ public class AnexosActivity extends AppCompatActivity {
             }
         }else{
             buttonSincronizarAnexos.setVisibility(View.GONE);
-        }
+        }//*/
     }
 
     private void contarAnexosValidados(List<Anexo> listAnexosHeader){

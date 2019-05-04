@@ -427,6 +427,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
         try {
             int totalActualizar = 0;
             int contador = 0;
+            int contadorEvidenciasProcesadas = 0;
             int flagNotificaciones = condicionNotificaciones(responseData);
             FoliosDBMethods foliosDBMethods = new FoliosDBMethods(context);
             folio = foliosDBMethods.readFolio(
@@ -458,7 +459,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                     sincronizacionPost.setSincronizacionData(sincronizacionData);
                                     if(notificar) {
                                         if(flagCambios) {
-                                            if (i == totalActualizar - 1) {
+                                            if (contadorEvidenciasProcesadas == totalActualizar - 1) {
                                                 if (flagNotificaciones == 2) {
                                                     sincronizacionData.setUltimaSincronizacion(true);
                                                 }
@@ -468,6 +469,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                     String response = sincronizaDatos(sincronizacionPost, 1);
                                     if (response.equals("Sincronizado correctamente")) {
                                         contador++;
+                                        contadorEvidenciasProcesadas++;
                                         System.out.println("Rubro: " + preguntaTemp.getIdRubro() + " Pregunta: " + preguntaTemp.getIdPregunta() + " Barco: " + preguntaTemp.getIdBarco());
                                     }//*/
                                     updateDialogText("Sincronizado: " + (totalActualizar - (totalActualizar - contador)) + " de: " + totalActualizar);

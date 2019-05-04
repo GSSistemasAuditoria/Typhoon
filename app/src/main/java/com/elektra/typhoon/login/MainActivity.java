@@ -26,6 +26,7 @@ import com.elektra.typhoon.carteraFolios.CarteraFolios;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.CatalogosDBMethods;
+import com.elektra.typhoon.database.NotificacionesDBMethods;
 import com.elektra.typhoon.database.TyphoonDataBase;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
@@ -40,7 +41,9 @@ import com.elektra.typhoon.objetos.response.EstatusEvidencia;
 import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.EtapaEvidencia;
 import com.elektra.typhoon.objetos.response.EtapaSubAnexo;
+import com.elektra.typhoon.objetos.response.Notificacion;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
+import com.elektra.typhoon.objetos.response.ResponseNotificaciones;
 import com.elektra.typhoon.objetos.response.RolUsuario;
 import com.elektra.typhoon.objetos.response.TipoRespuesta;
 import com.elektra.typhoon.registro.NuevoRegistro;
@@ -589,11 +592,16 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 progressDialog.dismiss();
                                 Utils.message(MainActivity.this, "Catálogos descargados");
+
+                                //ResponseLogin.Usuario usuarioData = new UsuarioDBMethods(getApplicationContext()).readUsuario();
+                                //obtenerNotificaciones(usuarioData.getIdrol(),opcion);
+
                                 if (opcion == 1) {
                                     Intent intent = new Intent(MainActivity.this, CarteraFolios.class);
                                     startActivity(intent);
                                     finish();
-                                }
+                                }//*/
+
                             /*} catch (NullPointerException e) {
                                 progressDialog.dismiss();
                                 Utils.message(activity, "Error al guardar los catálogos: " + e.getMessage());
@@ -635,5 +643,64 @@ public class MainActivity extends AppCompatActivity {
             progressDialog.dismiss();
             Utils.message(MainActivity.this, "Error al descargar catálogos: ");
         }//*/
+    }
+
+    private void obtenerNotificaciones(int idRol, final int opcion){
+
+        final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this,"Descargando notificaciones...");
+
+        ApiInterface mApiService = Utils.getInterfaceService();
+
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+
+        final NotificacionesDBMethods notificacionesDBMethods = new NotificacionesDBMethods(MainActivity.this);
+
+        //Call<ResponseCartera> mService = mApiService.carteraRevisiones(requestCartera);
+        Call<ResponseNotificaciones> mService = mApiService.getNotificaciones(sharedPreferences.getString(Constants.SP_JWT_TAG,""),idRol);
+        mService.enqueue(new Callback<ResponseNotificaciones>() {
+
+            @Override
+            public void onResponse(Call<ResponseNotificaciones> call, Response<ResponseNotificaciones> response) {
+                progressDialog.dismiss();
+                if(response != null) {
+                    if (response.body() != null) {
+                        if (response.body().getNotificaciones().getExito()) {
+                            if(response.body().getNotificaciones().getNotificaciones() != null){
+                                for(Notificacion notificacion:response.body().getNotificaciones().getNotificaciones()){
+                                    notificacionesDBMethods.createNotificacion(notificacion);
+                                }
+                                //loadNotificaciones(usuario.getIdrol());
+                                if (opcion == 1) {
+                                    Intent intent = new Intent(MainActivity.this, CarteraFolios.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            }
+                        } else {
+                            Utils.message(getApplicationContext(), response.body().getNotificaciones().getError());
+                        }
+                    } else {
+                        if (response.errorBody() != null) {
+                            try {
+                                Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + e.getMessage());
+                            }
+                        } else {
+                            Utils.message(getApplicationContext(), "Error al descargar notificaciones");
+                        }
+                    }
+                }else{
+                    Utils.message(getApplicationContext(), "Error al descargar notificaciones");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseNotificaciones> call, Throwable t) {
+                progressDialog.dismiss();
+                Utils.message(MainActivity.this, Constants.MSG_ERR_CONN);
+            }
+        });
     }
 }

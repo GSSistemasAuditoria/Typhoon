@@ -32,6 +32,8 @@ public class Notificacion {
     @Expose
     private String fchMod;
 
+    private int visto;
+
     public int getIdRol() {
         return idRol;
     }
@@ -70,5 +72,13 @@ public class Notificacion {
 
     public void setIdNotificacion(int idNotificacion) {
         this.idNotificacion = idNotificacion;
+    }
+
+    public int getVisto() {
+        return visto;
+    }
+
+    public void setVisto(int visto) {
+        this.visto = visto;
     }
 }

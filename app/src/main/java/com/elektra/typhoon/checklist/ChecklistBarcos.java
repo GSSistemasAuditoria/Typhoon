@@ -177,7 +177,7 @@ public class ChecklistBarcos extends AppCompatActivity{
             }
         });
 
-        buttonSincronizar.setVisibility(View.GONE);
+        //buttonSincronizar.setVisibility(View.GONE);
 
         final Button buttonAnexos = findViewById(R.id.buttonAnexos);
         buttonAnexos.setOnClickListener(new View.OnClickListener() {
@@ -709,7 +709,7 @@ public class ChecklistBarcos extends AppCompatActivity{
                             expandableListView.setAdapter(adapterExpandableChecklist);
                             //((AdapterExpandableChecklist)expandableListView.getAdapter()).notifyDataSetChanged();
                             statusDialog.dismiss();
-                            buttonSincronizar.setVisibility(View.VISIBLE);
+                            //buttonSincronizar.setVisibility(View.VISIBLE);
                         }else{
                             statusDialog.dismiss();
                             Utils.message(context,"No se ha descargado el checklist, sincronice su revisión");

@@ -8,7 +8,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.elektra.typhoon.R;
+import com.elektra.typhoon.database.NotificacionesDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
+import com.elektra.typhoon.objetos.response.Notificacion;
+
+import java.util.List;
 
 /**
  * Proyecto:
@@ -35,6 +39,14 @@ public class TyphoonNotificationActivity extends AppCompatActivity {
         if(getIntent().getStringExtra("message") != null){
             message = encryption.decryptAES(getIntent().getStringExtra("message"));
         }
+
+        NotificacionesDBMethods notificacionesDBMethods = new NotificacionesDBMethods(this);
+        List<Notificacion> listNotificaciones = notificacionesDBMethods.readNotificaciones(1);
+        Notificacion notificacion = new Notificacion();
+        notificacion.setTitle(title);
+        notificacion.setBody(message);
+        notificacion.setIdNotificacion(listNotificaciones.size() + 1);
+        notificacionesDBMethods.createNotificacion(notificacion);
 
         TextView textViewCancelar = findViewById(R.id.buttonCancelar);
         TextView textViewAceptar = findViewById(R.id.buttonAceptar);

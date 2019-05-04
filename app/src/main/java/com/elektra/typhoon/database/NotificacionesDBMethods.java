@@ -33,6 +33,7 @@ public class NotificacionesDBMethods {
             "ID_ROL INTEGER, " +
             "TITLE TEXT, " +
             "BODY TEXT, " +
+            "VISTO INTEGER, " +
             "FECHA_MOD TEXT)";
 
     public void createNotificacion(Notificacion notificacion){
@@ -51,8 +52,10 @@ public class NotificacionesDBMethods {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<Notificacion> listNotificaciones = new ArrayList<>();
         StringBuilder query = new StringBuilder();
-        query.append("SELECT ID_NOTIFICACION,ID_ROL,TITLE,BODY,FECHA_MOD FROM ").append(TP_TRAN_NOTIFICACIONES).append(" WHERE ID_ROL = ?");
-        Cursor cursor = db.rawQuery(query.toString(),new String[]{String.valueOf(idRol)});
+        query.append("SELECT ID_NOTIFICACION,ID_ROL,TITLE,BODY,FECHA_MOD,VISTO FROM ").append(TP_TRAN_NOTIFICACIONES);
+                //.append(" WHERE ID_ROL = ?");
+        String[] args = null;
+        Cursor cursor = db.rawQuery(query.toString(),/*new String[]{String.valueOf(idRol)*/args);
         if(cursor != null){
             if(cursor.moveToFirst()){
                 do{
@@ -62,6 +65,7 @@ public class NotificacionesDBMethods {
                     notificacion.setTitle(cursor.getString(2));
                     notificacion.setBody(cursor.getString(3));
                     notificacion.setFchMod(cursor.getString(4));
+                    notificacion.setVisto(cursor.getInt(5));
                     listNotificaciones.add(notificacion);
                 }while(cursor.moveToNext());
             }

@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
@@ -24,15 +25,19 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.adapters.AdapterRecyclerViewCartera;
+import com.elektra.typhoon.adapters.NotificacionesAdapter;
 import com.elektra.typhoon.adapters.SpinnerAdapter;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.BarcoDBMethods;
@@ -121,6 +126,7 @@ public class CarteraFolios extends AppCompatActivity {
         TextView textViewNombreUsuario = (TextView) findViewById(R.id.textViewNombreUsuario);
         TextView textViewRol = findViewById(R.id.textViewRol);
         textViewNotificaciones = findViewById(R.id.textViewNotificaciones);
+        final ImageView imageViewNotificaciones = findViewById(R.id.imageViewNotificaciones);
 
         UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(this);
         usuario = usuarioDBMethods.readUsuario();
@@ -128,6 +134,13 @@ public class CarteraFolios extends AppCompatActivity {
             textViewNombreUsuario.setText(usuario.getNombre());
             textViewRol.setText(Utils.getRol(this,usuario.getIdrol()));
         }
+
+        imageViewNotificaciones.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarPopupNotificaciones(imageViewNotificaciones,1);
+            }
+        });
 
         //loadNotificaciones(usuario.getIdrol());
 
@@ -515,6 +528,8 @@ public class CarteraFolios extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
+
+        loadNotificaciones(0);
     }
 
     private void obtenerNotificaciones(int idRol){
@@ -574,10 +589,41 @@ public class CarteraFolios extends AppCompatActivity {
     private void loadNotificaciones(int idRol){
         List<Notificacion> notificaciones = new NotificacionesDBMethods(CarteraFolios.this).readNotificaciones(idRol);
         if(notificaciones.size() == 0){
-            textViewNotificaciones.setVisibility(View.GONE);
+            //textViewNotificaciones.setVisibility(View.GONE);
         }else{
-            textViewNotificaciones.setVisibility(View.VISIBLE);
-            textViewNotificaciones.setText(String.valueOf(notificaciones.size()));
+            //textViewNotificaciones.setVisibility(View.VISIBLE);
+            //textViewNotificaciones.setText(String.valueOf(notificaciones.size()));
         }
+    }
+
+    private void mostrarPopupNotificaciones(View anchorView,final int position) {
+        final PopupWindow popup = new PopupWindow(CarteraFolios.this);
+        View layout = getLayoutInflater().inflate(R.layout.popup_notificaciones_layout, null);
+        popup.setContentView(layout);
+        // Set content width and height
+
+        List<Notificacion> notificaciones = new NotificacionesDBMethods(CarteraFolios.this).readNotificaciones(1);
+        ListView listViewNotificaciones = layout.findViewById(R.id.listViewNotificaciones);
+        NotificacionesAdapter notificacionesAdapter = new NotificacionesAdapter(notificaciones,CarteraFolios.this);
+        listViewNotificaciones.setAdapter(notificacionesAdapter);
+
+
+        popup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+        popup.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
+        // Closes the popup window when touch outside of it - when looses focus
+        popup.setOutsideTouchable(true);
+        popup.setFocusable(true);
+        //popup.setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.drawable_editext));descomentar
+        // Show anchored to button
+        popup.setBackgroundDrawable(new BitmapDrawable());
+        //popup.showAsDropDown(anchorView,0,Math.round(anchorView.getY())-dpToPx(100));
+        popup.showAsDropDown(anchorView);
+    }
+
+    public int dpToPx(int dp) {
+        float density = getResources()
+                .getDisplayMetrics()
+                .density;
+        return Math.round((float) dp * density);
     }
 }
