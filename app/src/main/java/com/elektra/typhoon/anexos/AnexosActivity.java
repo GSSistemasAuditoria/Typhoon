@@ -137,7 +137,7 @@ public class AnexosActivity extends AppCompatActivity {
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdAnexo()), String.valueOf(subanexo.getIdSubAnexo())});//*/
 
-                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO " +
+                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexosSinDocumento("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdSubAnexo())});
 
@@ -171,7 +171,7 @@ public class AnexosActivity extends AppCompatActivity {
 
         contarAnexosValidados(listAnexos);
 
-        adapterExpandableAnexos = new AdapterExpandableAnexos(listAnexos,this,textViewCumplen,textViewNoCumplen,textViewTotal,fechaInicio);
+        adapterExpandableAnexos = new AdapterExpandableAnexos(listAnexos,this,textViewCumplen,textViewNoCumplen,textViewTotal,fechaInicio,estatus);
         expandableListView.setAdapter(adapterExpandableAnexos);
 
         buttonSincronizarAnexos.setOnClickListener(new View.OnClickListener() {
@@ -454,7 +454,7 @@ public class AnexosActivity extends AppCompatActivity {
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdAnexo()), String.valueOf(subanexo.getIdSubAnexo())});//*/
 
-                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO " +
+                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexosSinDocumento("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdSubAnexo())});
 
@@ -470,7 +470,7 @@ public class AnexosActivity extends AppCompatActivity {
 
         contarAnexosValidados(listAnexos);
 
-        adapterExpandableAnexos = new AdapterExpandableAnexos(listAnexos,this,textViewCumplen,textViewNoCumplen,textViewTotal,fechaInicio);
+        adapterExpandableAnexos = new AdapterExpandableAnexos(listAnexos,this,textViewCumplen,textViewNoCumplen,textViewTotal,fechaInicio,estatus);
         expandableListView.setAdapter(adapterExpandableAnexos);
     }
 }

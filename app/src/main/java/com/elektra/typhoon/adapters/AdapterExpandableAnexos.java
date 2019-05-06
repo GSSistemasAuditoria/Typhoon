@@ -39,14 +39,16 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
     private TextView textViewNoCumplen;
     private TextView textViewTotal;
     private String fechaRevision;
+    private int estatusRevision;
 
-    public AdapterExpandableAnexos(List<Anexo> listAnexosHeader, Activity activity,TextView textViewCumplen,TextView textViewNoCumplen,TextView textViewTotal,String fechaRevision){
+    public AdapterExpandableAnexos(List<Anexo> listAnexosHeader, Activity activity,TextView textViewCumplen,TextView textViewNoCumplen,TextView textViewTotal,String fechaRevision,int estatusRevision){
         this.listAnexosHeader = listAnexosHeader;
         this.activity = activity;
         this.textViewCumplen = textViewCumplen;
         this.textViewNoCumplen = textViewNoCumplen;
         this.textViewTotal = textViewTotal;
         this.fechaRevision = fechaRevision;
+        this.estatusRevision = estatusRevision;
     }
 
     public List<Anexo> getListAnexosHeader() {
@@ -159,7 +161,7 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
         }
 
         RecyclerView recyclerViewItemsAnexos = view.findViewById(R.id.recyclerViewPreguntas);
-        AdapterRecycleViewItemsAnexos adapterRecycleViewItemsAnexos = new AdapterRecycleViewItemsAnexos(anexoHeader.getListSubAnexos(),activity,i,this,fechaRevision,anexoHeader);
+        AdapterRecycleViewItemsAnexos adapterRecycleViewItemsAnexos = new AdapterRecycleViewItemsAnexos(anexoHeader.getListSubAnexos(),activity,i,this,fechaRevision,anexoHeader,estatusRevision);
         recyclerViewItemsAnexos.setAdapter(adapterRecycleViewItemsAnexos);
         LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
         recyclerViewItemsAnexos.setLayoutManager(layoutManager);

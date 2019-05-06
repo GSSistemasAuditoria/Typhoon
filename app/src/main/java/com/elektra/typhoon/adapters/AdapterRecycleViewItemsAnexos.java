@@ -77,6 +77,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
     private AdapterExpandableAnexos adapterExpandableAnexos;
     private String fechaRevision;
     private Anexo anexoHeader;
+    private int estatusRevision;
 
     public class MyViewHolder extends RecyclerView.ViewHolder /*implements View.OnClickListener*/{
 
@@ -102,13 +103,14 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         }//*/
     }
 
-    public AdapterRecycleViewItemsAnexos(List<Anexo> listAnexos, Activity activity,int header,AdapterExpandableAnexos adapterExpandableAnexos,String fechaRevision,Anexo anexoHeader){
+    public AdapterRecycleViewItemsAnexos(List<Anexo> listAnexos, Activity activity,int header,AdapterExpandableAnexos adapterExpandableAnexos,String fechaRevision,Anexo anexoHeader,int estatusRevision){
         this.activity = activity;
         this.listAnexos = listAnexos;
         this.header = header;
         this.adapterExpandableAnexos = adapterExpandableAnexos;
         this.fechaRevision = fechaRevision;
         this.anexoHeader = anexoHeader;
+        this.estatusRevision = estatusRevision;
     }
 
     public int getHeader() {
@@ -254,6 +256,10 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
             holder.imageViewSeleccionado.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_check_blue));
         }else{
             holder.imageViewSeleccionado.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_uncheck_blue));
+        }
+
+        if(estatusRevision == 3 || estatusRevision == 4){
+            holder.imageViewSubirArchivo.setVisibility(View.GONE);
         }
     }
 

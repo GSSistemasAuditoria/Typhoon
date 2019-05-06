@@ -469,9 +469,10 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                     String response = sincronizaDatos(sincronizacionPost, 1);
                                     if (response.equals("Sincronizado correctamente")) {
                                         contador++;
-                                        contadorEvidenciasProcesadas++;
+                                        //contadorEvidenciasProcesadas++;
                                         System.out.println("Rubro: " + preguntaTemp.getIdRubro() + " Pregunta: " + preguntaTemp.getIdPregunta() + " Barco: " + preguntaTemp.getIdBarco());
                                     }//*/
+                                    contadorEvidenciasProcesadas++;
                                     updateDialogText("Sincronizado: " + (totalActualizar - (totalActualizar - contador)) + " de: " + totalActualizar);
                                 }
                             }
@@ -492,6 +493,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
             if(listAnexos != null){
                 totalActualizar = 0;
                 contador = 0;
+                int contadorAnexos = 0;
                 for(Anexo anexo:listAnexos) {
                     for(Anexo subanexo:anexo.getListSubAnexos()) {
                         if (subanexo.isSeleccionado() || existeId(responseData.body().getDatos().getDatosPorValidar().getListIdSubanexos(),subanexo.getIdSubAnexo())) {
@@ -512,7 +514,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                 sincronizacionPost.setSincronizacionData(sincronizacionData);
                                 if(notificar) {
                                     if(flagCambios) {
-                                        if (i == totalActualizar - 1) {
+                                        if (contadorAnexos == totalActualizar - 1) {
                                             if (flagNotificaciones == 1 || flagNotificaciones == 3) {
                                                 sincronizacionData.setUltimaSincronizacion(true);
                                             }
@@ -522,8 +524,10 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                 String response = sincronizaDatos(sincronizacionPost,2);
                                 if(response.equals("Sincronizado correctamente")) {
                                     contador++;
+                                    //contadorAnexos++;
                                     System.out.println("Anexo: " + anexo.getIdAnexo() + " Subanexo: " + subanexo.getIdSubAnexo());
                                 }//*/
+                                contadorAnexos++;
                                 updateDialogText("Sincronizado: " + (totalActualizar - (totalActualizar - contador)) + " de: " + totalActualizar);
                             }
                         }

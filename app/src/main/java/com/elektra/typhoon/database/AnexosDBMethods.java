@@ -178,6 +178,37 @@ public class AnexosDBMethods {
         return listAnexos;
     }
 
+    public List<Anexo> readAnexosSinDocumento(String query,String[] args){
+        CursorWindowFixer.fix();
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        List<Anexo> listAnexos = new ArrayList<>();
+        Cursor cursor = db.rawQuery(query,args);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    Anexo anexo = new Anexo();
+                    anexo.setIdRevision(cursor.getInt(0));
+                    //anexo.setIdAnexo(cursor.getInt(1));
+                    anexo.setIdSubAnexo(cursor.getInt(2));
+                    anexo.setIdDocumento(cursor.getString(3));
+                    anexo.setIdEtapa(cursor.getInt(4));
+                    //anexo.setBase64(cursor.getString(5));
+                    anexo.setNombreArchivo(cursor.getString(5));
+                    anexo.setFechaSinc(cursor.getString(6));
+                    if(cursor.getInt(7) == 0){
+                        anexo.setSeleccionado(false);
+                    }else{
+                        anexo.setSeleccionado(true);
+                    }
+                    listAnexos.add(anexo);
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return listAnexos;
+    }
+
     public void updateAnexo(ContentValues values,String condition,String[] args){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         db.update(TP_TRAN_ANEXOS,values,condition,args);
