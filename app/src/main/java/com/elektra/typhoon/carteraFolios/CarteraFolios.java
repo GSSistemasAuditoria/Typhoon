@@ -260,6 +260,8 @@ public class CarteraFolios extends AppCompatActivity {
                             descargaCatalogos(2);
                         }else if(item.getItemId() == R.id.nuevaInstalacion){
                             Utils.nuevaInstalacionDialog(CarteraFolios.this);
+                        }else if(item.getItemId() == R.id.actualizarRevisiones){
+                            obtenerFolios(-1, -1, -1);
                         }
                         return true;
                     }

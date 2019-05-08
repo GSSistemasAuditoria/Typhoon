@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="font_size_login">40sp</dimen>
+    <dimen name="font_size_login_button">34sp</dimen>
+    <dimen name="font_size_login_enlace">31sp</dimen>
+    <dimen name="font_size_login_edittext">32sp</dimen>
+
+</resources>

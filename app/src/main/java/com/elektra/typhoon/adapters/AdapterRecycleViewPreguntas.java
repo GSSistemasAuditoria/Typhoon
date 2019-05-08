@@ -11,6 +11,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -57,6 +59,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import retrofit2.Call;
@@ -610,6 +613,9 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
         String estatusString = "";
         String etapaString = "";
+        double longitud = 0.0;
+        double latitud = 0.0;
+        int barco = 0;
 
         View dialogLayout = null;
         UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(activity);
@@ -660,6 +666,19 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
             if(evidencia.getIdEvidencia().equals(identificador)) {
                 //if(evidencia.getIdEstatus() == 1){
+
+                longitud = evidencia.getLongitude();
+                latitud = evidencia.getLatitude();
+                barco = evidencia.getIdBarco();
+
+                List<Address> addresses;
+                Geocoder geocoder = new Geocoder(activity, Locale.getDefault());
+
+                try {
+                    addresses = geocoder.getFromLocation(latitud, longitud, 1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 etapaString = Utils.getEtapa(activity,evidencia.getIdEtapa());
                 estatusString = Utils.getEstatusEvidencia(activity,evidencia.getIdEstatus());
@@ -1430,8 +1449,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     public void seleccionarArchivo(int position) {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
-        String[] mimetypes={"image/png","image/jpg","image/jpeg", "application/pdf"};//*/
-        //String[] mimetypes={"application/pdf"}; //pdf*/
+        //String[] mimetypes={"image/png","image/jpg","image/jpeg", "application/pdf"};//*/
+        String[] mimetypes={"application/pdf"}; //pdf*/
         intent.setType("*/*");
         intent.putExtra(Intent.EXTRA_MIME_TYPES,mimetypes);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);

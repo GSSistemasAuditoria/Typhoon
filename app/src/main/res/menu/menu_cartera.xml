@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/cerrarSesion"
-        android:title="@string/cerrar_sesion_menu"
-        android:icon="@mipmap/ic_cerrar_sesion"
+        android:id="@+id/actualizarRevisiones"
+        android:title="@string/actualizar_revisiones_menu"
+        android:icon="@mipmap/ic_descarga_catalogos"
         />
 
     <item
@@ -18,6 +18,12 @@
         android:id="@+id/nuevaInstalacion"
         android:title="@string/nueva_instalacion_tag"
         android:icon="@mipmap/ic_nueva_instalacion"
+        />
+
+    <item
+        android:id="@+id/cerrarSesion"
+        android:title="@string/cerrar_sesion_menu"
+        android:icon="@mipmap/ic_cerrar_sesion"
         />
 
 </menu>
