@@ -51,6 +51,7 @@ import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.response.Barco;
+import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
 import com.elektra.typhoon.objetos.response.Configuracion;
 import com.elektra.typhoon.objetos.response.EstatusEvidencia;
@@ -119,7 +120,8 @@ public class Utils {
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.URL_PUBLIC)
+                //.baseUrl(Constants.URL_PUBLIC)
+                .baseUrl(new Encryption().decryptAES(Constants.URL_PUBLIC))
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();
@@ -969,10 +971,14 @@ public class Utils {
     @SuppressLint("NewApi")
     public static void deviceLockVerification(Context context){
         KeyguardManager keyguardManager = (KeyguardManager)context.getSystemService(Context.KEYGUARD_SERVICE);
-        if(keyguardManager.isDeviceSecure()){
+        try {
+            if (keyguardManager.isDeviceSecure()) {
 
-        }else{
+            } else {
 
+            }
+        }catch (NoSuchMethodError e){
+            e.printStackTrace();
         }
     }
 
@@ -1087,5 +1093,16 @@ public class Utils {
             }
         }
         return false;
+    }
+
+    public static String getNombreBarco(Context context,int id){
+        BarcoDBMethods barcoDBMethods = new BarcoDBMethods(context);
+        List<CatalogoBarco> barcos = barcoDBMethods.readBarcos();
+        for(CatalogoBarco catalogoBarco:barcos){
+            if(catalogoBarco.getIdBarco() == id){
+                return catalogoBarco.getNombre();
+            }
+        }
+        return "";
     }
 }

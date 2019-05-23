@@ -47,6 +47,12 @@ public class EvidenciasDBMethods {
             "LATITUDE REAL, " +
             "LONGITUDE REAL, " +
             "AGREGADO_COORDINADOR INTEGER, " +
+            "NUEVO INTEGER, " +
+            "FECHA_MOD TEXT, " +
+            "LOCATION TEXT, " +
+            "ID_ROL INTEGER, " +
+            "ID_USUARIO TEXT, " +
+            "AGREGADO_LIDER INTEGER, " +
             "PRIMARY KEY (ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_EVIDENCIA))";
 
     public void createEvidencia(Evidencia evidencia){
@@ -86,6 +92,12 @@ public class EvidenciasDBMethods {
         values.put("LATITUDE",evidencia.getLatitude());
         values.put("LONGITUDE",evidencia.getLongitude());
         values.put("AGREGADO_COORDINADOR",evidencia.getAgregadoCoordinador());
+        values.put("NUEVO",evidencia.getNuevo());
+        values.put("FECHA_MOD",evidencia.getFechaMod());
+        values.put("LOCATION",evidencia.getLocation());
+        values.put("ID_ROL",evidencia.getIdRol());
+        values.put("ID_USUARIO",evidencia.getIdUsuario());
+        values.put("AGREGADO_LIDER",evidencia.getAgregadoLider());
         db.insertWithOnConflict(TP_TRAN_CL_EVIDENCIA, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -127,6 +139,39 @@ public class EvidenciasDBMethods {
                     evidencia.setLatitude(cursor.getDouble(12));
                     evidencia.setLongitude(cursor.getDouble(13));
                     evidencia.setAgregadoCoordinador(cursor.getInt(14));
+                    evidencia.setNuevo(cursor.getInt(15));
+                    evidencia.setFechaMod(cursor.getString(16));
+                    evidencia.setLocation(cursor.getString(17));
+                    evidencia.setIdRol(cursor.getInt(18));
+                    evidencia.setIdUsuario(cursor.getString(19));
+                    evidencia.setAgregadoLider(cursor.getInt(20));
+                    listEvidencia.add(evidencia);
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return listEvidencia;
+    }
+
+    public List<Evidencia> readEvidenciasSinDocumento(String condition, String[] args) throws IOException {
+        CursorWindowFixer.fix();
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        List<Evidencia> listEvidencia = new ArrayList<>();
+        /*StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
+                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM ").append(TP_TRAN_CL_EVIDENCIA);
+        if(condition != null){
+            query.append(" ").append(condition);
+        }
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition,args);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    Evidencia evidencia = new Evidencia();
+                    evidencia.setIdEvidencia(cursor.getString(0));
+                    evidencia.setFechaMod(cursor.getString(1));
                     listEvidencia.add(evidencia);
                 }while(cursor.moveToNext());
             }
@@ -171,6 +216,12 @@ public class EvidenciasDBMethods {
                     evidencia.setLatitude(cursor.getDouble(11));
                     evidencia.setLongitude(cursor.getDouble(12));
                     evidencia.setAgregadoCoordinador(cursor.getInt(13));
+                    evidencia.setNuevo(cursor.getInt(14));
+                    evidencia.setFechaMod(cursor.getString(15));
+                    evidencia.setLocation(cursor.getString(16));
+                    evidencia.setIdRol(cursor.getInt(17));
+                    evidencia.setIdUsuario(cursor.getString(18));
+                    evidencia.setAgregadoLider(cursor.getInt(19));
                 }while(cursor.moveToNext());
             }
         }

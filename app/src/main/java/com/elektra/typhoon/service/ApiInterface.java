@@ -3,6 +3,7 @@ package com.elektra.typhoon.service;
 import com.elektra.typhoon.objetos.request.RequestCartera;
 import com.elektra.typhoon.objetos.request.RequestLogin;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
+import com.elektra.typhoon.objetos.request.ValidaDatosRequest;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
 import com.elektra.typhoon.objetos.response.DatosPorValidarResponse;
 import com.elektra.typhoon.objetos.response.ResponseCartera;
@@ -45,8 +46,9 @@ public interface ApiInterface {
     @GET("DownloadInformePregunta")
     Call<ResponseDescargaPdf> descargaPDF(@Header("Authorization") String jwt,@Query("idPregunta") int idPregunta);
 
-    @GET("GetDatosPorValidar")
-    Call<DatosPorValidarResponse> datosPorValidar(@Header("Authorization") String jwt, @Query("idRevision") int idRevision, @Query("idRol") int idRol);
+    @POST("GetDatosPorValidar")
+    //Call<DatosPorValidarResponse> datosPorValidar(@Header("Authorization") String jwt, @Query("idRevision") int idRevision, @Query("idRol") int idRol);
+    Call<DatosPorValidarResponse> datosPorValidar(@Header("Authorization") String jwt, @Body ValidaDatosRequest validaDatosRequest);
 
     @GET("GetTranNotificaciones")
     Call<ResponseNotificaciones> getNotificaciones(@Header("Authorization") String jwt, @Query("idRol") int idRol);

@@ -25,6 +25,7 @@
             android:textSize="18sp"
             android:textColor="@color/blanco"
             android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
             android:text="Texto"/>
 
     </LinearLayout>

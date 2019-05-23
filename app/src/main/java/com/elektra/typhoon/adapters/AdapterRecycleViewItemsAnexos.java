@@ -190,7 +190,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                                         "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ? AND ID_DOCUMENTO = ?"
                                 , new String[]{String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdAnexo()), String.valueOf(anexo.getIdSubAnexo()), anexo.getIdDocumento()});//*/
 
-                        List<Anexo> anexoGuardado = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO " +
+                        List<Anexo> anexoGuardado = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD " +
                                         "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                                 , new String[]{String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdSubAnexo())});
 
@@ -371,7 +371,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                 }
 
                 //textViewEstatus.setText("Estatus general: " + finalEstatusString);
-                textViewEtapa.setText("Etapa actual: " + finalEtapaString);
+                textViewEtapa.setText(finalEtapaString);
 
                 HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(activity);
                 List<HistoricoAnexo> listHistoricoAnexo = historicoDBMethods.readHistoricoAnexo("SELECT ID_SUBANEXO,ID_REVISION,ID_ETAPA,ID_USUARIO,NOMBRE,MOTIVO_RECHAZO,FECHA_MOD,GUID,SUBANEXO_FCH_SINC,ID_ROL FROM " +

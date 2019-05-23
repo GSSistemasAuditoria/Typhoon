@@ -52,6 +52,22 @@ public class Evidencia {
     @Expose
     private List<Historico> listHistorico;
 
+    @SerializedName("EVIDENCIA_FCH_MOD")
+    @Expose
+    private String fechaMod;
+
+    @SerializedName("LOCATION")
+    @Expose
+    private String location;
+
+    @SerializedName("ID_ROL")
+    @Expose
+    private int idRol;
+
+    @SerializedName("ID_USUARIO")
+    @Expose
+    private String idUsuario;
+
     private Bitmap smallBitmap;
     private Bitmap originalBitmap;
     private int idRevision;
@@ -62,6 +78,8 @@ public class Evidencia {
     private String contenidoPreview;
     private int idBarco;
     private int agregadoCoordinador;
+    private int agregadoLider;
+    private int nuevo;
 
     public Evidencia(){
 
@@ -219,5 +237,53 @@ public class Evidencia {
 
     public void setAgregadoCoordinador(int agregadoCoordinador) {
         this.agregadoCoordinador = agregadoCoordinador;
+    }
+
+    public int getNuevo() {
+        return nuevo;
+    }
+
+    public void setNuevo(int nuevo) {
+        this.nuevo = nuevo;
+    }
+
+    public String getFechaMod() {
+        return fechaMod;
+    }
+
+    public void setFechaMod(String fechaMod) {
+        this.fechaMod = fechaMod;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public int getIdRol() {
+        return idRol;
+    }
+
+    public void setIdRol(int idRol) {
+        this.idRol = idRol;
+    }
+
+    public String getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(String idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+
+    public int getAgregadoLider() {
+        return agregadoLider;
+    }
+
+    public void setAgregadoLider(int agregadoLider) {
+        this.agregadoLider = agregadoLider;
     }
 }

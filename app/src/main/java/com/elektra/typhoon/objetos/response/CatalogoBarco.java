@@ -22,6 +22,18 @@ public class CatalogoBarco {
     @Expose
     private String nombre;
 
+    @SerializedName("LONGITUD")
+    @Expose
+    private double longitud;
+
+    @SerializedName("LATITUD")
+    @Expose
+    private double latitud;
+
+    @SerializedName("RADIO")
+    @Expose
+    private float radio;
+
     private List<RubroData> listRubros;
 
     public int getIdBarco() {
@@ -46,5 +58,29 @@ public class CatalogoBarco {
 
     public void setListRubros(List<RubroData> listRubros) {
         this.listRubros = listRubros;
+    }
+
+    public double getLongitud() {
+        return longitud;
+    }
+
+    public void setLongitud(double longitud) {
+        this.longitud = longitud;
+    }
+
+    public double getLatitud() {
+        return latitud;
+    }
+
+    public void setLatitud(double latitud) {
+        this.latitud = latitud;
+    }
+
+    public float getRadio() {
+        return radio;
+    }
+
+    public void setRadio(float radio) {
+        this.radio = radio;
     }
 }

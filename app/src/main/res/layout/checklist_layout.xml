@@ -65,8 +65,8 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="13dp"
-                android:layout_height="16dp"
+                android:layout_width="@dimen/icono_user_ancho"
+                android:layout_height="@dimen/icono_user_alto"
                 android:layout_marginEnd="5dp"
                 android:background="@mipmap/ic_user_tp"/>
 
@@ -74,7 +74,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/blanco"
-                android:textSize="12sp"
+                android:textSize="@dimen/font_size_bienvenido"
                 android:layout_gravity="center_vertical"
                 android:text="@string/bienvenido_tag"/>
 
@@ -83,7 +83,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/blanco"
-                android:textSize="12sp"
+                android:textSize="@dimen/font_size_bienvenido"
                 android:textStyle="bold"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="5dp"
@@ -93,7 +93,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/blanco"
-                android:textSize="12sp"
+                android:textSize="@dimen/font_size_bienvenido"
                 android:layout_gravity="center_vertical"
                 android:text="@string/simbolo_exclamacion_tag"/>
 
@@ -106,7 +106,7 @@
             android:textColor="@color/blanco"
             android:layout_below="@+id/linearLayoutUsuario"
             android:layout_alignEnd="@+id/linearLayoutUsuario"
-            android:textSize="12sp"
+            android:textSize="@dimen/font_size_bienvenido"
             android:text="Rol"/>
 
     </RelativeLayout>
@@ -115,10 +115,10 @@
         android:id="@+id/relativeLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="5dp"
-        android:paddingTop="5dp"
+        android:paddingStart="@dimen/checklist_padding_vertical_size"
+        android:paddingEnd="@dimen/checklist_padding_vertical_size"
+        android:paddingBottom="@dimen/checklist_padding_horizontal_size"
+        android:paddingTop="@dimen/checklist_padding_horizontal_size"
         android:layout_below="@+id/relativeLayoutUsuario"
         android:background="@color/azul">
 
@@ -133,7 +133,7 @@
                 android:textColor="@color/blanco"
                 android:layout_marginEnd="3dp"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="@dimen/font_size_bienvenido"
                 android:text="@string/folio_tag"/>
 
             <TextView
@@ -143,7 +143,7 @@
                 android:textColor="@color/azulClaro"
                 android:padding="3dp"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="@dimen/font_size_bienvenido"
                 android:text="1001"/>
 
         </LinearLayout>
@@ -160,7 +160,7 @@
                 android:textColor="@color/blanco"
                 android:layout_marginEnd="3dp"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="@dimen/font_size_bienvenido"
                 android:text="@string/mes_revision_tag"/>
 
             <TextView
@@ -170,7 +170,7 @@
                 android:layout_marginEnd="10dp"
                 android:padding="3dp"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="@dimen/font_size_bienvenido"
                 android:textColor="@color/azulClaro" />
 
             <TextView
@@ -179,7 +179,7 @@
                 android:textColor="@color/blanco"
                 android:layout_marginEnd="3dp"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="@dimen/font_size_bienvenido"
                 android:text="@string/estatus_tag"/>
 
             <TextView
@@ -188,7 +188,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/azulClaro"
                 android:padding="3dp"
-                android:textSize="12sp"
+                android:textSize="@dimen/font_size_bienvenido"
                 android:textStyle="bold"
                 />
 
@@ -213,8 +213,8 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="40dp"
-                android:layout_height="30dp"
+                android:layout_width="@dimen/checklist_icono_barco_width"
+                android:layout_height="@dimen/checklist_icono_barco_height"
                 android:layout_margin="5dp"
                 android:src="@drawable/ship"/>
 
@@ -228,6 +228,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:layout_marginEnd="10dp"
+                android:textSize="@dimen/checklist_text_title_barco_size"
                 android:text="Far Sentinel"/>
 
         </LinearLayout>
@@ -265,6 +266,7 @@
                 android:gravity="center_horizontal"
                 android:layout_marginBottom="5dp"
                 android:textStyle="bold"
+                android:textSize="@dimen/checklist_text_title_barco_size"
                 android:textColor="@color/azul"
                 />
 
@@ -299,7 +301,7 @@
                                 android:textColor="@color/azul"
                                 android:textStyle="bold"
                                 android:layout_marginEnd="5dp"
-                                android:textSize="12sp"
+                                android:textSize="@dimen/font_size_bienvenido"
                                 android:text="@string/cumplen_tag"/>
 
                             <TextView
@@ -312,9 +314,9 @@
                                 android:paddingBottom="1dp"
                                 android:paddingStart="7dp"
                                 android:paddingEnd="7dp"
-                                android:layout_marginEnd="10dp"
+                                android:layout_marginEnd="@dimen/checklist_separacion_totales_size"
                                 android:textColor="@color/blanco"
-                                android:textSize="12sp"
+                                android:textSize="@dimen/font_size_bienvenido"
                                 android:text="0"/>
 
                             <TextView
@@ -324,7 +326,7 @@
                                 android:textColor="@color/azul"
                                 android:textStyle="bold"
                                 android:layout_marginEnd="5dp"
-                                android:textSize="12sp"
+                                android:textSize="@dimen/font_size_bienvenido"
                                 android:text="@string/no_cumplen_tag"/>
 
                             <TextView
@@ -338,8 +340,8 @@
                                 android:paddingBottom="1dp"
                                 android:paddingStart="7dp"
                                 android:paddingEnd="7dp"
-                                android:textSize="12sp"
-                                android:layout_marginEnd="10dp"
+                                android:textSize="@dimen/font_size_bienvenido"
+                                android:layout_marginEnd="@dimen/checklist_separacion_totales_size"
                                 android:text="0"/>
 
                             <TextView
@@ -349,7 +351,7 @@
                                 android:textColor="@color/azul"
                                 android:textStyle="bold"
                                 android:layout_marginEnd="5dp"
-                                android:textSize="12sp"
+                                android:textSize="@dimen/font_size_bienvenido"
                                 android:text="@string/total_tag"/>
 
                             <TextView
@@ -363,7 +365,7 @@
                                 android:paddingBottom="1dp"
                                 android:paddingStart="7dp"
                                 android:paddingEnd="7dp"
-                                android:textSize="12sp"
+                                android:textSize="@dimen/font_size_bienvenido"
                                 android:text="0"/>
 
                         </LinearLayout>

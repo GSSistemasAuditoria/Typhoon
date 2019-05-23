@@ -37,6 +37,7 @@
                     android:textStyle="bold"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginBottom="2dp"
+                    android:textSize="@dimen/textview_item_revision_text_size"
                     android:text="Folio:" />
 
                 <TextView
@@ -46,6 +47,7 @@
                     android:textColor="@color/blanco"
                     android:textStyle="bold"
                     android:layout_gravity="center_horizontal"
+                    android:textSize="@dimen/textview_item_revision_text_size"
                     android:text="Folio" />
 
                 </LinearLayout>
@@ -62,7 +64,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_margin="5dp"
+                    android:layout_margin="@dimen/cartera_titulo_revision_margin_size"
                     android:orientation="vertical">
 
                 <TextView
@@ -72,7 +74,7 @@
                     android:singleLine="false"
                     android:textColor="@color/azul"
                     android:layout_marginBottom="5dp"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/textview_item_revision_text_size"
                     android:text="Descripcion" />
 
                 <TextView
@@ -81,6 +83,7 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/azul"
                     android:textStyle="bold"
+                    android:textSize="@dimen/textview_item_revision_text_size"
                     android:text="Fecha" />
 
                 </LinearLayout>
@@ -101,8 +104,8 @@
 
                 <ImageView
                     android:id="@+id/imageViewSincronizar"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_width="@dimen/icono_sinc_item_revision_size"
+                    android:layout_height="@dimen/icono_sinc_item_revision_size"
                     android:layout_centerInParent="true"
                     android:src="@mipmap/ic_sincronizar"/>
 
@@ -121,8 +124,8 @@
 
                 <ImageView
                     android:id="@+id/imageViewEstatus"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="@dimen/icono_estatus_item_revision_size"
+                    android:layout_height="@dimen/icono_estatus_item_revision_size"
                     android:src="@drawable/status_1"
                     android:layout_centerInParent="true"/>
 

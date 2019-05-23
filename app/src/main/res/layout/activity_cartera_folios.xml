@@ -85,8 +85,8 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="13dp"
-                    android:layout_height="16dp"
+                    android:layout_width="@dimen/icono_user_ancho"
+                    android:layout_height="@dimen/icono_user_alto"
                     android:layout_marginEnd="5dp"
                     android:background="@mipmap/ic_user_tp"/>
 
@@ -94,7 +94,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/blanco"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/font_size_bienvenido"
                     android:layout_gravity="center_vertical"
                     android:text="@string/bienvenido_tag"/>
 
@@ -103,7 +103,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/blanco"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/font_size_bienvenido"
                     android:textStyle="bold"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="5dp"
@@ -113,7 +113,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/blanco"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/font_size_bienvenido"
                     android:layout_gravity="center_vertical"
                     android:text="@string/simbolo_exclamacion_tag"/>
 
@@ -126,7 +126,7 @@
                 android:textColor="@color/blanco"
                 android:layout_below="@+id/linearLayoutUsuario"
                 android:layout_alignEnd="@+id/linearLayoutUsuario"
-                android:textSize="12sp"
+                android:textSize="@dimen/font_size_bienvenido"
                 android:text="Rol"/>
 
         </RelativeLayout>
@@ -141,23 +141,23 @@
                 android:id="@+id/spinnerAnio"
                 style="@style/spinner_style"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="3dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/cartera_separacion_combos_size"
                 android:layout_weight="1" />
 
             <Spinner
                 android:id="@+id/spinnerMes"
                 style="@style/spinner_style"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="3dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/cartera_separacion_combos_size"
                 android:layout_weight="1" />
 
             <EditText
                 android:id="@+id/editTextBuscar"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginEnd="3dp"
+                android:layout_marginEnd="@dimen/cartera_separacion_combos_size"
                 android:layout_weight="1"
                 android:background="@drawable/drawable_editext_busqueda"
                 android:ems="10"
@@ -165,20 +165,20 @@
                 android:inputType="number"
                 android:padding="5dp"
                 android:textColor="@color/grisObscuro"
-                android:textSize="14sp" />
+                android:textSize="16sp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="3dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/cartera_separacion_combos_size"
                 android:background="@drawable/drawable_button"
                 android:orientation="horizontal"
                 android:padding="7dp">
 
                 <Button
                     android:id="@+id/buttonBuscar"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/button_cartera_size"
+                    android:layout_height="@dimen/button_cartera_size"
                     android:background="@drawable/ic_search"
                     android:textAllCaps="false"
                     android:textColor="@color/blanco" />
@@ -187,15 +187,15 @@
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:background="@drawable/drawable_button_azul"
                 android:orientation="horizontal"
                 android:padding="7dp">
 
                 <Button
                     android:id="@+id/buttonLimpiarFiltro"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/button_cartera_size"
+                    android:layout_height="@dimen/button_cartera_size"
                     android:background="@drawable/ic_clear"
                     android:textAllCaps="false"
                     android:textColor="@color/blanco" />
@@ -208,7 +208,7 @@
             android:id="@+id/recyclerViewFolios"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="@dimen/cartera_recyclerview_margintop_size"
             android:scrollbars="vertical" />
     </LinearLayout>
 

@@ -31,6 +31,9 @@ public class BarcoDBMethods {
 
     public static String QUERY_CREATE_TABLE_TP_CAT_BARCO = "CREATE TABLE " + TP_CAT_BARCO + " (" +
             "ID_BARCO INTEGER PRIMARY KEY, " +
+            "LATITUDE REAL, " +
+            "LONGITUDE REAL, " +
+            "RADIO REAL, " +
             "NOMBRE TEXT)";
 
     public void createBarco(Barco barco){
@@ -38,6 +41,9 @@ public class BarcoDBMethods {
         ContentValues values = new ContentValues();
         values.put("ID_BARCO",barco.getIdBarco());
         values.put("NOMBRE",barco.getNombre());
+        values.put("LATITUDE",barco.getLatitud());
+        values.put("LONGITUDE",barco.getLongitud());
+        values.put("RADIO",barco.getRadio());
         db.insertWithOnConflict(TP_CAT_BARCO, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -46,7 +52,7 @@ public class BarcoDBMethods {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<CatalogoBarco> listBarco = new ArrayList<>();
         StringBuilder query = new StringBuilder();
-        query.append("SELECT ID_BARCO,NOMBRE FROM ").append(TP_CAT_BARCO);
+        query.append("SELECT ID_BARCO,NOMBRE,LATITUDE,LONGITUDE,RADIO FROM ").append(TP_CAT_BARCO);
         Cursor cursor = db.rawQuery(query.toString(),null);
         if(cursor != null){
             if(cursor.moveToFirst()){
@@ -54,6 +60,9 @@ public class BarcoDBMethods {
                     CatalogoBarco barco = new CatalogoBarco();
                     barco.setIdBarco(cursor.getInt(0));
                     barco.setNombre(cursor.getString(1));
+                    barco.setLatitud(cursor.getDouble(2));
+                    barco.setLongitud(cursor.getDouble(3));
+                    barco.setRadio(cursor.getFloat(4));
                     listBarco.add(barco);
                 }while(cursor.moveToNext());
             }

@@ -43,6 +43,10 @@ public class SubAnexo {
     @Expose
     private String fechaSincronizacion;
 
+    @SerializedName("SUBANEXO_FCH_MOD")
+    @Expose
+    private String fechaMod;
+
     public SubAnexo(int idSubAnexo, int idRevision, String fileName, String contenido, int idEtapa) {
         this.idSubAnexo = idSubAnexo;
         this.idRevision = idRevision;
@@ -108,5 +112,13 @@ public class SubAnexo {
 
     public void setFechaSincronizacion(String fechaSincronizacion) {
         this.fechaSincronizacion = fechaSincronizacion;
+    }
+
+    public String getFechaMod() {
+        return fechaMod;
+    }
+
+    public void setFechaMod(String fechaMod) {
+        this.fechaMod = fechaMod;
     }
 }

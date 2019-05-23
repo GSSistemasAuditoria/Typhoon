@@ -24,6 +24,7 @@
                 android:textStyle="bold"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
+                android:textSize="@dimen/sinc_dialog_text_title_size"
                 android:text="Se va a realizar una nueva instalación y se borrarán todos los datos de esta sesión, ¿Desea continuar?"/>
 
         </LinearLayout>
@@ -33,8 +34,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:layout_marginBottom="20dp">
+        android:layout_marginTop="@dimen/sinc_dialog_text_title_margin_up"
+        android:layout_marginBottom="@dimen/sinc_dialog_text_title_margin_bottom">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -47,19 +48,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/drawable_button_azul"
-                android:layout_marginEnd="5dp">
+                android:layout_marginEnd="@dimen/sinc_dialog_separacion_hor_button">
 
                 <TextView
                     android:id="@+id/buttonCancelar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/cancelar_tag"
-                    android:textSize="16sp"
+                    android:textSize="@dimen/sinc_dialog_text_button_size"
                     android:textStyle="bold"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="7dp"
-                    android:layout_marginBottom="7dp"
+                    android:layout_marginEnd="@dimen/sinc_dialog_margin_ver_button"
+                    android:layout_marginStart="@dimen/sinc_dialog_margin_ver_button"
+                    android:layout_marginTop="@dimen/sinc_dialog_margin_hor_button"
+                    android:layout_marginBottom="@dimen/sinc_dialog_margin_hor_button"
                     android:textColor="@color/blanco"/>
 
             </LinearLayout>
@@ -75,12 +76,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/aceptar_tag"
-                    android:textSize="16sp"
+                    android:textSize="@dimen/sinc_dialog_text_button_size"
                     android:textStyle="bold"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="7dp"
-                    android:layout_marginBottom="7dp"
+                    android:layout_marginEnd="@dimen/sinc_dialog_margin_ver_button"
+                    android:layout_marginStart="@dimen/sinc_dialog_margin_ver_button"
+                    android:layout_marginTop="@dimen/sinc_dialog_margin_hor_button"
+                    android:layout_marginBottom="@dimen/sinc_dialog_margin_hor_button"
                     android:textColor="@color/blanco"/>
 
             </LinearLayout>

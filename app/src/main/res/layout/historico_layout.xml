@@ -15,8 +15,8 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/sinc_dialog_icono_size"
+                android:layout_height="@dimen/sinc_dialog_icono_size"
                 android:src="@drawable/historial_icono"/>
 
             <TextView
@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/historico_tag"
                 android:textStyle="bold"
-                android:textSize="18sp"
+                android:textSize="@dimen/sinc_dialog_text_title_size"
                 android:layout_marginStart="10dp"
                 android:layout_gravity="center_vertical"
                 android:textColor="@color/azul"/>
@@ -33,36 +33,98 @@
 
     </RelativeLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewtituloBarco"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/barco_tag"
+            android:textSize="@dimen/historico_text_datos_size"
+            android:layout_marginBottom="5dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
+            android:visibility="gone"
+            android:textStyle="bold"
+            android:textColor="@color/azul"/>
+
+        <TextView
+            android:id="@+id/textViewEstatusEvidencia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/estatus_general_tag"
+            android:textSize="@dimen/historico_text_datos_size"
+            android:layout_marginBottom="5dp"
+            android:layout_marginEnd="10dp"
+            android:visibility="gone"
+            android:textColor="@color/azul"/>
+
+    </LinearLayout>
+
     <TextView
-        android:id="@+id/textViewEstatusEvidencia"
+        android:id="@+id/textViewTituloLocalizacionEvidencia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/localizacion_tag"
+        android:textSize="@dimen/historico_text_datos_size"
+        android:layout_marginBottom="3dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:visibility="gone"
+        android:textStyle="bold"
+        android:textColor="@color/azul"/>
+
+    <TextView
+        android:id="@+id/textViewLocalizacionEvidencia"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/estatus_general_tag"
-        android:textSize="16sp"
-        android:layout_marginBottom="10dp"
+        android:textSize="@dimen/historico_text_datos_size"
+        android:layout_marginBottom="5dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:visibility="gone"
         android:textColor="@color/azul"/>
 
-    <TextView
-        android:id="@+id/textViewEtapaEvidencia"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/etapa_tag"
-        android:textSize="16sp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:textColor="@color/azul"/>
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewTituloEtapaEvidencia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/etapa_actual_tag"
+            android:textSize="@dimen/historico_text_datos_size"
+            android:layout_marginBottom="@dimen/historico_text_datos_margin_bottom"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
+            android:textStyle="bold"
+            android:textColor="@color/azul"/>
+
+        <TextView
+            android:id="@+id/textViewEtapaEvidencia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/etapa_tag"
+            android:textSize="@dimen/historico_text_datos_size"
+            android:layout_marginBottom="@dimen/historico_text_datos_margin_bottom"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/azul"/>
+
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/historial_de_validaciones_y_rechazos_tag"
-        android:textSize="14sp"
+        android:textSize="@dimen/historico_text_title_listview_size"
         android:textStyle="bold"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="@dimen/historico_text_datos_margin_bottom"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:textColor="@color/azul"/>
@@ -70,9 +132,9 @@
     <ListView
         android:id="@+id/listViewHistorico"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="@dimen/historico_listview_height_size"
         android:divider="@android:color/transparent"
-        android:dividerHeight="5sp"
+        android:dividerHeight="@dimen/historico_listview_divider_size"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:descendantFocusability="afterDescendants"
@@ -81,16 +143,16 @@
     <Button
         android:id="@+id/buttonCerrar"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="@dimen/historico_button_height_size"
         android:textColor="@color/blanco"
         android:textStyle="bold"
         android:background="@drawable/drawable_button"
-        android:layout_marginEnd="40dp"
-        android:layout_marginStart="40dp"
+        android:layout_marginEnd="@dimen/historico_button_margin_vertical_size"
+        android:layout_marginStart="@dimen/historico_button_margin_vertical_size"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="20dp"
         android:textAllCaps="false"
-        android:textSize="18sp"
+        android:textSize="@dimen/historico_text_button_size"
         android:text="@string/cerrar_tag"/>
 
 </LinearLayout>

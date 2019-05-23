@@ -53,6 +53,10 @@ public class SincronizacionData {
     @Expose
     private String idUsuarioSesion;
 
+    @SerializedName("SyncMode")
+    @Expose
+    private int syncMode;
+
     public int getIdRevision() {
         return idRevision;
     }
@@ -123,5 +127,13 @@ public class SincronizacionData {
 
     public void setIdUsuarioSesion(String idUsuarioSesion) {
         this.idUsuarioSesion = idUsuarioSesion;
+    }
+
+    public int getSyncMode() {
+        return syncMode;
+    }
+
+    public void setSyncMode(int syncMode) {
+        this.syncMode = syncMode;
     }
 }

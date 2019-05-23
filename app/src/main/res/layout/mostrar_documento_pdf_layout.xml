@@ -12,8 +12,8 @@
 
         <ImageView
             android:id="@+id/imageViewCloseDialog"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/mostrar_documento_icono_cerrar_size"
+            android:layout_height="@dimen/mostrar_documento_icono_cerrar_size"
             android:layout_marginEnd="5dp"
             android:layout_marginTop="5dp"
             android:layout_alignParentEnd="true"
@@ -28,21 +28,22 @@
         android:gravity="center_horizontal"
         android:textStyle="bold"
         android:textColor="@color/azul"
-        android:layout_marginTop="10dp"/>
+        android:textSize="@dimen/sinc_dialog_text_title_size"
+        android:layout_marginTop="@dimen/mostrar_documento_margin_top_size"/>
 
     <com.github.barteksc.pdfviewer.PDFView
         android:id="@+id/pdfViewDocumento"
-        android:layout_width="300dp"
-        android:layout_height="350dp"
-        android:layout_marginTop="10dp"
+        android:layout_width="@dimen/mostrar_documento_width"
+        android:layout_height="@dimen/mostrar_documento_height"
+        android:layout_marginTop="@dimen/mostrar_documento_margin_top_size"
         android:layout_gravity="center_horizontal"
          />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp">
+        android:layout_marginTop="@dimen/mostrar_documento_margen_horizontal_botones"
+        android:layout_marginBottom="@dimen/mostrar_documento_margen_horizontal_botones">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -52,29 +53,29 @@
 
             <Button
                 android:id="@+id/buttonCumple"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/sinc_dialog_icono_size"
+                android:layout_height="@dimen/sinc_dialog_icono_size"
                 android:background="@mipmap/ic_cumple_gris"
                 android:layout_marginEnd="15dp"/>
 
             <Button
                 android:id="@+id/buttonNoCumple"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/sinc_dialog_icono_size"
+                android:layout_height="@dimen/sinc_dialog_icono_size"
                 android:background="@mipmap/ic_nocumple_gris"
                 android:layout_marginEnd="15dp"/>
 
             <Button
                 android:id="@+id/buttonBorrar"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/sinc_dialog_icono_size"
+                android:layout_height="@dimen/sinc_dialog_icono_size"
                 android:background="@mipmap/ic_borrar"
                 android:layout_marginEnd="15dp"/>
 
             <Button
                 android:id="@+id/buttonHistorico"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/sinc_dialog_icono_size"
+                android:layout_height="@dimen/sinc_dialog_icono_size"
                 android:background="@drawable/historial_icono" />
 
         </LinearLayout>

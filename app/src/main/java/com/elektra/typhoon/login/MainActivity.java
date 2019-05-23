@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                 usuario = Normalizer.normalize(editTextUsuario.getText().toString(), Normalizer.Form.NFD);
                 contrasena = Normalizer.normalize(editTextContrasena.getText().toString(), Normalizer.Form.NFD);
                 if(sharedPrefs.contains(Constants.SP_FIREBASE_TOKEN)){
-                    String firebase = new Encryption().decryptAES(sharedPrefs.getString(Constants.SP_FIREBASE_TOKEN,""));
+                    String firebase = Normalizer.normalize(new Encryption().decryptAES(sharedPrefs.getString(Constants.SP_FIREBASE_TOKEN,"")), Normalizer.Form.NFD);
                     if(!firebase.equals("")){
                         firebaseToken = firebase;
                     }
@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }else{
-            String firebase = new Encryption().decryptAES(sharedPrefs.getString(Constants.SP_FIREBASE_TOKEN,""));
+            String firebase = Normalizer.normalize(new Encryption().decryptAES(sharedPrefs.getString(Constants.SP_FIREBASE_TOKEN,"")), Normalizer.Form.NFD);
             System.out.println("Token firebase: " + firebase);
             if(firebase != null) {
                 if(firebase.equals("")) {
@@ -267,7 +267,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ApiInterface getInterfaceService() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.URL_PUBLIC)
+                //.baseUrl(Constants.URL_PUBLIC)
+                .baseUrl(new Encryption().decryptAES(Constants.URL_PUBLIC))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         final ApiInterface mInterfaceService = retrofit.create(ApiInterface.class);

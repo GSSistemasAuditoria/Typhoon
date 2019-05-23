@@ -30,9 +30,11 @@ import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.gps.GPSTracker;
 import com.elektra.typhoon.json.SincronizacionJSON;
 import com.elektra.typhoon.objetos.Folio;
+import com.elektra.typhoon.objetos.request.DatosRequest;
 import com.elektra.typhoon.objetos.request.SincronizacionData;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.request.SubAnexo;
+import com.elektra.typhoon.objetos.request.ValidaDatosRequest;
 import com.elektra.typhoon.objetos.response.Anexo;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.ChecklistData;
@@ -240,7 +242,33 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                             updateDialogText("Checklist descargado");
                             //**********************************************************************************************************
                             ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
-                            Call<DatosPorValidarResponse> mServiceValidar = mApiService.datosPorValidar(jwt,idRevision,0);
+
+                            DatosRequest datosRequest = new DatosRequest();
+
+                            datosRequest.setIdRevision(idRevision);
+                            EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
+                            List<Evidencia> listaEvidencias = evidenciasDBMethods.readEvidenciasSinDocumento("SELECT ID_EVIDENCIA,FECHA_MOD FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA
+                            + " WHERE ID_REVISION = ?",new String[]{String.valueOf(idRevision)});
+                            datosRequest.setLocalEvidencias(listaEvidencias);
+
+                            AnexosDBMethods anexosDBMethods = new AnexosDBMethods(activity);
+                            List<Anexo> listAnexos = anexosDBMethods.readAnexosSinDocumento("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD " +
+                                            "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ?"
+                                    , new String[]{String.valueOf(idRevision)});
+                            List<SubAnexo> listSubanexo = new ArrayList<>();
+                            for(Anexo anexo:listAnexos){
+                                SubAnexo subAnexo = new SubAnexo();
+                                subAnexo.setIdRevision(anexo.getIdRevision());
+                                subAnexo.setIdSubAnexo(anexo.getIdSubAnexo());
+                                subAnexo.setFechaMod(anexo.getFechaMod());
+                                subAnexo.setFechaSincronizacion(anexo.getFechaSinc());
+                                listSubanexo.add(subAnexo);
+                            }
+                            datosRequest.setLocalSubanexo(listSubanexo);
+                            ValidaDatosRequest validaDatosRequest = new ValidaDatosRequest();
+                            validaDatosRequest.setDatosRequest(datosRequest);
+
+                            Call<DatosPorValidarResponse> mServiceValidar = mApiService.datosPorValidar(jwt,validaDatosRequest);
                             try {
                                 Response<DatosPorValidarResponse> responseValidar = mServiceValidar.execute();
                                 if(responseValidar != null) {
@@ -308,48 +336,78 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
             }
         }else{
             ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
-            Call<DatosPorValidarResponse> mService = mApiService.datosPorValidar(jwt,idRevision,usuario.getIdrol());
+
             try {
-                Response<DatosPorValidarResponse> response = mService.execute();
-                if(response != null) {
-                    if (response.body() != null) {
-                        if (response.body().getDatos() != null) {
-                            if (response.body().getDatos().getExito()) {
-                                loadDataSincronizacion();
-                                return executeSincronizacionCompleta(response,true);
-                                //return "Sincronizado correctamente";
+
+                DatosRequest datosRequest = new DatosRequest();
+
+                datosRequest.setIdRevision(idRevision);
+                EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
+                List<Evidencia> listaEvidencias = evidenciasDBMethods.readEvidenciasSinDocumento("SELECT ID_EVIDENCIA,FECHA_MOD FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA
+                        + " WHERE ID_REVISION = ?",new String[]{String.valueOf(idRevision)});
+                datosRequest.setLocalEvidencias(listaEvidencias);
+
+                AnexosDBMethods anexosDBMethods = new AnexosDBMethods(activity);
+                List<Anexo> listAnexos = anexosDBMethods.readAnexosSinDocumento("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD " +
+                                "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ?"
+                        , new String[]{String.valueOf(idRevision)});
+                List<SubAnexo> listSubanexo = new ArrayList<>();
+                for(Anexo anexo:listAnexos){
+                    SubAnexo subAnexo = new SubAnexo();
+                    subAnexo.setIdRevision(anexo.getIdRevision());
+                    subAnexo.setIdSubAnexo(anexo.getIdSubAnexo());
+                    subAnexo.setFechaMod(anexo.getFechaMod());
+                    listSubanexo.add(subAnexo);
+                }
+                datosRequest.setLocalSubanexo(listSubanexo);
+                ValidaDatosRequest validaDatosRequest = new ValidaDatosRequest();
+                validaDatosRequest.setDatosRequest(datosRequest);
+
+                Call<DatosPorValidarResponse> mService = mApiService.datosPorValidar(jwt,validaDatosRequest);
+                try {
+                    Response<DatosPorValidarResponse> response = mService.execute();
+                    if(response != null) {
+                        if (response.body() != null) {
+                            if (response.body().getDatos() != null) {
+                                if (response.body().getDatos().getExito()) {
+                                    loadDataSincronizacion();
+                                    return executeSincronizacionCompleta(response,true);
+                                    //return "Sincronizado correctamente";
+                                } else {
+                                    //Utils.message(activity, response.body().getDatos().getError());
+                                    return response.body().getDatos().getError();
+                                }
                             } else {
-                                //Utils.message(activity, response.body().getDatos().getError());
-                                return response.body().getDatos().getError();
+                                //Utils.message(activity, "Error al descargar datos por validar");
+                                return "Error al descargar datos por validar";
                             }
                         } else {
-                            //Utils.message(activity, "Error al descargar datos por validar");
-                            return "Error al descargar datos por validar";
-                        }
-                    } else {
-                        if (response.errorBody() != null) {
-                            try {
-                                //Utils.message(activity, "Error al descargar datos por validar: " + response.errorBody().string());
-                                return "Error al descargar datos por validar: " + response.errorBody().string();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                //Utils.message(activity, "Error al descargar datos por validar: " + e.getMessage());
-                                return "Error al descargar datos por validar: " + e.getMessage();
+                            if (response.errorBody() != null) {
+                                try {
+                                    //Utils.message(activity, "Error al descargar datos por validar: " + response.errorBody().string());
+                                    return "Error al descargar datos por validar: " + response.errorBody().string();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    //Utils.message(activity, "Error al descargar datos por validar: " + e.getMessage());
+                                    return "Error al descargar datos por validar: " + e.getMessage();
+                                }
+                            } else {
+                                //Utils.message(activity, "Error al descargar datos por validar");
+                                return "Error al descargar datos por validar";
                             }
-                        } else {
-                            //Utils.message(activity, "Error al descargar datos por validar");
-                            return "Error al descargar datos por validar";
                         }
+                    }else{
+                        //Utils.message(activity, "Error al descargar datos por validar");
+                        return "Error al descargar datos por validar";
                     }
-                }else{
-                    //Utils.message(activity, "Error al descargar datos por validar");
-                    return "Error al descargar datos por validar";
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return "Error al descargar datos por validar: " + e.getMessage();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
                 return "Error al descargar datos por validar: " + e.getMessage();
             }
-
             //loadDataSincronizacion();
             //return executeSincronizacionCompleta();
         }
@@ -366,9 +424,11 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
     }
 
     private boolean existeId(List<Integer> listId,int idValidar){
-        for(int id:listId){
-            if(id == idValidar){
-                return true;
+        if(listId != null) {
+            for (int id : listId) {
+                if (id == idValidar) {
+                    return true;
+                }
             }
         }
         return false;
@@ -392,7 +452,6 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                     }
                 }
             }
-
         }
 
         if(listAnexos != null) {
@@ -446,7 +505,10 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 }
 
                 if(totalActualizar != 0) {
+                    int fallidos = 0;
                     updateDialogText("Sincronizando evidencias...");
+                    updateDialogText("Evidencias\nSincronizado: " + (totalActualizar - (totalActualizar - contador)) + " de: " + totalActualizar
+                    + "\nFallidos: " + fallidos + " de: " + totalActualizar);
                     for (CatalogoBarco catalogoBarco : listBarcos) {
                         for (RubroData rubroDataTemp : catalogoBarco.getListRubros()) {
                             //for (Pregunta preguntaTemp : rubroDataTemp.getListPreguntasTemp()) {
@@ -471,15 +533,18 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                         contador++;
                                         //contadorEvidenciasProcesadas++;
                                         System.out.println("Rubro: " + preguntaTemp.getIdRubro() + " Pregunta: " + preguntaTemp.getIdPregunta() + " Barco: " + preguntaTemp.getIdBarco());
-                                    }//*/
+                                    }else{
+                                        fallidos++;
+                                    }
                                     contadorEvidenciasProcesadas++;
-                                    updateDialogText("Sincronizado: " + (totalActualizar - (totalActualizar - contador)) + " de: " + totalActualizar);
+                                    updateDialogText("Evidencias\nSincronizado: " + (totalActualizar - (totalActualizar - contador)) + " de: " + totalActualizar
+                                            + "\nFallidos: " + fallidos + " de: " + totalActualizar);
                                 }
                             }
                         }
                     }
                 }else{
-                    return "No hay preguntas para sincronizar";
+                    //return "No hay preguntas para sincronizar";
                 }
 
                 /*Intent intent = new Intent(activity, ChecklistBarcos.class);
@@ -503,7 +568,10 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 }
 
                 if(totalActualizar != 0) {
+                    int fallidosAnexos = 0;
                     updateDialogText("Sincronizando anexos...");
+                    updateDialogText("Anexos\nSincronizado: " + (totalActualizar - (totalActualizar - contador)) + " de: " + totalActualizar
+                            + "\nFallidos: " + fallidosAnexos + " de: " + totalActualizar);
                     for (Anexo anexo : listAnexos) {
                         //for (Anexo subanexo : anexo.getListSubAnexos()) {
                         for (int i=0;i<anexo.getListSubAnexos().size();i++) {
@@ -511,6 +579,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                             if (subanexo.isSeleccionado() || existeId(responseData.body().getDatos().getDatosPorValidar().getListIdSubanexos(),subanexo.getIdSubAnexo())) {
                                 SincronizacionPost sincronizacionPost = new SincronizacionPost();
                                 sincronizacionData = new SincronizacionJSON().generateRequestDataIndividual(activity, context, idRevision, 0, 0, subanexo.getIdSubAnexo(), 0);
+                                sincronizacionData.setSyncMode(1);
                                 sincronizacionPost.setSincronizacionData(sincronizacionData);
                                 if(notificar) {
                                     if(flagCambios) {
@@ -526,14 +595,17 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                     contador++;
                                     //contadorAnexos++;
                                     System.out.println("Anexo: " + anexo.getIdAnexo() + " Subanexo: " + subanexo.getIdSubAnexo());
-                                }//*/
+                                }else{
+                                    fallidosAnexos++;
+                                }
                                 contadorAnexos++;
-                                updateDialogText("Sincronizado: " + (totalActualizar - (totalActualizar - contador)) + " de: " + totalActualizar);
+                                updateDialogText("Anexos\nSincronizado: " + (totalActualizar - (totalActualizar - contador)) + " de: " + totalActualizar
+                                        + "\nFallidos: " + fallidosAnexos + " de: " + totalActualizar);
                             }
                         }
                     }
                 }else{
-                    return "No hay anexos para sincronizar";
+                    //return "No hay anexos para sincronizar";
                 }
             }
         } catch (OutOfMemoryError e) {
@@ -543,7 +615,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
             e.printStackTrace();
             return "Error al sincronizar: " + e.getMessage();
         }//*/
-        return "Sincronizado correctamente";
+        return "Termina la sincronización";
     }
 
     private int getIdBarco(List<RespuestaData> lista,int idRegistro){
@@ -582,6 +654,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
             intent.putExtra(Constants.INTENT_ESTATUS_TAG, encryption.encryptAES(String.valueOf(folioIntent.getEstatus())));
 
             activity.startActivity(intent);
+            activity.finish();
         }
         progressDialog.dismiss();
     }
@@ -593,62 +666,72 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
             if (response != null) {
                 if (response.body() != null) {
                     if (response.body().getSincronizacion().getExito()) {
+                        HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(context);
                         //try {
-                        if (response.body().getSincronizacion().getSincronizacionResponseData().getListChecklist() != null) {
-                            ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(context);
-                            EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(context);
-                            HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(context);
-                            AnexosDBMethods anexosDBMethods = new AnexosDBMethods(context);
+                        if(opcion == 1){
+                            if (response.body().getSincronizacion().getSincronizacionResponseData().getListChecklist() != null) {
+                                ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(context);
+                                EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(context);
 
-                            if(response.body().getSincronizacion().getError() != null) {
-                                sincronizacionMensaje = response.body().getSincronizacion().getError();
-                            }
 
-                            if(opcion == 1){
+                                if(response.body().getSincronizacion().getError() != null) {
+                                    sincronizacionMensaje = response.body().getSincronizacion().getError();
+                                }
 
-                                //Borrado de evidencias y su histórico
-                                for(ChecklistData checklistData:sincronizacionPost.getSincronizacionData().getListChecklist()){
-                                    for(Rubro rubro:checklistData.getListRubros()){
-                                        for(PreguntaData preguntaData:rubro.getListPreguntas()){
-                                            for(Evidencia evidencia:preguntaData.getListEvidencias()){
-                                                evidenciasDBMethods.deleteEvidencia("ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_EVIDENCIA = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ?",
+                                    //Borrado de evidencias y su histórico
+                                    for(ChecklistData checklistData:sincronizacionPost.getSincronizacionData().getListChecklist()){
+                                        for(Rubro rubro:checklistData.getListRubros()){
+                                            for(PreguntaData preguntaData:rubro.getListPreguntas()){
+                                                for(Evidencia evidencia:preguntaData.getListEvidencias()){
+                                                /*evidenciasDBMethods.deleteEvidencia("ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_EVIDENCIA = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ?",
                                                         new String[]{String.valueOf(idRevision), String.valueOf(checklistData.getIdChecklist())
-                                                                , String.valueOf(evidencia.getIdEvidencia()), String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro())});
-                                                historicoDBMethods.deleteHistorico("ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_EVIDENCIA = ?",
-                                                        new String[]{String.valueOf(idRevision), String.valueOf(checklistData.getIdChecklist()),
-                                                                String.valueOf(evidencia.getIdEvidencia())});
+                                                                , String.valueOf(evidencia.getIdEvidencia()), String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro())});//*/
+                                                    historicoDBMethods.deleteHistorico("ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_EVIDENCIA = ?",
+                                                            new String[]{String.valueOf(idRevision), String.valueOf(checklistData.getIdChecklist()),
+                                                                    String.valueOf(evidencia.getIdEvidencia())});
+                                                }
                                             }
                                         }
                                     }
-                                }
 
-                                //Guardado de evidencias y su histórico
-                                for (ChecklistData checklistData : response.body().getSincronizacion().getSincronizacionResponseData().getListChecklist()) {
-                                    checklistData.setIdRevision(idRevision);
-                                    checklistDBMethods.createChecklist(checklistData);
-                                    if (checklistData.getListRubros() != null) {
-                                        for (Rubro rubroData : checklistData.getListRubros()) {
-                                            rubroData.setIdRevision(idRevision);
-                                            rubroData.setIdChecklist(checklistData.getIdChecklist());
-                                            checklistDBMethods.createRubro(rubroData);
-                                            if (rubroData.getListPreguntas() != null) {
-                                                for (PreguntaData preguntaData : rubroData.getListPreguntas()) {
-                                                    preguntaData.setIdRevision(idRevision);
-                                                    preguntaData.setIdChecklist(checklistData.getIdChecklist());
-                                                    checklistDBMethods.createPregunta(preguntaData);
-                                                    if (preguntaData.getListEvidencias() != null) {
-                                                        if(preguntaData.getListEvidencias().size() != 0) {
-                                                            for (Evidencia evidencia : preguntaData.getListEvidencias()) {
-                                                                evidencia.setIdRevision(preguntaData.getIdRevision());
-                                                                evidencia.setIdChecklist(preguntaData.getIdChecklist());
-                                                                evidencia.setIdRubro(preguntaData.getIdRubro());
-                                                                evidencia.setIdPregunta(preguntaData.getIdPregunta());
-                                                                evidencia.setIdBarco(getIdBarco(response.body().getSincronizacion().
-                                                                        getSincronizacionResponseData().getListRespuestas(), evidencia.getIdRegistro()));
-                                                                evidenciasDBMethods.createEvidencia(evidencia);
-                                                                if (evidencia.getListHistorico() != null) {
-                                                                    for (Historico historico : evidencia.getListHistorico()) {
-                                                                        historicoDBMethods.createHistorico(historico);
+                                    //Guardado de evidencias y su histórico
+                                    for (ChecklistData checklistData : response.body().getSincronizacion().getSincronizacionResponseData().getListChecklist()) {
+                                        checklistData.setIdRevision(idRevision);
+                                        checklistDBMethods.createChecklist(checklistData);
+                                        if (checklistData.getListRubros() != null) {
+                                            for (Rubro rubroData : checklistData.getListRubros()) {
+                                                rubroData.setIdRevision(idRevision);
+                                                rubroData.setIdChecklist(checklistData.getIdChecklist());
+                                                checklistDBMethods.createRubro(rubroData);
+                                                if (rubroData.getListPreguntas() != null) {
+                                                    for (PreguntaData preguntaData : rubroData.getListPreguntas()) {
+                                                        preguntaData.setIdRevision(idRevision);
+                                                        preguntaData.setIdChecklist(checklistData.getIdChecklist());
+                                                        checklistDBMethods.createPregunta(preguntaData);
+                                                        if (preguntaData.getListEvidencias() != null) {
+                                                            if(preguntaData.getListEvidencias().size() != 0) {
+                                                                for (Evidencia evidencia : preguntaData.getListEvidencias()) {
+                                                                    evidencia.setIdRevision(preguntaData.getIdRevision());
+                                                                    evidencia.setIdChecklist(preguntaData.getIdChecklist());
+                                                                    evidencia.setIdRubro(preguntaData.getIdRubro());
+                                                                    evidencia.setIdPregunta(preguntaData.getIdPregunta());
+                                                                    evidencia.setIdBarco(getIdBarco(response.body().getSincronizacion().
+                                                                            getSincronizacionResponseData().getListRespuestas(), evidencia.getIdRegistro()));
+                                                                    if(evidencia.getContenido() != null) {
+                                                                        evidenciasDBMethods.createEvidencia(evidencia);
+                                                                    }else{
+                                                                        ContentValues contentValues = new ContentValues();
+                                                                        //contentValues.put("NUEVO",0);
+                                                                        contentValues.put("FECHA_MOD",evidencia.getFechaMod());
+                                                                        contentValues.put("ID_ETAPA",evidencia.getIdEtapa());
+                                                                        contentValues.put("ID_ESTATUS",evidencia.getIdEstatus());
+                                                                        evidenciasDBMethods.updateEvidencia(contentValues,"ID_EVIDENCIA = ?",
+                                                                                new String[]{evidencia.getIdEvidencia()});
+                                                                    }
+                                                                    if (evidencia.getListHistorico() != null) {
+                                                                        for (Historico historico : evidencia.getListHistorico()) {
+                                                                            historicoDBMethods.createHistorico(historico);
+                                                                        }
                                                                     }
                                                                 }
                                                             }
@@ -658,67 +741,87 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                             }
                                         }
                                     }
-                                }
 
-                                RespuestaData respuestaDataTemp = null;
-                                for(RespuestaData respuestaData:sincronizacionPost.getSincronizacionData().getListRespuestas()){
-                                    respuestaDataTemp = respuestaData;
-                                }
-
-                                if (response.body().getSincronizacion().getSincronizacionResponseData().getListRespuestas() != null) {
-                                    for (RespuestaData respuestaData : response.body().getSincronizacion().getSincronizacionResponseData().getListRespuestas()) {
-                                        if(respuestaDataTemp != null){
-                                            if(respuestaData.getIdPregunta() == respuestaDataTemp.getIdPregunta() &&
-                                                    respuestaData.getIdBarco() == respuestaDataTemp.getIdBarco() &&
-                                                    respuestaData.getIdRevision() == respuestaDataTemp.getIdRevision() &&
-                                                    respuestaData.getIdChecklist() == respuestaDataTemp.getIdChecklist() &&
-                                                    respuestaData.getIdRubro() == respuestaDataTemp.getIdRubro()){
-                                                //respuestaData.setSincronizado(1);
-                                                checklistDBMethods.createRespuesta(respuestaData);
-                                            }
-                                        }else{
-                                            checklistDBMethods.createRespuesta(respuestaData);
-                                        }//*/
+                                    RespuestaData respuestaDataTemp = null;
+                                    for(RespuestaData respuestaData:sincronizacionPost.getSincronizacionData().getListRespuestas()){
+                                        respuestaDataTemp = respuestaData;
                                     }
-                                }
-                            }else{
 
-                                //Borrado de anexos
-                                for(SubAnexo subAnexo:sincronizacionPost.getSincronizacionData().getListSubAnexos()){
-                                    anexosDBMethods.deleteAnexo("ID_REVISION = ? AND ID_SUBANEXO = ?", new String[]{String.valueOf(idRevision),String.valueOf(subAnexo.getIdSubAnexo())});
-                                    historicoDBMethods.deleteHistoricoAnexo("ID_REVISION = ? AND ID_SUBANEXO = ?", new String[]{String.valueOf(idRevision),String.valueOf(subAnexo.getIdSubAnexo())});
-                                }
+                                    if (response.body().getSincronizacion().getSincronizacionResponseData().getListRespuestas() != null) {
+                                        for (RespuestaData respuestaData : response.body().getSincronizacion().getSincronizacionResponseData().getListRespuestas()) {
+                                            if(respuestaDataTemp != null){
+                                                if(respuestaData.getIdPregunta() == respuestaDataTemp.getIdPregunta() &&
+                                                        respuestaData.getIdBarco() == respuestaDataTemp.getIdBarco() &&
+                                                        respuestaData.getIdRevision() == respuestaDataTemp.getIdRevision() &&
+                                                        respuestaData.getIdChecklist() == respuestaDataTemp.getIdChecklist() &&
+                                                        respuestaData.getIdRubro() == respuestaDataTemp.getIdRubro()){
+                                                    //respuestaData.setSincronizado(1);
+                                                    checklistDBMethods.createRespuesta(respuestaData);
+                                                }
+                                            }else{
+                                                checklistDBMethods.createRespuesta(respuestaData);
+                                            }//*/
+                                        }
+                                    }
 
-                                if (response.body().getSincronizacion().getSincronizacionResponseData().getListAnexos() != null) {
-                                    for (Anexo anexo : response.body().getSincronizacion().getSincronizacionResponseData().getListAnexos()) {
-                                        anexosDBMethods.createCatalogoAnexo(anexo);
-                                        anexosDBMethods.createRelacionRevisionAnexo(anexo.getIdAnexo(), folio.getIdRevision());
-                                        if (anexo.getListSubAnexos() != null) {
-                                            for (Anexo subAnexo : anexo.getListSubAnexos()) {
-                                                anexosDBMethods.createCatalogoAnexo(subAnexo);
-                                            }
+                            }
+                        }else{
+                            //Borrado de anexos
+                            AnexosDBMethods anexosDBMethods = new AnexosDBMethods(context);
+
+                            for(SubAnexo subAnexo:sincronizacionPost.getSincronizacionData().getListSubAnexos()){
+                                //anexosDBMethods.deleteAnexo("ID_REVISION = ? AND ID_SUBANEXO = ?", new String[]{String.valueOf(idRevision),String.valueOf(subAnexo.getIdSubAnexo())});
+                                historicoDBMethods.deleteHistoricoAnexo("ID_REVISION = ? AND ID_SUBANEXO = ?", new String[]{String.valueOf(idRevision),String.valueOf(subAnexo.getIdSubAnexo())});
+                            }
+
+                            if (response.body().getSincronizacion().getSincronizacionResponseData().getListAnexos() != null) {
+                                for (Anexo anexo : response.body().getSincronizacion().getSincronizacionResponseData().getListAnexos()) {
+                                    anexosDBMethods.createCatalogoAnexo(anexo);
+                                    anexosDBMethods.createRelacionRevisionAnexo(anexo.getIdAnexo(), folio.getIdRevision());
+                                    if (anexo.getListSubAnexos() != null) {
+                                        for (Anexo subAnexo : anexo.getListSubAnexos()) {
+                                            anexosDBMethods.createCatalogoAnexo(subAnexo);
                                         }
                                     }
                                 }
-                                if (response.body().getSincronizacion().getSincronizacionResponseData().getListSubAnexos() != null) {
-                                    for (SubAnexo subAnexo : response.body().getSincronizacion().getSincronizacionResponseData().getListSubAnexos()) {
-                                        Anexo anexo = new Anexo();
-                                        anexo.setIdRevision(subAnexo.getIdRevision());
-                                        anexo.setIdSubAnexo(subAnexo.getIdSubAnexo());
-                                        anexo.setNombreArchivo(subAnexo.getFileName());
-                                        anexo.setBase64(subAnexo.getContenido());
-                                        anexo.setIdEtapa(subAnexo.getIdEtapa());
-                                        anexo.setFechaSinc(subAnexo.getFechaSincronizacion());
+                            }
+                            if (response.body().getSincronizacion().getSincronizacionResponseData().getListSubAnexos() != null) {
+                                for (SubAnexo subAnexo : response.body().getSincronizacion().getSincronizacionResponseData().getListSubAnexos()) {
+                                    Anexo anexo = new Anexo();
+                                    anexo.setIdRevision(subAnexo.getIdRevision());
+                                    anexo.setIdSubAnexo(subAnexo.getIdSubAnexo());
+                                    anexo.setNombreArchivo(subAnexo.getFileName());
+                                    anexo.setBase64(subAnexo.getContenido());
+                                    anexo.setIdEtapa(subAnexo.getIdEtapa());
+                                    anexo.setFechaSinc(subAnexo.getFechaSincronizacion());
+                                    anexo.setFechaMod(subAnexo.getFechaMod());
+
+                                    ContentValues contentValues = new ContentValues();
+                                    contentValues.put("ID_ETAPA",subAnexo.getIdEtapa());
+                                    contentValues.put("SUBANEXO_FCH_SINC",subAnexo.getFechaSincronizacion());
+                                    contentValues.put("NOMBRE",subAnexo.getFileName());
+                                    contentValues.put("SUBANEXO_FCH_MOD",subAnexo.getFechaMod());
+                                    //contentValues.put("DOCUMENTO",subAnexo.getContenido());
+
+                                    if(subAnexo.getContenido() != null){
                                         new AnexosDBMethods(activity).createAnexo(anexo);
-                                        if (subAnexo.getListHistorico() != null) {
-                                            for (HistoricoAnexo historicoAnexo : subAnexo.getListHistorico()) {
-                                                historicoDBMethods.createHistoricoAnexo(historicoAnexo);
-                                            }
+                                    }else {
+                                        new AnexosDBMethods(activity).updateAnexo(contentValues, "ID_REVISION = ? AND ID_SUBANEXO = ?",
+                                                new String[]{String.valueOf(subAnexo.getIdRevision()), String.valueOf(subAnexo.getIdSubAnexo())});
+                                    }
+
+                                    //new AnexosDBMethods(activity).createAnexo(anexo);
+                                    if (subAnexo.getListHistorico() != null) {
+                                        for (HistoricoAnexo historicoAnexo : subAnexo.getListHistorico()) {
+                                            historicoDBMethods.createHistoricoAnexo(historicoAnexo);
                                         }
                                     }
                                 }
                             }
                         }
+
+
+
                         //progressDialog.dismiss();
                         /*if (checklistBarcos == null) {
                             Intent intent = new Intent(activity, ChecklistBarcos.class);
@@ -742,31 +845,31 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
 
                         new FoliosDBMethods(activity).updateFolio(contentValues,"ID_REVISION = ?",new String[]{String.valueOf(sincronizacionResponseData.getIdRevision())});
 
-                        updateDialogText("Sincronizado correctamente");
+                        //updateDialogText("Sincronizado correctamente");
                         return "Sincronizado correctamente";
                     } else {
                         //progressDialog.dismiss();
-                        updateDialogText(response.body().getSincronizacion().getError());
+                        //updateDialogText(response.body().getSincronizacion().getError());
                         return response.body().getSincronizacion().getError();
                     }
                 } else {
                     //progressDialog.dismiss();
                     if (response.errorBody() != null) {
-                        updateDialogText("No se pudo sincronizar: " + response.errorBody().string());
+                        //updateDialogText("No se pudo sincronizar: " + response.errorBody().string());
                         return "No se pudo sincronizar: " + response.errorBody().string();
                     } else {
-                        updateDialogText("No se pudo sincronizar");
+                        //updateDialogText("No se pudo sincronizar");
                         return "No se pudo sincronizar";
                     }
                 }
             } else {
                 //progressDialog.dismiss();
-                updateDialogText("No se pudo sincronizar");
+                //updateDialogText("No se pudo sincronizar");
                 return "No se pudo sincronizar";
             }
         } catch (IOException e) {
             //e.printStackTrace();
-            updateDialogText("Error al sincronizar: " + e.getMessage());
+            //updateDialogText("Error al sincronizar: " + e.getMessage());
             return "Error al sincronizar: " + e.getMessage();
         }
     }
@@ -898,7 +1001,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdAnexo()), String.valueOf(subanexo.getIdSubAnexo())});//*/
 
-                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO " +
+                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(idRevision), String.valueOf(subanexo.getIdSubAnexo())});
 

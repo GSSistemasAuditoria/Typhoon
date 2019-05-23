@@ -24,14 +24,14 @@
                 android:id="@+id/textViewTituloHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textSize="@dimen/checklist_text_encabezado_size"
                 android:textStyle="bold"
                 android:text="Encabezado"
                 android:textColor="@color/blanco"
                 android:layout_alignParentStart="true"
                 android:layout_marginEnd="5dp"
                 android:layout_toStartOf="@+id/linearLayoutIndicadores"
-                android:padding="7dp" />
+                android:padding="@dimen/checklist_text_encabezado_padding_size" />
 
             <LinearLayout
                 android:id="@+id/linearLayoutIndicadores"
@@ -44,15 +44,15 @@
 
                 <ImageView
                     android:id="@+id/imageViewIconoGrupo"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/checklist_expand_icon_size"
+                    android:layout_height="@dimen/checklist_expand_icon_size"
                     android:layout_gravity="center_vertical"
                     android:src="@mipmap/ic_group_open"/>
 
                 <ImageView
                     android:id="@+id/imageViewSelect"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_width="@dimen/checklist_check_icon_size"
+                    android:layout_height="@dimen/checklist_check_icon_size"
                     android:layout_gravity="center_vertical"
                     android:src="@mipmap/ic_uncheck_white"/>
 

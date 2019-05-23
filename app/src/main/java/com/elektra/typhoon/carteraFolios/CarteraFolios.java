@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
@@ -90,6 +92,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -282,6 +285,22 @@ public class CarteraFolios extends AppCompatActivity {
 
         //obtenerDatosPorValidar(5,1);
         //obtenerNotificaciones(usuario.getIdrol());
+
+        /*List<Address> addresses;
+        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+
+        try {
+            addresses = geocoder.getFromLocation(19.4879944,-99.0978375, 15);
+            if(addresses != null){
+                if(addresses.size() != 0){
+                    if(addresses.get(0).getAddressLine(0).length() != 0) {
+                        System.out.println();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }//*/
     }
 
     @Override

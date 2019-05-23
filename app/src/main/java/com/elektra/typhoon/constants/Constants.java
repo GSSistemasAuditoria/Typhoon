@@ -11,10 +11,12 @@ import android.os.Environment;
  */
 public class Constants {
 
-    //url del servicio
-    public static String URL_PUBLIC = "http://10.89.69.112/TyphoonService/TyphoonService.svc/";
-    //public static String URL_PUBLIC = "http://www.auditoriags.com/TyphoonService/TyphoonService.svc/";
-    //public static String URL_PUBLIC = "http://www.auditoriags.com/TyphoonService_Test/TyphoonService.svc/";
+    //ARTUR
+    public static String URL_PUBLIC = "LsiGo/AXyECN6RUcXJZ1mqc/Bu+u6ZyjRNu5Y6dMDMD9UNX4K2O+W3fRR98yWkmUeZZe609LuB7ut16ANgNZHQ==";
+    //SP1
+    //public static String URL_PUBLIC = "4KyixEVLzWvCxpff3GzyEtrWvoIZqTWAk+RdY/8owt3bY77EKveLaKzihai9kyUfJ8DIauaZdXYF+Dkiu3GjQg==";
+    //SP2
+    //public static String URL_PUBLIC = "4KyixEVLzWvCxpff3GzyEtrWvoIZqTWAk+RdY/8owt2hhfZzM4s0hMvTD+1UXMSXPdrmQ+QpKkpuyb7Z/+vMk6b7z4Fe9+9GYKdV6tL+VS0=";
 
     //**********************************************************************************************
     public static String DB_NAME = "TyphoonDB";

@@ -5,5 +5,62 @@
     <dimen name="font_size_login_button">34sp</dimen>
     <dimen name="font_size_login_enlace">31sp</dimen>
     <dimen name="font_size_login_edittext">32sp</dimen>
+    <dimen name="font_size_bienvenido">18sp</dimen>
+
+    <dimen name="icono_user_ancho">22dp</dimen>
+    <dimen name="icono_user_alto">25dp</dimen>
+    <dimen name="icono_sinc_item_revision_size">36dp</dimen>
+    <dimen name="icono_estatus_item_revision_size">23dp</dimen>
+
+    <dimen name="button_cartera_size">30dp</dimen>
+
+    <dimen name="spinner_text_size">18sp</dimen>
+
+    <dimen name="textview_item_revision_text_size">22sp</dimen>
+
+    <dimen name="edittext_background_white_radius">51dp</dimen>
+    <dimen name="label_us_ext_margin_bottom">15dp</dimen>
+
+    <dimen name="sinc_dialog_text_button_size">24sp</dimen>
+    <dimen name="sinc_dialog_margin_hor_button">14dp</dimen>
+    <dimen name="sinc_dialog_margin_ver_button">40dp</dimen>
+    <dimen name="sinc_dialog_separacion_hor_button">10dp</dimen>
+    <dimen name="sinc_dialog_text_title_size">22sp</dimen>
+    <dimen name="sinc_dialog_text_title_margin_up">50dp</dimen>
+    <dimen name="sinc_dialog_text_title_margin_bottom">40dp</dimen>
+    <dimen name="sinc_dialog_icono_size">60dp</dimen>
+
+    <dimen name="mostrar_documento_width">600dp</dimen>
+    <dimen name="mostrar_documento_height">700dp</dimen>
+    <dimen name="mostrar_documento_margen_horizontal_botones">10dp</dimen>
+    <dimen name="mostrar_documento_icono_cerrar_size">40dp</dimen>
+    <dimen name="mostrar_documento_margin_top_size">20dp</dimen>
+
+    <dimen name="historico_text_button_size">26sp</dimen>
+    <dimen name="historico_button_height_size">60dp</dimen>
+    <dimen name="historico_listview_height_size">300dp</dimen>
+    <dimen name="historico_button_margin_vertical_size">80dp</dimen>
+    <dimen name="historico_text_datos_size">18sp</dimen>
+    <dimen name="historico_text_title_listview_size">20sp</dimen>
+    <dimen name="historico_text_datos_margin_bottom">20dp</dimen>
+    <dimen name="historico_listview_divider_size">10dp</dimen>
+    <dimen name="historico_text_title_size">24sp</dimen>
+
+    <dimen name="historico_item_text_size">20sp</dimen>
+
+    <dimen name="cartera_separacion_combos_size">6dp</dimen>
+    <dimen name="cartera_recyclerview_margintop_size">20dp</dimen>
+    <dimen name="cartera_titulo_revision_margin_size">10dp</dimen>
+
+    <dimen name="checklist_padding_vertical_size">20dp</dimen>
+    <dimen name="checklist_padding_horizontal_size">10dp</dimen>
+    <dimen name="checklist_text_title_barco_size">18sp</dimen>
+    <dimen name="checklist_icono_barco_width">70dp</dimen>
+    <dimen name="checklist_icono_barco_height">50dp</dimen>
+    <dimen name="checklist_separacion_totales_size">20dp</dimen>
+    <dimen name="checklist_text_encabezado_size">20sp</dimen>
+    <dimen name="checklist_expand_icon_size">30dp</dimen>
+    <dimen name="checklist_check_icon_size">40dp</dimen>
+    <dimen name="checklist_text_encabezado_padding_size">14dp</dimen>
 
 </resources>

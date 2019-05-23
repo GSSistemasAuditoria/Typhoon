@@ -8,14 +8,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -39,11 +42,13 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.database.BarcoDBMethods;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.HistoricoDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
+import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.Historico;
 import com.elektra.typhoon.objetos.response.Pregunta;
@@ -54,6 +59,9 @@ import com.elektra.typhoon.objetos.response.RubroData;
 import com.elektra.typhoon.service.ApiInterface;
 import com.elektra.typhoon.utils.Utils;
 import com.github.barteksc.pdfviewer.PDFView;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -177,7 +185,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),String.valueOf(pregunta.getIdRubro()),
                         String.valueOf(idBarco)});
 
-        if(usuario.getIdrol() == 1){
+        if(usuario.getIdrol() == 1 || usuario.getIdrol() == 2){
             holder.imageViewAddEvidencia.setVisibility(View.VISIBLE);
             holder.imageViewAgregaEvidencia.setVisibility(View.VISIBLE);
             holder.textViewAddEvidencias.setVisibility(View.VISIBLE);
@@ -214,11 +222,12 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     if (Utils.validaConfiguracionApp(activity)) {
                         String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
                         if (flagGPS.equals("true")) {
-                            if (Utils.validaGeocerca(activity)) {
+                            /*if (Utils.validaGeocerca(activity)) {
                                 agregarEvidencias(pregunta.getListEvidencias(), holder.textViewAddEvidencias, position);
                             } else {
                                 Utils.message(activity, "No se encuentra dentro de la zona");
-                            }
+                            }//*/
+                            validaGeocerca(activity,position,pregunta.getListEvidencias(), holder.textViewAddEvidencias);
                         } else {
                             agregarEvidencias(pregunta.getListEvidencias(), holder.textViewAddEvidencias, position);
                         }
@@ -244,11 +253,12 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     if (Utils.validaConfiguracionApp(activity)) {
                         String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
                         if (flagGPS.equals("true")) {
-                            if (Utils.validaGeocerca(activity)) {
+                            /*if (Utils.validaGeocerca(activity)) {
                                 agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia, position);
                             } else {
                                 Utils.message(activity, "No se encuentra dentro de la zona");
-                            }
+                            }//*/
+                            validaGeocerca(activity,position,pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia);
                         } else {
                             agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia, position);
                         }
@@ -274,11 +284,12 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     if (Utils.validaConfiguracionApp(activity)) {
                         String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
                         if (flagGPS.equals("true")) {
-                            if (Utils.validaGeocerca(activity)) {
+                            /*if (Utils.validaGeocerca(activity)) {
                                 agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
                             } else {
                                 Utils.message(activity, "No se pueden agregar evidencias fuera de la zona de operación");
-                            }
+                            }//*/
+                            validaGeocerca(activity,position,pregunta.getListEvidencias(), holder.imageViewAddEvidencia);
                         } else {
                             agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
                         }
@@ -417,6 +428,56 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         //reiniciaRadioGroup(holder.radioGroup,pregunta.getListEvidencias());
     }
 
+    private void validaGeocerca(final Activity activity, final int position, final List<Evidencia> listEvidencias, final View view){
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
+
+        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        }
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(activity, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+
+                            List<CatalogoBarco> barcos = new BarcoDBMethods(activity).readBarcos();
+                            CatalogoBarco catalogoBarco = null;
+                            for(CatalogoBarco catalogoBarcoTemp:barcos){
+                                if(catalogoBarco.getIdBarco() == idBarco){
+                                    catalogoBarco = catalogoBarcoTemp;
+                                }
+                            }
+
+                            float[] disResultado = new float[2];
+                            SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
+                            if(sharedPreferences.contains(Constants.SP_GPS_GEOCERCA)){
+                                String geocerca = new Encryption().decryptAES(sharedPreferences.getString(Constants.SP_GPS_GEOCERCA,""));
+                                String[] temp = geocerca.split("\\|");
+                                double latitudeTyphoon = Double.parseDouble(temp[1].replace("Lat:",""));
+                                double longitudeTyphoon = Double.parseDouble(temp[0].replace("Lon:",""));
+                                float radioTyphoon = Float.parseFloat(temp[2].replace("Rad:",""));
+
+                                Location.distanceBetween(latitudeTyphoon,longitudeTyphoon,location.getLatitude(),location.getLongitude(),disResultado);
+                                //Location.distanceBetween(19.3046277,-99.2037863,miPosicion.getLatitude(),miPosicion.getLongitude(),disResultado);
+                                //Location.distanceBetween(19.3046277,-99.2037863,19.304980, -99.204047,disResultado);
+
+                                if(disResultado[0] > radioTyphoon){
+                                    //Utils.message(this,"Fuera de la geocerca");
+                                    Utils.message(activity, "No se pueden agregar evidencias fuera de la zona de operación");
+                                } else {
+                                    //Utils.message(this,"Dentro de la geocerca");
+                                    agregarEvidencias(listEvidencias, view, position);
+                                }
+                            }
+                        }
+                    }
+                });
+    }
+
     private void agregarEvidencias(List<Evidencia> listEvidencias,View view,int position){
         if(listEvidencias != null) {
             if (validaNumeroEvidencias(listEvidencias.size())) {
@@ -526,7 +587,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 //if ((evidenciaTemp.getIdEtapa() == 2 || evidenciaTemp.getIdEtapa() == 3) && evidenciaTemp.getIdEstatus() == 1) {
                 if (evidenciaTemp.getIdEtapa() != 1 && evidenciaTemp.getIdEstatus() == 1) {
                     relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
-                } else if (evidenciaTemp.getIdEtapa() == 1 && evidenciaTemp.getIdEstatus() == 3) {
+                } else if ((evidenciaTemp.getIdEtapa() == 1 || evidenciaTemp.getIdEtapa() == 2) && evidenciaTemp.getIdEstatus() == 3) {
                     relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
                 } else {
                     relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.gris));
@@ -536,7 +597,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 //if (evidenciaTemp.getIdEtapa() == 3 && evidenciaTemp.getIdEstatus() == 1) {
                 if (evidenciaTemp.getIdEtapa() > usuario.getIdrol() && evidenciaTemp.getIdEstatus() == 1) {
                     relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
-                } else if (evidenciaTemp.getIdEtapa() == 1 && evidenciaTemp.getIdEstatus() == 3) {
+                } else if ((evidenciaTemp.getIdEtapa() == 1 || evidenciaTemp.getIdEtapa() == 2) && evidenciaTemp.getIdEstatus() == 3) {
                     relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
                 } else {
                     relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.gris));
@@ -574,7 +635,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
                     Evidencia evidencia = evidenciasDBMethods.readEvidencia(
                             "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
-                                    "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA + " WHERE ID_EVIDENCIA = ? AND ID_REVISION = ? " +
+                                    "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR,NUEVO,FECHA_MOD," +
+                                    "LOCATION,ID_ROL,ID_USUARIO,AGREGADO_LIDER FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA + " WHERE ID_EVIDENCIA = ? AND ID_REVISION = ? " +
                                     "AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?",
                             new String[]{String.valueOf(identificador),String.valueOf(pregunta.getIdRevision()),
                                     String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdRubro()),
@@ -616,6 +678,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         double longitud = 0.0;
         double latitud = 0.0;
         int barco = 0;
+        String localizacion = "";
 
         View dialogLayout = null;
         UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(activity);
@@ -670,15 +733,16 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 longitud = evidencia.getLongitude();
                 latitud = evidencia.getLatitude();
                 barco = evidencia.getIdBarco();
+                localizacion = evidencia.getLocation();
 
-                List<Address> addresses;
-                Geocoder geocoder = new Geocoder(activity, Locale.getDefault());
+                /*List<Address> addresses;
+                Geocoder geocoder = new Geocoder(activity.getBaseContext(), Locale.getDefault());
 
                 try {
                     addresses = geocoder.getFromLocation(latitud, longitud, 1);
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
+                }//*/
 
                 etapaString = Utils.getEtapa(activity,evidencia.getIdEtapa());
                 estatusString = Utils.getEstatusEvidencia(activity,evidencia.getIdEstatus());
@@ -698,6 +762,12 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         //buttonCumple.setBackground(drawableCumpleGris);
                         //buttonNoCumple.setBackground(drawableNoCumpleRojo);
                         buttonCumple.setVisibility(View.GONE);
+                    } else if (evidencia.getIdEtapa() == 2 && evidencia.getIdEstatus() == 3) {
+                        //buttonCumple.setBackground(drawableCumpleGris);
+                        //buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                        buttonBorrar.setVisibility(View.GONE);
+                        buttonCumple.setVisibility(View.GONE);
+                        buttonNoCumple.setVisibility(View.GONE);
                     } else {
                         //buttonCumple.setBackground(drawableCumpleGris);
                         //buttonNoCumple.setBackground(drawableNoCumpleGris);
@@ -716,6 +786,12 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         buttonBorrar.setVisibility(View.GONE);
                         buttonCumple.setVisibility(View.GONE);
                         buttonNoCumple.setVisibility(View.GONE);
+                    }else if (evidencia.getIdEtapa() == 2 && evidencia.getIdEstatus() == 3) {
+                        //buttonCumple.setBackground(drawableCumpleGris);
+                        //buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                        buttonBorrar.setVisibility(View.VISIBLE);
+                        buttonCumple.setVisibility(View.GONE);
+                        buttonNoCumple.setVisibility(View.GONE);
                     } else if (evidencia.getIdEtapa() < usuario.getIdrol() && evidencia.getIdEstatus() == 1) {
                         //buttonCumple.setBackground(drawableCumpleGris);
                         //buttonNoCumple.setBackground(drawableNoCumpleGris);
@@ -723,11 +799,20 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         buttonNoCumple.setVisibility(View.GONE);
                     }
 
-                    if(evidencia.getAgregadoCoordinador() == 1){
-                        //buttonBorrar.setVisibility(View.VISIBLE);
-                        buttonNoCumple.setVisibility(View.GONE);
-                    }else{
-                        buttonBorrar.setVisibility(View.GONE);
+                    if(usuario.getIdrol() > 2) {
+                        if (evidencia.getAgregadoCoordinador() == 1) {
+                            //buttonBorrar.setVisibility(View.VISIBLE);
+                            buttonNoCumple.setVisibility(View.GONE);
+                        } else {
+                            buttonBorrar.setVisibility(View.GONE);
+                        }
+                    }
+
+                    if(usuario.getIdrol() == 2){
+                        if (evidencia.getAgregadoLider() == 1) {
+                            //buttonBorrar.setVisibility(View.VISIBLE);
+                            buttonNoCumple.setVisibility(View.GONE);
+                        }
                     }
                 }
                 textViewNombreDocumento.setText(evidencia.getNombre());
@@ -767,6 +852,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         final String finalEstatusString = estatusString;
         final String finalEtapaString = etapaString;
 
+        final int finalBarco = barco;
+        final String finalLocalizacion = localizacion;
         buttonHistorico.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -776,10 +863,18 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 ListView listViewHistorico = dialogLayout.findViewById(R.id.listViewHistorico);
                 Button buttonCerrar = dialogLayout.findViewById(R.id.buttonCerrar);
                 TextView textViewEstatus = dialogLayout.findViewById(R.id.textViewEstatusEvidencia);
+                TextView textViewLocalizacion = dialogLayout.findViewById(R.id.textViewLocalizacionEvidencia);
                 TextView textViewEtapa = dialogLayout.findViewById(R.id.textViewEtapaEvidencia);
+                TextView textViewtituloBarco = dialogLayout.findViewById(R.id.textViewtituloBarco);
+                TextView textViewTituloLocalizacion = dialogLayout.findViewById(R.id.textViewTituloLocalizacionEvidencia);
 
-                textViewEstatus.setText("Estatus general: " + finalEstatusString);
-                textViewEtapa.setText("Etapa actual: " + finalEtapaString);
+                textViewEstatus.setVisibility(View.VISIBLE);
+                textViewLocalizacion.setVisibility(View.VISIBLE);
+                textViewtituloBarco.setVisibility(View.VISIBLE);
+                textViewTituloLocalizacion.setVisibility(View.VISIBLE);
+                textViewEstatus.setText(Utils.getNombreBarco(activity,finalBarco));
+                textViewLocalizacion.setText(finalLocalizacion);
+                textViewEtapa.setText(finalEtapaString);
 
                 HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(activity);
                 List<Historico> listHistorico = historicoDBMethods.readHistorico(
@@ -1067,7 +1162,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 for (Evidencia evidencia : listPreguntas.get(numeroPregunta).getListEvidencias()) {
                     if (evidencia.getIdEvidencia().equals(identificador)) {
                         evidenciaTemp = evidencia;
-                        if(usuario.getIdrol()==1) {
+                        if(usuario.getIdrol()==1 || usuario.getIdrol()==2) {
                             //si esta rechazada la evidencia
                             if(evidencia.getIdEstatus() == 3){
                                 //borrado lógico
@@ -1112,7 +1207,12 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                     String.valueOf(evidencia.getIdPregunta()),
                                     String.valueOf(evidencia.getIdBarco())
                             });
+                            listPreguntas.get(numeroPregunta).setSeleccionado(true);
                             listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
+                            Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
+                            Utils.updatePregunta(activity,String.valueOf(preguntaTemp.getIdRevision()),
+                                    String.valueOf(preguntaTemp.getIdChecklist()),String.valueOf(preguntaTemp.getIdPregunta()),
+                                    String.valueOf(preguntaTemp.getIdRubro()),String.valueOf(idBarco),1);//*/
                         }
                         break;
                     }
@@ -1121,8 +1221,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 //linearLayoutParent.removeView(viewImagen.getParent());
                 Utils.message(activity, "Evidencia borrada");
 
-                listPreguntas.get(numeroPregunta).setSeleccionado(true);
-                Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
+                /*Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
                 Utils.updatePregunta(activity,String.valueOf(preguntaTemp.getIdRevision()),
                         String.valueOf(preguntaTemp.getIdChecklist()),String.valueOf(preguntaTemp.getIdPregunta()),
                         String.valueOf(preguntaTemp.getIdRubro()),String.valueOf(idBarco),1);//*/
@@ -1209,9 +1308,9 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
             if(evidencia.getIdEvidencia().equals(identificador)) {
                 evidencia.setIdEstatus(3);
-                evidencia.setIdEtapa(1);
+                evidencia.setIdEtapa(evidencia.getIdRol());
                 ContentValues contentValues = new ContentValues();
-                contentValues.put("ID_ETAPA",1);
+                contentValues.put("ID_ETAPA",evidencia.getIdRol());
                 contentValues.put("ID_ESTATUS",3);
                 //try {
                 new EvidenciasDBMethods(activity).updateEvidencia(contentValues,

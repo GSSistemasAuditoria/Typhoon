@@ -31,6 +31,7 @@ public class Anexo {
     private List<Anexo> listSubAnexos;
 
     private String fechaSinc;
+    private String fechaMod;
 
     private String titulo;
     private List<Anexo> listAnexos;
@@ -156,5 +157,13 @@ public class Anexo {
 
     public void setSeleccionado(boolean seleccionado) {
         this.seleccionado = seleccionado;
+    }
+
+    public String getFechaMod() {
+        return fechaMod;
+    }
+
+    public void setFechaMod(String fechaMod) {
+        this.fechaMod = fechaMod;
     }
 }
