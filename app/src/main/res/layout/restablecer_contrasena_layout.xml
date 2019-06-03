@@ -84,7 +84,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
+            android:layout_margin="@dimen/login_margin_icono_size"
             android:adjustViewBounds="true"
             android:src="@drawable/mail" />
 

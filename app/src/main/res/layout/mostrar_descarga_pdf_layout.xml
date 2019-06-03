@@ -14,8 +14,8 @@
 
         <ImageView
             android:id="@+id/imageViewCloseDialog"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/mostrar_documento_icono_cerrar_size"
+            android:layout_height="@dimen/mostrar_documento_icono_cerrar_size"
             android:layout_marginEnd="5dp"
             android:layout_marginTop="5dp"
             android:layout_alignParentEnd="true"
@@ -30,14 +30,15 @@
         android:gravity="center_horizontal"
         android:textStyle="bold"
         android:textColor="@color/azul"
-        android:layout_marginTop="10dp"/>
+        android:textSize="@dimen/sinc_dialog_text_title_size"
+        android:layout_marginTop="@dimen/mostrar_documento_margin_top_size"/>
 
     <com.github.barteksc.pdfviewer.PDFView
         android:id="@+id/pdfViewDocumento"
-        android:layout_width="300dp"
-        android:layout_height="350dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_width="@dimen/mostrar_documento_width"
+        android:layout_height="@dimen/mostrar_documento_height"
+        android:layout_marginTop="@dimen/mostrar_documento_margin_top_size"
+        android:layout_marginBottom="@dimen/mostrar_documento_margin_top_size"
         android:layout_gravity="center_horizontal"
          />
 

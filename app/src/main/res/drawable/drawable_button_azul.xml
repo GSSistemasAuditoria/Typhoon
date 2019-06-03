@@ -3,9 +3,9 @@
     android:shape="rectangle" >
     <solid android:color="@color/azul"/>
     <corners
-        android:bottomRightRadius="35dp"
-        android:bottomLeftRadius="35dp"
-        android:topLeftRadius="35dp"
-        android:topRightRadius="35dp"
+        android:bottomRightRadius="@dimen/edittext_background_white_radius"
+        android:bottomLeftRadius="@dimen/edittext_background_white_radius"
+        android:topLeftRadius="@dimen/edittext_background_white_radius"
+        android:topRightRadius="@dimen/edittext_background_white_radius"
         />
 </shape>

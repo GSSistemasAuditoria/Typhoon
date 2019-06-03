@@ -14,7 +14,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp">
+            android:layout_marginBottom="@dimen/dialog_usuario_externo_margin_bottom_title">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -22,16 +22,17 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:src="@mipmap/ic_login"/>
+                    android:layout_width="@dimen/dialog_usuario_externo_icon_title_size"
+                    android:layout_height="@dimen/dialog_usuario_externo_icon_title_size"
+                    android:layout_marginEnd="@dimen/dialog_usuario_externo_separacion_button"
+                    android:src="@drawable/ic_login"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/azul"
                     android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:textSize="@dimen/dialog_usuario_externo_text_title_size"
                     android:layout_gravity="center_vertical"
                     android:text="@string/usuario_externo_tag"/>
 
@@ -52,9 +53,12 @@
                 android:layout_centerHorizontal="true">
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/dialog_usuario_externo_icon_button_size"
+                    android:layout_height="@dimen/dialog_usuario_externo_icon_button_size"
                     android:src="@drawable/man_user"
+                    android:layout_marginTop="@dimen/dialog_usuario_externo_margin_top_image_button"
+                    android:layout_marginBottom="@dimen/dialog_usuario_externo_margin_top_image_button"
+                    android:layout_marginEnd="@dimen/dialog_usuario_externo_separacion_button"
                     android:layout_gravity="center_vertical"/>
 
                 <Button
@@ -64,6 +68,8 @@
                     android:textAllCaps="false"
                     android:textColor="@color/blanco"
                     android:textStyle="bold"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="@dimen/dialog_usuario_externo_text_button_size"
                     android:background="@color/transparente"
                     android:text="@string/registrarse" />
 
@@ -75,7 +81,7 @@
             android:id="@+id/relativeLayoutRecuperar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="@dimen/dialog_usuario_externo_margin_top__button"
             android:background="@drawable/drawable_button_azul">
 
             <LinearLayout
@@ -85,9 +91,12 @@
                 android:layout_centerHorizontal="true">
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/dialog_usuario_externo_icon_button_size"
+                    android:layout_height="@dimen/dialog_usuario_externo_icon_button_size"
                     android:src="@drawable/locked_padlock"
+                    android:layout_marginTop="@dimen/dialog_usuario_externo_margin_top_image_button"
+                    android:layout_marginBottom="@dimen/dialog_usuario_externo_margin_top_image_button"
+                    android:layout_marginEnd="@dimen/dialog_usuario_externo_separacion_button"
                     android:layout_gravity="center_vertical"/>
 
                 <Button
@@ -98,6 +107,8 @@
                     android:background="@color/transparente"
                     android:textColor="@color/blanco"
                     android:textStyle="bold"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="@dimen/dialog_usuario_externo_text_button_size"
                     android:layout_marginStart="5dp"
                     android:text="@string/restablecerContrasena" />
 

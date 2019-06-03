@@ -16,7 +16,7 @@ public class Login {
     @Expose
     private String userName;
 
-    @SerializedName("PASSWORD")
+    @SerializedName("LLAVE_MAESTRA")
     @Expose
     private String password;
 

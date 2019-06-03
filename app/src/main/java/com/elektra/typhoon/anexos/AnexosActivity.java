@@ -147,6 +147,7 @@ public class AnexosActivity extends AppCompatActivity {
                     subanexo.setIdEtapa(listDatosAnexos.get(0).getIdEtapa());
                     subanexo.setIdRevision(folio);
                     subanexo.setSeleccionado(listDatosAnexos.get(0).isSeleccionado());
+                    subanexo.setFechaSinc(listDatosAnexos.get(0).getFechaSinc());
                 }
             }
         }
@@ -291,8 +292,13 @@ public class AnexosActivity extends AppCompatActivity {
                                 anexo.setIdDocumento(UUID.randomUUID().toString());
                             }
                         }//*/
+                        ResponseLogin.Usuario usuario = new UsuarioDBMethods(getApplicationContext()).readUsuario();
                         anexo.setIdRevision(folio);
-                        anexo.setIdEtapa(0);
+                        if(usuario != null) {
+                            anexo.setIdEtapa(usuario.getIdrol() - 1);
+                        }else {
+                            anexo.setIdEtapa(0);
+                        }
                         System.out.println();
                         if(flagCrea) {
                             new AnexosDBMethods(getApplicationContext()).createAnexo(anexo);

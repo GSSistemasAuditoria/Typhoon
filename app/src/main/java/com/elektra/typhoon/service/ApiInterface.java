@@ -35,7 +35,7 @@ public interface ApiInterface {
     Call<ResponseValidaUsuario> validaUsuarioExterno(@Header("Authorization") String jwt,@Query("correo") String correo);
 
     @GET("InsertaNuevoUsuario")
-    Call<ResponseNuevoUsuario> insertarNuevoUsuario(@Header("Authorization") String jwt,@Query("correo") String correo,@Query("password") String password);
+    Call<ResponseNuevoUsuario> insertarNuevoUsuario(@Header("Authorization") String jwt,@Query("correo") String correo,@Query("LLAVE_MAESTRA") String password);
 
     @POST("Sincronizar")
     Call<SincronizacionResponse> sincronizacion(@Header("Authorization") String jwt,@Body SincronizacionPost sincronizacionPost);

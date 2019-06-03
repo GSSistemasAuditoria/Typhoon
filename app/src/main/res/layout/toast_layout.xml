@@ -3,12 +3,13 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/drawable_toast"
-    android:padding="10dp">
+    android:padding="@dimen/toast_margin">
 
     <TextView
         android:id="@+id/textViewToast"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textSize="@dimen/toast_text_size"
         android:textColor="@color/blanco" />
 
 </LinearLayout>

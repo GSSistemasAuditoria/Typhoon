@@ -3,10 +3,10 @@
     android:shape="rectangle" >
     <solid android:color="@color/azul"/>
     <corners
-        android:bottomRightRadius="16dp"
-        android:bottomLeftRadius="16dp"
-        android:topLeftRadius="16dp"
-        android:topRightRadius="16dp"
+        android:bottomRightRadius="@dimen/toast_background_radius"
+        android:bottomLeftRadius="@dimen/toast_background_radius"
+        android:topLeftRadius="@dimen/toast_background_radius"
+        android:topRightRadius="@dimen/toast_background_radius"
         />
     <stroke android:width="2dp" android:color="@color/blanco"/>
 </shape>

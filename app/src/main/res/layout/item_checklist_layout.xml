@@ -15,7 +15,7 @@
         android:layout_marginTop="3dp"
         android:paddingStart="3dp"
         android:paddingEnd="3dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="@dimen/checklist_item_margin_bottom"
         app:cardBackgroundColor="@color/blanco"
         card_view:cardCornerRadius="4dp">
 
@@ -46,8 +46,8 @@
 
                     <ImageView
                         android:id="@+id/imageViewSelect"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
+                        android:layout_width="@dimen/checklist_check_icon_size"
+                        android:layout_height="@dimen/checklist_check_icon_size"
                         android:layout_marginEnd="2dp"
                         android:layout_marginTop="5dp"
                         android:src="@mipmap/ic_uncheck_blue"/>
@@ -68,7 +68,7 @@
                 android:id="@+id/myRadioGroup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
+                android:layout_marginBottom="@dimen/checklist_radiogroup_margin_bottom"
                 android:orientation="horizontal" >
 
                 <RadioButton
@@ -78,6 +78,7 @@
                     android:textColor="@drawable/text_radiobutton_cumple"
                     android:textStyle="bold"
                     android:enabled="false"
+                    android:textSize="@dimen/checklist_text_encabezado_size"
                     android:text="@string/aplica_tag" />
 
                 <RadioButton
@@ -87,6 +88,7 @@
                     android:textColor="@drawable/text_radiobutton_nocumple"
                     android:textStyle="bold"
                     android:enabled="false"
+                    android:textSize="@dimen/checklist_text_encabezado_size"
                     android:text="@string/no_aplica_tag" />
 
             </RadioGroup>
@@ -108,8 +110,8 @@
 
                 <ImageView
                     android:id="@+id/imageViewAgregaEvidencias"
-                    android:layout_width="35dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/checklist_evidencias01_icono_width"
+                    android:layout_height="@dimen/checklist_evidencias01_icono_height"
                     android:src="@drawable/image"/>
 
                 <Button
@@ -121,6 +123,7 @@
                     android:textAllCaps="false"
                     android:background="@color/transparente"
                     android:layout_gravity="center_vertical"
+                    android:textSize="@dimen/checklist_text_encabezado_size"
                     android:text="@string/agregar_evidencias_tag"/>
 
             </LinearLayout>
@@ -149,8 +152,8 @@
 
                         <ImageView
                             android:id="@+id/imageViewAddEvidencia"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
+                            android:layout_width="@dimen/checklist_evidencias02_icono_size"
+                            android:layout_height="@dimen/checklist_evidencias02_icono_size"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/add_image"/>
 

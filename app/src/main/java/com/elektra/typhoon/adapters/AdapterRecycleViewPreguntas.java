@@ -449,6 +449,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                             for(CatalogoBarco catalogoBarcoTemp:barcos){
                                 if(catalogoBarco.getIdBarco() == idBarco){
                                     catalogoBarco = catalogoBarcoTemp;
+                                    break;
                                 }
                             }
 
@@ -457,8 +458,10 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                             if(sharedPreferences.contains(Constants.SP_GPS_GEOCERCA)){
                                 String geocerca = new Encryption().decryptAES(sharedPreferences.getString(Constants.SP_GPS_GEOCERCA,""));
                                 String[] temp = geocerca.split("\\|");
-                                double latitudeTyphoon = Double.parseDouble(temp[1].replace("Lat:",""));
-                                double longitudeTyphoon = Double.parseDouble(temp[0].replace("Lon:",""));
+                                //double latitudeTyphoon = Double.parseDouble(temp[1].replace("Lat:",""));
+                                //double longitudeTyphoon = Double.parseDouble(temp[0].replace("Lon:",""));
+                                double latitudeTyphoon = catalogoBarco.getLatitud();
+                                double longitudeTyphoon = catalogoBarco.getLongitud();
                                 float radioTyphoon = Float.parseFloat(temp[2].replace("Rad:",""));
 
                                 Location.distanceBetween(latitudeTyphoon,longitudeTyphoon,location.getLatitude(),location.getLongitude(),disResultado);

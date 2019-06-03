@@ -258,8 +258,18 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
             holder.imageViewSeleccionado.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_uncheck_blue));
         }
 
-        if(estatusRevision == 3 || estatusRevision == 4){
+        /*if(estatusRevision == 3 || estatusRevision == 4){
             holder.imageViewSubirArchivo.setVisibility(View.GONE);
+        }//*/
+
+        if(anexo.getNombreArchivo() != null){
+            if(!anexo.getNombreArchivo().equals("")) {
+                holder.imageViewSubirArchivo.setVisibility(View.GONE);
+            }else{
+                holder.imageViewSubirArchivo.setVisibility(View.VISIBLE);
+            }
+        }else{
+            holder.imageViewSubirArchivo.setVisibility(View.VISIBLE);
         }
     }
 
@@ -314,7 +324,11 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         }else{
             if(anexo.getIdEtapa() == etapaAnexo){
                 buttonCumple.setVisibility(View.VISIBLE);
-                buttonNoCumple.setVisibility(View.VISIBLE);
+                if(anexo.getFechaSinc() == null){
+                    buttonNoCumple.setVisibility(View.GONE);
+                }else{
+                    buttonNoCumple.setVisibility(View.VISIBLE);
+                }
             }else if(anexo.getIdEtapa() > etapaAnexo){
                 buttonCumple.setVisibility(View.GONE);
                 buttonNoCumple.setVisibility(View.GONE);

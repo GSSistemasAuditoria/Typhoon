@@ -62,5 +62,39 @@
     <dimen name="checklist_expand_icon_size">30dp</dimen>
     <dimen name="checklist_check_icon_size">40dp</dimen>
     <dimen name="checklist_text_encabezado_padding_size">14dp</dimen>
+    <dimen name="checklist_evidencias01_icono_width">60dp</dimen>
+    <dimen name="checklist_evidencias01_icono_height">70dp</dimen>
+    <dimen name="checklist_evidencias02_icono_size">100dp</dimen>
+    <dimen name="checklist_preview_evidenica_size">82dp</dimen>
+    <dimen name="checklist_preview_evidenica_margin">6dp</dimen>
+    <dimen name="checklist_radiogroup_margin_bottom">10dp</dimen>
+    <dimen name="checklist_item_margin_bottom">10dp</dimen>
+    <dimen name="checklist_totales_margin_horizontal">10dp</dimen>
+    <dimen name="checklist_popup_icons_size">70dp</dimen>
+
+    <dimen name="loader_typhoon_logo_size">300dp</dimen>
+    <dimen name="loader_typhoon_logo_text_size">26sp</dimen>
+
+    <dimen name="login_margin_icono_size">8dp</dimen>
+
+    <dimen name="dialog_usuario_externo_icon_title_size">60dp</dimen>
+    <dimen name="dialog_usuario_externo_text_title_size">24sp</dimen>
+    <dimen name="dialog_usuario_externo_text_button_size">22sp</dimen>
+    <dimen name="dialog_usuario_externo_icon_button_size">33dp</dimen>
+    <dimen name="dialog_usuario_externo_margin_top__button">20dp</dimen>
+    <dimen name="dialog_usuario_externo_margin_top_image_button">25dp</dimen>
+    <dimen name="dialog_usuario_externo_margin_bottom_title">60dp</dimen>
+    <dimen name="dialog_usuario_externo_separacion_button">5dp</dimen>
+
+    <dimen name="dialog_rechazo_text_titulo_size">24sp</dimen>
+    <dimen name="dialog_rechazo_edittext_height_size">200dp</dimen>
+
+    <dimen name="dialog_notificacion_margin_vertical">80dp</dimen>
+    <dimen name="dialog_notificacion_button_margin_top">50dp</dimen>
+    <dimen name="dialog_notificacion_button_margin_bottom">40dp</dimen>
+
+    <dimen name="toast_text_size">24sp</dimen>
+    <dimen name="toast_margin">20dp</dimen>
+    <dimen name="toast_background_radius">32dp</dimen>
 
 </resources>

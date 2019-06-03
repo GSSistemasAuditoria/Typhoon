@@ -226,6 +226,8 @@ public class MainActivity extends AppCompatActivity {
         }//*/
         //checkAndRequestPermissions();
 
+        //Utils.checkPermission(this);
+
         Encryption encryption = new Encryption();
 
         if (!sharedPrefs.contains(Constants.SP_FIREBASE_TOKEN)) {
