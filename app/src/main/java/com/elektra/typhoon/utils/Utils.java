@@ -766,6 +766,61 @@ public class Utils {
         return false;
     }
 
+    public static void checkPermissionTest(final Activity activity){
+
+            LayoutInflater li = LayoutInflater.from(activity);
+            LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.permission_layout, null);
+
+            Button buttonAceptar = (Button) layoutDialog.findViewById(R.id.buttonAceptar);
+            LinearLayout linearLayoutCamera = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCameraPermission);
+            LinearLayout linearLayoutLocation = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutLocationPermission);
+            LinearLayout linearLayoutStorage = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutStoragePermission);
+
+            /*if(ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+                linearLayoutStorage.setVisibility(View.GONE);
+            }
+
+            if(ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
+                linearLayoutCamera.setVisibility(View.GONE);
+            }
+
+            if(ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+                linearLayoutLocation.setVisibility(View.GONE);
+            }//*/
+
+            final AlertDialog builder = new AlertDialog.Builder(activity)
+                    .setView(layoutDialog)
+                    .show();
+
+            buttonAceptar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ActivityCompat.requestPermissions(
+                            activity,
+                            new String[]{
+                                    //Manifest.permission.CAMERA,
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            },
+                            200
+                    );
+                    builder.dismiss();
+                }
+            });
+            /*}else{
+                // Directly request for required permissions, without explanation
+                ActivityCompat.requestPermissions(
+                        activity,
+                        new String[]{
+                                Manifest.permission.CAMERA,
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        },
+                        200
+                );
+            }//*/
+    }
+
     public static Calendar getCalendarDate(String inputDate){
         SimpleDateFormat format1=new SimpleDateFormat(Constants.DATE_FORMAT_FULL);
         Calendar c = null;

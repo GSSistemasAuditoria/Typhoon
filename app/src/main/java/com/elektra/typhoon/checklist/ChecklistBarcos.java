@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
@@ -1397,7 +1398,9 @@ public class ChecklistBarcos extends AppCompatActivity {
 
                                 }
 
-                                fusedLocationClient.getLastLocation()
+                                new GetLocationTask(evidencia,ChecklistBarcos.this).execute();
+
+                                /*fusedLocationClient.getLastLocation()
                                         .addOnSuccessListener(ChecklistBarcos.this, new OnSuccessListener<Location>() {
                                             @Override
                                             public void onSuccess(Location location) {
@@ -1433,7 +1436,7 @@ public class ChecklistBarcos extends AppCompatActivity {
                                                             new String[]{evidencia.getIdEvidencia()});
                                                 }
                                             }
-                                        });
+                                        });//*/
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -1612,7 +1615,9 @@ public class ChecklistBarcos extends AppCompatActivity {
 
                             }
 
-                            fusedLocationClient.getLastLocation()
+                            new GetLocationTask(evidencia,ChecklistBarcos.this).execute();
+
+                            /*fusedLocationClient.getLastLocation()
                                     .addOnSuccessListener(ChecklistBarcos.this, new OnSuccessListener<Location>() {
                                         @Override
                                         public void onSuccess(Location location) {
@@ -1648,7 +1653,7 @@ public class ChecklistBarcos extends AppCompatActivity {
                                                         new String[]{evidencia.getIdEvidencia()});
                                             }
                                         }
-                                    });
+                                    });//*/
                             //scaledBitmap.recycle();
                         }
                     }catch (IndexOutOfBoundsException e) {
@@ -1800,6 +1805,81 @@ public class ChecklistBarcos extends AppCompatActivity {
                             "ID_CHECKLIST = ? AND ID_PREGUNTA = ? AND ID_RUBRO = ? AND ID_BARCO = ? AND ID_REGISTRO = ?",
                     new String[]{String.valueOf(evidencia.getIdRevision()), String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdPregunta()),
                             String.valueOf(evidencia.getIdRubro()), String.valueOf(evidencia.getIdBarco()), String.valueOf(evidencia.getIdRegistro())});
+        }
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME,MODE_PRIVATE);
+        if(sharedPreferences.contains(Constants.SP_LOGIN_TAG)){
+            if(!sharedPreferences.getBoolean(Constants.SP_LOGIN_TAG,false)){
+                finish();
+            }
+        }
+    }
+
+    class GetLocationTask extends AsyncTask<String, String, String> {
+
+        private Evidencia evidencia;
+        private Activity activity;
+        private EvidenciasDBMethods evidenciasDBMethods;
+
+        public GetLocationTask(Evidencia evidencia,Activity activity){
+            this.evidencia = evidencia;
+            this.activity = activity;
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+            evidenciasDBMethods = new EvidenciasDBMethods(activity);
+
+            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(ChecklistBarcos.this);
+
+            if (ActivityCompat.checkSelfPermission(ChecklistBarcos.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ChecklistBarcos.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            }
+
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(ChecklistBarcos.this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            // Got last known location. In some rare situations this can be null.
+                            if (location != null) {
+                                // Logic to handle location object
+                                System.out.println("Pruebas: Lat: " + location.getLatitude() + " Long: " + location.getLongitude());
+                                double latitude = location.getLatitude();
+                                double longitude = location.getLongitude();
+                                evidencia.setLatitude(latitude);
+                                evidencia.setLongitude(longitude);
+                                List<Address> addresses;
+                                Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+
+                                try {
+                                    addresses = geocoder.getFromLocation(latitude, longitude, 3);
+                                    if(addresses != null){
+                                        if(addresses.size() != 0){
+                                            if(addresses.get(0).getAddressLine(0).length() != 0) {
+                                                evidencia.setLocation(addresses.get(0).getAddressLine(0));
+                                            }
+                                        }
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put("LATITUDE",evidencia.getLatitude());
+                                contentValues.put("LONGITUDE",evidencia.getLongitude());
+                                contentValues.put("LOCATION",evidencia.getLocation());
+                                evidenciasDBMethods.updateEvidencia(contentValues,"ID_EVIDENCIA = ?",
+                                        new String[]{evidencia.getIdEvidencia()});
+                            }
+                        }
+                    });
+
+            return "OK";
         }
     }
 }

@@ -10,6 +10,7 @@
         android:textStyle="bold"
         android:textColor="@color/azul"
         android:gravity="center_horizontal"
+        android:textSize="@dimen/permission_dialog_title_text_size"
         android:text="Para el correcto funcionamiento de la aplicación es necesario otorgar los permisos solicitados:"/>
 
     <LinearLayout
@@ -19,11 +20,11 @@
         android:orientation="horizontal"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="@dimen/permission_dialog_text_separation">
 
         <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/permission_dialog_icon_size"
+            android:layout_height="@dimen/permission_dialog_icon_size"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="10dp"
             android:src="@mipmap/ic_camera_permission"/>
@@ -40,12 +41,13 @@
                 android:textStyle="bold"
                 android:textColor="@color/azul"
                 android:layout_marginBottom="5dp"
+                android:textSize="@dimen/permission_dialog_title_text_size"
                 android:text="Cámara"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
+                android:textSize="@dimen/permission_dialog_item_text_size"
                 android:text="Captura las evidencias para tus checklists."/>
 
         </LinearLayout>
@@ -59,11 +61,11 @@
         android:orientation="horizontal"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="@dimen/permission_dialog_icon_separation">
 
         <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/permission_dialog_icon_size"
+            android:layout_height="@dimen/permission_dialog_icon_size"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="10dp"
             android:src="@mipmap/ic_location_permission"/>
@@ -80,12 +82,13 @@
                 android:textStyle="bold"
                 android:textColor="@color/azul"
                 android:layout_marginBottom="5dp"
+                android:textSize="@dimen/permission_dialog_title_text_size"
                 android:text="Ubicación"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
+                android:textSize="@dimen/permission_dialog_item_text_size"
                 android:text="Agrega información adicional a tus evidencias."/>
 
         </LinearLayout>
@@ -99,11 +102,11 @@
         android:orientation="horizontal"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="@dimen/permission_dialog_icon_separation">
 
         <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/permission_dialog_icon_size"
+            android:layout_height="@dimen/permission_dialog_icon_size"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="10dp"
             android:src="@mipmap/ic_storage_permission"/>
@@ -120,12 +123,13 @@
                 android:textStyle="bold"
                 android:textColor="@color/azul"
                 android:layout_marginBottom="5dp"
+                android:textSize="@dimen/permission_dialog_title_text_size"
                 android:text="Almacenamiento"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
+                android:textSize="@dimen/permission_dialog_item_text_size"
                 android:text="Agrega evidencias a tus checklists desde tus documentos."/>
 
         </LinearLayout>
@@ -135,15 +139,15 @@
     <Button
         android:id="@+id/buttonAceptar"
         android:layout_width="match_parent"
-        android:layout_height="35dp"
+        android:layout_height="@dimen/permission_dialog_button_height_size"
         android:background="@drawable/drawable_button"
         android:textColor="@color/blanco"
         android:textAllCaps="false"
-        android:textSize="18sp"
+        android:textSize="@dimen/permission_dialog_button_text_size"
         android:layout_marginEnd="40dp"
         android:layout_marginStart="40dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginTop="@dimen/permission_dialog_button_margin_top"
+        android:layout_marginBottom="@dimen/permission_dialog_button_margin_bottom"
         android:text="@string/aceptar_tag"/>
 
 </LinearLayout>

@@ -24,6 +24,10 @@ public class Login {
     @Expose
     private String fbToken;
 
+    /*@SerializedName("ANDROID_ID")
+    @Expose
+    private String androidID;//*/
+
     public String getUserName() {
         return userName;
     }
@@ -47,4 +51,12 @@ public class Login {
     public void setFbToken(String fbToken) {
         this.fbToken = fbToken;
     }
+
+    /*public String getAndroidID() {
+        return androidID;
+    }
+
+    public void setAndroidID(String androidID) {
+        this.androidID = androidID;
+    }//*/
 }

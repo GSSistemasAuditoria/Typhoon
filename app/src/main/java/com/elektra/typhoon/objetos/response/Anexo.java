@@ -41,6 +41,8 @@ public class Anexo {
     private String idDocumento;
     private int idRevision;
     private boolean seleccionado;
+    private int idRol;
+    private String idUsuario;
 
     public Anexo(){
 
@@ -165,5 +167,21 @@ public class Anexo {
 
     public void setFechaMod(String fechaMod) {
         this.fechaMod = fechaMod;
+    }
+
+    public int getIdRol() {
+        return idRol;
+    }
+
+    public void setIdRol(int idRol) {
+        this.idRol = idRol;
+    }
+
+    public String getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(String idUsuario) {
+        this.idUsuario = idUsuario;
     }
 }

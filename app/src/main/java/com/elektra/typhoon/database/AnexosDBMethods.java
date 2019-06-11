@@ -130,6 +130,8 @@ public class AnexosDBMethods {
             "SUBANEXO_FCH_SINC DATE, " +
             "SUBANEXO_FCH_MOD DATE, " +
             "SELECCIONADO INTEGER, " +
+            "ID_ROL INTEGER, " +
+            "ID_USUARIO TEXT, " +
             "PRIMARY KEY (ID_REVISION,ID_SUBANEXO))";
 
     public void createAnexo(Anexo anexo){
@@ -145,6 +147,8 @@ public class AnexosDBMethods {
         values.put("SUBANEXO_FCH_SINC",anexo.getFechaSinc());
         values.put("SUBANEXO_FCH_MOD",anexo.getFechaMod());
         values.put("SELECCIONADO",0);
+        values.put("ID_ROL",anexo.getIdRol());
+        values.put("ID_USUARIO",anexo.getIdUsuario());
         db.insertWithOnConflict(TP_TRAN_ANEXOS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -172,6 +176,8 @@ public class AnexosDBMethods {
                     }else{
                         anexo.setSeleccionado(true);
                     }
+                    anexo.setIdRol(cursor.getInt(10));
+                    anexo.setIdUsuario(cursor.getString(11));
                     listAnexos.add(anexo);
                 }while(cursor.moveToNext());
             }
@@ -204,6 +210,8 @@ public class AnexosDBMethods {
                         anexo.setSeleccionado(true);
                     }
                     anexo.setFechaMod(cursor.getString(8));
+                    anexo.setIdRol(cursor.getInt(9));
+                    anexo.setIdUsuario(cursor.getString(10));
                     listAnexos.add(anexo);
                 }while(cursor.moveToNext());
             }

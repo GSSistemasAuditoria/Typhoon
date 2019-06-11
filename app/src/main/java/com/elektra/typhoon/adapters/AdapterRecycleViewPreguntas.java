@@ -48,6 +48,7 @@ import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.HistoricoDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
+import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.Historico;
@@ -208,7 +209,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             @Override
             public void onClick(View view) {
                 if(usuario.getIdrol() == 3) {
-                    descargaPDF(pregunta.getIdPregunta());
+                    descargaPDF(pregunta.getIdRevision(),pregunta.getIdPregunta());
                 }else{
                     Utils.message(activity,"No cuenta con el permiso para visualizar el documento");
                 }
@@ -935,7 +936,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                         String.valueOf(idBarco)});
 
                         Utils.message(activity,"Validada");
-                        crearHistorico(evidencia,usuario,"Validada por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
+                        crearHistorico(evidencia,usuario,"VALIDADA POR " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
 
                         listPreguntas.get(numeroPregunta).setSeleccionado(true);
                         Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
@@ -1185,7 +1186,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                                 String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
                                                 String.valueOf(evidencia.getIdBarco())});
 
-                                crearHistorico(evidencia,usuario,"Borrado por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
+                                crearHistorico(evidencia,usuario,"BORRADO POR " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
+                                listPreguntas.get(numeroPregunta).setSeleccionado(true);
+                                Utils.updatePregunta(activity,String.valueOf(listPreguntas.get(numeroPregunta).getIdRevision()),
+                                        String.valueOf(listPreguntas.get(numeroPregunta).getIdChecklist()),String.valueOf(listPreguntas.get(numeroPregunta).getIdPregunta()),
+                                        String.valueOf(listPreguntas.get(numeroPregunta).getIdRubro()),String.valueOf(idBarco),1);//*/
                             }else{
                                 //borrado físico
                                 new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
@@ -1325,7 +1330,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                 String.valueOf(evidencia.getIdBarco())});
 
                 Utils.message(activity,"Rechazada");
-                crearHistorico(evidencia,usuario,"Rechazado por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre() + "\nMotivo: " +
+                crearHistorico(evidencia,usuario,"RECHAZADO POR " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre() + "\nMotivo: " +
                         motivoRechazo);
 
                 if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
@@ -1560,16 +1565,16 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         //activity.startActivity(intent.createChooser(intent, "Selecciona el archivo"));
     }
 
-    private void descargaPDF(int idPregunta){
+    private void descargaPDF(int idRevision,int idPregunta){
 
         final ProgressDialog progressDialog = Utils.typhoonLoader(activity,"Descargando informe...");
 
         //try {
 
-        SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
+        final SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
 
         ApiInterface mApiService = Utils.getInterfaceService();
-        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(sharedPrefs.getString(Constants.SP_JWT_TAG, ""), idPregunta);
+        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(sharedPrefs.getString(Constants.SP_JWT_TAG, ""),idRevision, idPregunta);
         mService.enqueue(new Callback<ResponseDescargaPdf>() {
             @Override
             public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {
@@ -1578,6 +1583,10 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     if (response.body() != null) {
                         if (response.body().getDescargaPDF().getExito()) {
                             //try {
+
+                            String jwt = response.headers().get("Authorization");
+                            sharedPrefs.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+
                             if (response.body().getDescargaPDF().getDocumentoPDF() != null) {
                                 String base64 = response.body().getDescargaPDF().getDocumentoPDF().getBase64();
                                 if (base64 != null) {
@@ -1639,7 +1648,19 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     } else {
                         if (response.errorBody() != null) {
                             try {
-                                Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
+                                String mensaje = "" + response.errorBody().string();
+                                int code = response.code();
+                                //if(!mensaje.contains("No tiene permiso para ver")) {
+                                if(code != 401) {
+                                    Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
+                                }else{
+                                    sharedPrefs.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
+                                    Utils.message(activity, "La sesión ha expirado");
+                                    Intent intent = new Intent(activity,MainActivity.class);
+                                    activity.startActivity(intent);
+                                    activity.finish();
+                                }
+                                //Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 Utils.message(activity, "Error al descargar informe: " + e.getMessage());

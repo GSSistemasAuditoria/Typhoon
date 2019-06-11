@@ -134,7 +134,7 @@ public class SincronizacionJSON {
                     "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA,SINCRONIZADO FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ?"
                 , new String[]{String.valueOf(checklistData.getIdRevision()), String.valueOf(checklistData.getIdChecklist())});
 
-            List<Anexo> listAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD FROM " +
+            List<Anexo> listAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD,ID_ROL,ID_USUARIO FROM " +
              anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND (ID_ETAPA = ? OR ID_ETAPA = -1) ",new String[]{String.valueOf(folio),String.valueOf(usuario.getIdrol())});
 
             List<SubAnexo> listSubAnexo = new ArrayList<>();
@@ -300,7 +300,7 @@ public class SincronizacionJSON {
                     rubro.setListPreguntas(listPreguntasPost);
                 }
 
-                List<Anexo> listAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD FROM " +
+                List<Anexo> listAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD,ID_ROL,ID_USUARIO FROM " +
                         anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND (ID_ETAPA = ? OR ID_ETAPA = -1) AND ID_SUBANEXO = ?",
                         new String[]{String.valueOf(folio), String.valueOf(usuario.getIdrol()),String.valueOf(idSubanexo)});
 
@@ -308,6 +308,8 @@ public class SincronizacionJSON {
                 for (Anexo anexo : listAnexos) {
                     SubAnexo subAnexo = new SubAnexo(anexo.getIdSubAnexo(), anexo.getIdRevision(), anexo.getNombreArchivo(), anexo.getBase64(), anexo.getIdEtapa());
                     subAnexo.setFechaSincronizacion(anexo.getFechaSinc());
+                    subAnexo.setIdRol(anexo.getIdRol());
+                    subAnexo.setIdUsuario(anexo.getIdUsuario());
                     if(anexo.getFechaSinc() != null){
                         subAnexo.setContenido(null);
                     }

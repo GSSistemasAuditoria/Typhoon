@@ -39,6 +39,7 @@ import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.HistoricoDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
+import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.response.Anexo;
 import com.elektra.typhoon.objetos.response.EtapaSubAnexo;
 import com.elektra.typhoon.objetos.response.Evidencia;
@@ -190,12 +191,13 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                                         "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ? AND ID_DOCUMENTO = ?"
                                 , new String[]{String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdAnexo()), String.valueOf(anexo.getIdSubAnexo()), anexo.getIdDocumento()});//*/
 
-                        List<Anexo> anexoGuardado = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD " +
+                        List<Anexo> anexoGuardado = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD,ID_ROL,ID_USUARIO " +
                                         "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                                 , new String[]{String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdSubAnexo())});
 
                         if (anexoGuardado.size() != 0) {
                             Anexo tempAnexo = anexoGuardado.get(0);
+
                             mostrarDocumento(activity, tempAnexo.getNombreArchivo(), tempAnexo.getBase64(),anexo);
                         } else {
                             Utils.message(activity, "No se ha agregado documento");
@@ -270,6 +272,19 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
             }
         }else{
             holder.imageViewSubirArchivo.setVisibility(View.VISIBLE);
+        }//*/
+
+        if(usuario.getIdrol() < 3){
+            //holder.imageViewSubirArchivo.setVisibility(View.GONE);
+            if(anexo.getIdEtapa() == -1) {
+                if(usuario.getIdrol() == anexo.getIdRol()){
+                    holder.imageViewSubirArchivo.setVisibility(View.VISIBLE);
+                }else{
+                    holder.imageViewSubirArchivo.setVisibility(View.GONE);
+                }
+            }else{
+                //holder.imageViewSubirArchivo.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -543,16 +558,16 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         activity.startActivityForResult(intent.createChooser(intent, "Selecciona el archivo"),position);
     }
 
-    private void descargaPDF(int idPregunta){
+    private void descargaPDF(int idRevision,int idPregunta){
 
         final ProgressDialog progressDialog = Utils.typhoonLoader(activity,"Descargando informe...");
 
         //try {
 
-        SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
+        final SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
 
         ApiInterface mApiService = Utils.getInterfaceService();
-        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(sharedPrefs.getString(Constants.SP_JWT_TAG, ""), idPregunta);
+        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(sharedPrefs.getString(Constants.SP_JWT_TAG, ""),idRevision, idPregunta);
         mService.enqueue(new Callback<ResponseDescargaPdf>() {
             @Override
             public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {
@@ -561,6 +576,10 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                     if (response.body() != null) {
                         if (response.body().getDescargaPDF().getExito()) {
                             //try {
+
+                            String jwt = response.headers().get("Authorization");
+                            sharedPrefs.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+
                             if (response.body().getDescargaPDF().getDocumentoPDF() != null) {
                                 String base64 = response.body().getDescargaPDF().getDocumentoPDF().getBase64();
                                 if (base64 != null) {
@@ -622,7 +641,19 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                     } else {
                         if (response.errorBody() != null) {
                             try {
-                                Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
+                                String mensaje = "" + response.errorBody().string();
+                                int code = response.code();
+                                //if(!mensaje.contains("No tiene permiso para ver")) {
+                                if(code != 401) {
+                                    Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
+                                }else{
+                                    sharedPrefs.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
+                                    Utils.message(activity, "La sesión ha expirado");
+                                    Intent intent = new Intent(activity,MainActivity.class);
+                                    activity.startActivity(intent);
+                                    activity.finish();
+                                }
+                                //Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 Utils.message(activity, "Error al descargar informe: " + e.getMessage());

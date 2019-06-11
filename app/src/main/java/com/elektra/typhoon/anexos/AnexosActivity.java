@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -137,7 +138,7 @@ public class AnexosActivity extends AppCompatActivity {
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdAnexo()), String.valueOf(subanexo.getIdSubAnexo())});//*/
 
-                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexosSinDocumento("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD " +
+                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexosSinDocumento("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD,ID_ROL,ID_USUARIO " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdSubAnexo())});
 
@@ -148,6 +149,9 @@ public class AnexosActivity extends AppCompatActivity {
                     subanexo.setIdRevision(folio);
                     subanexo.setSeleccionado(listDatosAnexos.get(0).isSeleccionado());
                     subanexo.setFechaSinc(listDatosAnexos.get(0).getFechaSinc());
+                    subanexo.setFechaMod(listDatosAnexos.get(0).getFechaMod());
+                    subanexo.setIdRol(listDatosAnexos.get(0).getIdRol());
+                    subanexo.setIdUsuario(listDatosAnexos.get(0).getIdUsuario());
                 }
             }
         }
@@ -299,10 +303,13 @@ public class AnexosActivity extends AppCompatActivity {
                         }else {
                             anexo.setIdEtapa(0);
                         }
+                        anexo.setIdRol(usuario.getIdrol());
+                        anexo.setIdUsuario(usuario.getIdUsuario());
                         System.out.println();
                         if(flagCrea) {
                             new AnexosDBMethods(getApplicationContext()).createAnexo(anexo);
                         }else{
+                            anexo.setFechaSinc(null);
                             ContentValues contentValues = new ContentValues();
                             contentValues.put("ID_ETAPA",anexo.getIdEtapa());
                             contentValues.put("DOCUMENTO",anexo.getBase64());
@@ -460,7 +467,7 @@ public class AnexosActivity extends AppCompatActivity {
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdAnexo()), String.valueOf(subanexo.getIdSubAnexo())});//*/
 
-                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexosSinDocumento("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD " +
+                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexosSinDocumento("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD,ID_ROL,ID_USUARIO " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdSubAnexo())});
 
@@ -470,6 +477,10 @@ public class AnexosActivity extends AppCompatActivity {
                     subanexo.setIdEtapa(listDatosAnexos.get(0).getIdEtapa());
                     subanexo.setIdRevision(folio);
                     subanexo.setSeleccionado(listDatosAnexos.get(0).isSeleccionado());
+                    subanexo.setFechaSinc(listDatosAnexos.get(0).getFechaSinc());
+                    subanexo.setFechaMod(listDatosAnexos.get(0).getFechaMod());
+                    subanexo.setIdRol(listDatosAnexos.get(0).getIdRol());
+                    subanexo.setIdUsuario(listDatosAnexos.get(0).getIdUsuario());
                 }
             }
         }
@@ -478,5 +489,16 @@ public class AnexosActivity extends AppCompatActivity {
 
         adapterExpandableAnexos = new AdapterExpandableAnexos(listAnexos,this,textViewCumplen,textViewNoCumplen,textViewTotal,fechaInicio,estatus);
         expandableListView.setAdapter(adapterExpandableAnexos);
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME,MODE_PRIVATE);
+        if(sharedPreferences.contains(Constants.SP_LOGIN_TAG)){
+            if(!sharedPreferences.getBoolean(Constants.SP_LOGIN_TAG,false)){
+                finish();
+            }
+        }
     }
 }

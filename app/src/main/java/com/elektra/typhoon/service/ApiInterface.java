@@ -5,6 +5,7 @@ import com.elektra.typhoon.objetos.request.RequestLogin;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.request.ValidaDatosRequest;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
+import com.elektra.typhoon.objetos.response.CerrarSesionResponse;
 import com.elektra.typhoon.objetos.response.DatosPorValidarResponse;
 import com.elektra.typhoon.objetos.response.ResponseCartera;
 import com.elektra.typhoon.objetos.response.ResponseDescargaPdf;
@@ -44,7 +45,7 @@ public interface ApiInterface {
     Call<CatalogosTyphoonResponse> catalogosTyphoon(@Header("Authorization") String jwt);
 
     @GET("DownloadInformePregunta")
-    Call<ResponseDescargaPdf> descargaPDF(@Header("Authorization") String jwt,@Query("idPregunta") int idPregunta);
+    Call<ResponseDescargaPdf> descargaPDF(@Header("Authorization") String jwt,@Query("idRevision") int idRevision,@Query("idPregunta") int idPregunta);
 
     @POST("GetDatosPorValidar")
     //Call<DatosPorValidarResponse> datosPorValidar(@Header("Authorization") String jwt, @Query("idRevision") int idRevision, @Query("idRol") int idRol);
@@ -52,4 +53,7 @@ public interface ApiInterface {
 
     @GET("GetTranNotificaciones")
     Call<ResponseNotificaciones> getNotificaciones(@Header("Authorization") String jwt, @Query("idRol") int idRol);
+
+    @GET("CerrarSesion")
+    Call<CerrarSesionResponse> cerrarSesion(@Header("Authorization") String jwt, @Query("idUsuario") String idUsuario);
 }

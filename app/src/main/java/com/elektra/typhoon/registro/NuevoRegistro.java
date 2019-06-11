@@ -2,6 +2,7 @@ package com.elektra.typhoon.registro;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,6 +19,7 @@ import android.widget.LinearLayout;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.response.ResponseNuevoUsuario;
 import com.elektra.typhoon.objetos.response.ResponseValidaUsuario;
 import com.elektra.typhoon.service.ApiInterface;
@@ -176,7 +178,7 @@ public class NuevoRegistro extends AppCompatActivity {
 
         ApiInterface mApiService = Utils.getInterfaceService();
 
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
         Call<ResponseValidaUsuario> mService = mApiService.validaUsuarioExterno(sharedPreferences.getString(Constants.SP_JWT_TAG,""),correo);
         mService.enqueue(new Callback<ResponseValidaUsuario>() {
 
@@ -186,6 +188,10 @@ public class NuevoRegistro extends AppCompatActivity {
                 if(response != null) {
                     if (response.body() != null) {
                         if (response.body().getValidaUsuario().getExito()) {
+
+                            String jwt = response.headers().get("Authorization");
+                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+
                             registrar.setVisibility(View.VISIBLE);
                             linearLayoutContrasena.setVisibility(View.VISIBLE);
                             linearLayoutConfirmarContrasena.setVisibility(View.VISIBLE);
@@ -195,7 +201,18 @@ public class NuevoRegistro extends AppCompatActivity {
                     } else {
                         if (response.errorBody() != null) {
                             try {
-                                Utils.message(getApplicationContext(), "Error al validar usuario: " + response.errorBody().string());
+                                String mensaje = "" + response.errorBody().string();
+                                int code = response.code();
+                                //if(!mensaje.contains("No tiene permiso para ver")) {
+                                if(code != 401) {
+                                    Utils.message(getApplicationContext(), "Error al validar usuario: " + response.errorBody().string());
+                                }else{
+                                    sharedPreferences.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
+                                    Utils.message(getApplicationContext(), "La sesión ha expirado");
+                                    Intent intent = new Intent(NuevoRegistro.this,MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 Utils.message(getApplicationContext(), "Error al validar usuario: " + e.getMessage());
@@ -223,7 +240,7 @@ public class NuevoRegistro extends AppCompatActivity {
 
         ApiInterface mApiService = Utils.getInterfaceService();
 
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
         Call<ResponseNuevoUsuario> mService = mApiService.insertarNuevoUsuario(sharedPreferences.getString(Constants.SP_JWT_TAG,""),correo,password);
         mService.enqueue(new Callback<ResponseNuevoUsuario>() {
 
@@ -233,6 +250,10 @@ public class NuevoRegistro extends AppCompatActivity {
                 if(response != null) {
                     if (response.body() != null) {
                         if (response.body().getNuevoUsuario().getExito()) {
+
+                            String jwt = response.headers().get("Authorization");
+                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+
                             Utils.message(getApplicationContext(), "Registro exitoso");
                             activity.finish();
                         } else {
@@ -241,7 +262,18 @@ public class NuevoRegistro extends AppCompatActivity {
                     } else {
                         if (response.errorBody() != null) {
                             try {
-                                Utils.message(getApplicationContext(), "Error al registrar usuario: " + response.errorBody().string());
+                                String mensaje = "" + response.errorBody().string();
+                                int code = response.code();
+                                //if(!mensaje.contains("No tiene permiso para ver")) {
+                                if(code != 401) {
+                                    Utils.message(getApplicationContext(), "Error al registrar usuario: " + response.errorBody().string());
+                                }else{
+                                    sharedPreferences.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
+                                    Utils.message(getApplicationContext(), "La sesión ha expirado");
+                                    Intent intent = new Intent(NuevoRegistro.this,MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 Utils.message(getApplicationContext(), "Error al registrar usuario: " + e.getMessage());

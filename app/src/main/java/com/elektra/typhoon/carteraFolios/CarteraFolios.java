@@ -323,7 +323,7 @@ public class CarteraFolios extends AppCompatActivity {
         carteraData.setMes(mes);
         requestCartera.setCarteraData(carteraData);
 
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
 
         //Call<ResponseCartera> mService = mApiService.carteraRevisiones(requestCartera);
         Call<ResponseCartera> mService = mApiService.carteraRevisiones(sharedPreferences.getString(Constants.SP_JWT_TAG,""),requestCartera);
@@ -335,6 +335,10 @@ public class CarteraFolios extends AppCompatActivity {
                 if(response != null) {
                     if (response.body() != null) {
                         if (response.body().getCarteraRevisiones().getExito()) {
+
+                            String jwt = response.headers().get("Authorization");
+                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+
                             FoliosDBMethods foliosDBMethods = new FoliosDBMethods(getApplicationContext());
                             for (FolioRevision folioRevision : response.body().getCarteraRevisiones().getFolioRevision()) {
                                 foliosDBMethods.createFolio(folioRevision);
@@ -350,7 +354,18 @@ public class CarteraFolios extends AppCompatActivity {
                     } else {
                         if (response.errorBody() != null) {
                             try {
-                                Utils.message(getApplicationContext(), "Error al descargar folios: " + response.errorBody().string());
+                                String mensaje = "" + response.errorBody().string();
+                                int code = response.code();
+                                //if(!mensaje.contains("No tiene permiso para ver")) {
+                                if(code != 401) {
+                                    Utils.message(getApplicationContext(), "Error al descargar folios: " + response.errorBody().string());
+                                }else{
+                                    sharedPreferences.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
+                                    Utils.message(getApplicationContext(), "La sesión ha expirado");
+                                    Intent intent = new Intent(CarteraFolios.this,MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 Utils.message(getApplicationContext(), "Error al descargar folios: " + e.getMessage());
@@ -407,7 +422,7 @@ public class CarteraFolios extends AppCompatActivity {
         final Encryption encryption = new Encryption();
 
         ApiInterface mApiService = Utils.getInterfaceService();
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
         Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(sharedPreferences.getString(Constants.SP_JWT_TAG, ""));
         mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
             @Override
@@ -416,6 +431,10 @@ public class CarteraFolios extends AppCompatActivity {
                     if (response.body() != null) {
                         if (response.body().getCatalogos().getExito()) {
                             //try {
+
+                            String jwt = response.headers().get("Authorization");
+                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+
                             BarcoDBMethods barcoDBMethods = new BarcoDBMethods(CarteraFolios.this);
                             CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(CarteraFolios.this);
                             if (response.body().getCatalogos().getCatalogosData().getListBarcos() != null) {
@@ -512,7 +531,19 @@ public class CarteraFolios extends AppCompatActivity {
                         progressDialog.dismiss();
                         if (response.errorBody() != null) {
                             try {
-                                Utils.message(CarteraFolios.this, "Error al descargar catálogos: " + response.errorBody().string());
+                                String mensaje = "" + response.errorBody().string();
+                                int code = response.code();
+                                //if(!mensaje.contains("No tiene permiso para ver")) {
+                                if(code != 401) {
+                                    Utils.message(CarteraFolios.this, "Error al descargar catálogos: " + response.errorBody().string());
+                                }else{
+                                    sharedPreferences.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
+                                    Utils.message(getApplicationContext(), "La sesión ha expirado");
+                                    Intent intent = new Intent(CarteraFolios.this,MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                                //Utils.message(CarteraFolios.this, "Error al descargar catálogos: " + response.errorBody().string());
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 Utils.message(CarteraFolios.this, "Error al descargar catálogos: " + e.getMessage());
@@ -559,7 +590,7 @@ public class CarteraFolios extends AppCompatActivity {
 
         ApiInterface mApiService = Utils.getInterfaceService();
 
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
 
         final NotificacionesDBMethods notificacionesDBMethods = new NotificacionesDBMethods(CarteraFolios.this);
 
@@ -573,6 +604,10 @@ public class CarteraFolios extends AppCompatActivity {
                 if(response != null) {
                     if (response.body() != null) {
                         if (response.body().getNotificaciones().getExito()) {
+
+                            String jwt = response.headers().get("Authorization");
+                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+
                             if(response.body().getNotificaciones().getNotificaciones() != null){
                                 for(Notificacion notificacion:response.body().getNotificaciones().getNotificaciones()){
                                     notificacionesDBMethods.createNotificacion(notificacion);
@@ -585,7 +620,19 @@ public class CarteraFolios extends AppCompatActivity {
                     } else {
                         if (response.errorBody() != null) {
                             try {
-                                Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + response.errorBody().string());
+                                String mensaje = "" + response.errorBody().string();
+                                int code = response.code();
+                                //if(!mensaje.contains("No tiene permiso para ver")) {
+                                if(code != 401) {
+                                    Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + response.errorBody().string());
+                                }else{
+                                    sharedPreferences.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
+                                    Utils.message(getApplicationContext(), "La sesión ha expirado");
+                                    Intent intent = new Intent(CarteraFolios.this,MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                                //Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + response.errorBody().string());
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + e.getMessage());
@@ -646,5 +693,16 @@ public class CarteraFolios extends AppCompatActivity {
                 .getDisplayMetrics()
                 .density;
         return Math.round((float) dp * density);
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME,MODE_PRIVATE);
+        if(sharedPreferences.contains(Constants.SP_LOGIN_TAG)){
+            if(!sharedPreferences.getBoolean(Constants.SP_LOGIN_TAG,false)){
+                finish();
+            }
+        }
     }
 }

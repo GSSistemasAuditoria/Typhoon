@@ -71,6 +71,7 @@
     <dimen name="checklist_item_margin_bottom">10dp</dimen>
     <dimen name="checklist_totales_margin_horizontal">10dp</dimen>
     <dimen name="checklist_popup_icons_size">70dp</dimen>
+    <dimen name="checklist_pdf_icono_size">80dp</dimen>
 
     <dimen name="loader_typhoon_logo_size">300dp</dimen>
     <dimen name="loader_typhoon_logo_text_size">26sp</dimen>
@@ -96,5 +97,15 @@
     <dimen name="toast_text_size">24sp</dimen>
     <dimen name="toast_margin">20dp</dimen>
     <dimen name="toast_background_radius">32dp</dimen>
+
+    <dimen name="permission_dialog_title_text_size">22sp</dimen>
+    <dimen name="permission_dialog_item_text_size">20sp</dimen>
+    <dimen name="permission_dialog_button_text_size">26sp</dimen>
+    <dimen name="permission_dialog_icon_size">60dp</dimen>
+    <dimen name="permission_dialog_button_height_size">70dp</dimen>
+    <dimen name="permission_dialog_icon_separation">40dp</dimen>
+    <dimen name="permission_dialog_button_margin_top">60dp</dimen>
+    <dimen name="permission_dialog_button_margin_bottom">40dp</dimen>
+    <dimen name="permission_dialog_text_separation">20dp</dimen>
 
 </resources>

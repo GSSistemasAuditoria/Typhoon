@@ -47,6 +47,14 @@ public class SubAnexo {
     @Expose
     private String fechaMod;
 
+    @SerializedName("ID_ROL")
+    @Expose
+    private int idRol;
+
+    @SerializedName("ID_USUARIO")
+    @Expose
+    private String idUsuario;
+
     public SubAnexo(int idSubAnexo, int idRevision, String fileName, String contenido, int idEtapa) {
         this.idSubAnexo = idSubAnexo;
         this.idRevision = idRevision;
@@ -120,5 +128,21 @@ public class SubAnexo {
 
     public void setFechaMod(String fechaMod) {
         this.fechaMod = fechaMod;
+    }
+
+    public int getIdRol() {
+        return idRol;
+    }
+
+    public void setIdRol(int idRol) {
+        this.idRol = idRol;
+    }
+
+    public String getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(String idUsuario) {
+        this.idUsuario = idUsuario;
     }
 }

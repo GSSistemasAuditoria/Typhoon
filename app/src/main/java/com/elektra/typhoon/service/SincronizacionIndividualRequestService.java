@@ -23,6 +23,7 @@ import com.elektra.typhoon.database.FoliosDBMethods;
 import com.elektra.typhoon.database.HistoricoDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.json.SincronizacionJSON;
+import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.request.SincronizacionData;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.request.SubAnexo;
@@ -347,6 +348,10 @@ public class SincronizacionIndividualRequestService extends AsyncTask<String,Str
                 if (response.body() != null) {
                     if (response.body().getSincronizacion().getExito()) {
                         //try {
+
+                        String jwt = response.headers().get("Authorization");
+                        sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+
                         if (response.body().getSincronizacion().getSincronizacionResponseData().getListChecklist() != null) {
                             ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(context);
                             EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(context);
@@ -486,8 +491,22 @@ public class SincronizacionIndividualRequestService extends AsyncTask<String,Str
                 } else {
                     //progressDialog.dismiss();
                     if (response.errorBody() != null) {
-                        updateDialogText("No se pudo sincronizar: " + response.errorBody().string());
-                        return "No se pudo sincronizar: " + response.errorBody().string();
+                        String mensaje = "" + response.errorBody().string();
+                        int code = response.code();
+                        //if(!mensaje.contains("No tiene permiso para ver")) {
+                        if(code != 401) {
+                            //updateDialogText("No se pudo sincronizar: " + response.errorBody().string());
+                            return "No se pudo sincronizar: " + response.errorBody().string();
+                        }else{
+                            sharedPreferences.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
+                            //Utils.message(activity, "La sesión ha expirado");
+                            Intent intent = new Intent(activity,MainActivity.class);
+                            activity.startActivity(intent);
+                            //activity.finish();
+                            return "La sesión ha expirado";
+                        }
+                        //updateDialogText("No se pudo sincronizar: " + response.errorBody().string());
+                        //return "No se pudo sincronizar: " + response.errorBody().string();
                     } else {
                         updateDialogText("No se pudo sincronizar");
                         return "No se pudo sincronizar";

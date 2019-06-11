@@ -172,8 +172,8 @@
 
                 <ImageView
                     android:id="@+id/imageViewDescargaPdf"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/checklist_pdf_icono_size"
+                    android:layout_height="@dimen/checklist_pdf_icono_size"
                     android:src="@drawable/pdf_icon"
                     android:layout_alignParentEnd="true"
                     android:layout_margin="10dp"/>

@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.provider.Settings;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -226,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
         }//*/
         //checkAndRequestPermissions();
 
-        //Utils.checkPermission(this);
+        //Utils.checkPermissionTest(this);
 
         Encryption encryption = new Encryption();
 
@@ -287,6 +288,8 @@ public class MainActivity extends AppCompatActivity {
         login.setUserName(usuario);
         login.setPassword(new Encryption().encryptAES(contrasena));
         login.setFbToken(token);
+        //se agregara id dispositivo
+        //login.setAndroidID(Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
 
         RequestLogin requestLogin = new RequestLogin();
         requestLogin.setLogin(login);
@@ -508,7 +511,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             ApiInterface mApiService = Utils.getInterfaceService();
-            SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+            final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
             Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(sharedPreferences.getString(Constants.SP_JWT_TAG, ""));
             mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
                 @Override
@@ -517,6 +520,10 @@ public class MainActivity extends AppCompatActivity {
                         if (response.body() != null) {
                             if (response.body().getCatalogos().getExito()) {
                                 //try {
+
+                                String jwt = response.headers().get("Authorization");
+                                sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+
                                 BarcoDBMethods barcoDBMethods = new BarcoDBMethods(MainActivity.this);
                                 CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(MainActivity.this);
                                 if (response.body().getCatalogos().getCatalogosData().getListBarcos() != null) {
@@ -618,7 +625,19 @@ public class MainActivity extends AppCompatActivity {
                             progressDialog.dismiss();
                             if (response.errorBody() != null) {
                                 try {
-                                    Utils.message(MainActivity.this, "Error al descargar catálogos: " + response.errorBody().string());
+                                    String mensaje = "" + response.errorBody().string();
+                                    int code = response.code();
+                                    //if(!mensaje.contains("No tiene permiso para ver")) {
+                                    if(code != 401) {
+                                        Utils.message(MainActivity.this, "Error al descargar catálogos: " + response.errorBody().string());
+                                    }else{
+                                        sharedPreferences.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
+                                        Utils.message(getApplicationContext(), "La sesión ha expirado");
+                                        Intent intent = new Intent(MainActivity.this,MainActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                    //Utils.message(MainActivity.this, "Error al descargar catálogos: " + response.errorBody().string());
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                     Utils.message(MainActivity.this, "Error al descargar catálogos: " + e.getMessage());
@@ -654,7 +673,7 @@ public class MainActivity extends AppCompatActivity {
 
         ApiInterface mApiService = Utils.getInterfaceService();
 
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
 
         final NotificacionesDBMethods notificacionesDBMethods = new NotificacionesDBMethods(MainActivity.this);
 
@@ -668,6 +687,10 @@ public class MainActivity extends AppCompatActivity {
                 if(response != null) {
                     if (response.body() != null) {
                         if (response.body().getNotificaciones().getExito()) {
+
+                            String jwt = response.headers().get("Authorization");
+                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+
                             if(response.body().getNotificaciones().getNotificaciones() != null){
                                 for(Notificacion notificacion:response.body().getNotificaciones().getNotificaciones()){
                                     notificacionesDBMethods.createNotificacion(notificacion);
@@ -685,7 +708,19 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         if (response.errorBody() != null) {
                             try {
-                                Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + response.errorBody().string());
+                                String mensaje = "" + response.errorBody().string();
+                                int code = response.code();
+                                //if(!mensaje.contains("No tiene permiso para ver")) {
+                                if(code != 401) {
+                                    Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + response.errorBody().string());
+                                }else{
+                                    sharedPreferences.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
+                                    Utils.message(getApplicationContext(), "La sesión ha expirado");
+                                    Intent intent = new Intent(MainActivity.this,MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                                //Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + response.errorBody().string());
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + e.getMessage());
