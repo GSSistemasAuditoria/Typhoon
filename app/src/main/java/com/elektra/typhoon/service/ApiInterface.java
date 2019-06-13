@@ -1,6 +1,7 @@
 package com.elektra.typhoon.service;
 
 import com.elektra.typhoon.objetos.request.RequestCartera;
+import com.elektra.typhoon.objetos.request.RequestCatalogos;
 import com.elektra.typhoon.objetos.request.RequestLogin;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.request.ValidaDatosRequest;
@@ -43,6 +44,8 @@ public interface ApiInterface {
 
     @GET("GetCatalogosThyphoon")
     Call<CatalogosTyphoonResponse> catalogosTyphoon(@Header("Authorization") String jwt);
+    //@POST("GetCatalogosThyphoon")
+    //Call<CatalogosTyphoonResponse> catalogosTyphoon(@Header("Authorization") String jwt, RequestCatalogos requestCatalogos);
 
     @GET("DownloadInformePregunta")
     Call<ResponseDescargaPdf> descargaPDF(@Header("Authorization") String jwt,@Query("idRevision") int idRevision,@Query("idPregunta") int idPregunta);

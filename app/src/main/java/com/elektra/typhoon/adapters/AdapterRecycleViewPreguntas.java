@@ -936,7 +936,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                         String.valueOf(idBarco)});
 
                         Utils.message(activity,"Validada");
-                        crearHistorico(evidencia,usuario,"VALIDADA POR " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
+                        crearHistorico(evidencia,usuario,"VALIDADA POR " + Utils.getRol(activity,usuario.getIdrol()).toUpperCase() + ": " + usuario.getNombre());
 
                         listPreguntas.get(numeroPregunta).setSeleccionado(true);
                         Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
@@ -1186,7 +1186,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                                 String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
                                                 String.valueOf(evidencia.getIdBarco())});
 
-                                crearHistorico(evidencia,usuario,"BORRADO POR " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre());
+                                crearHistorico(evidencia,usuario,"BORRADO POR " + Utils.getRol(activity,usuario.getIdrol()).toUpperCase() + ": " + usuario.getNombre());
                                 listPreguntas.get(numeroPregunta).setSeleccionado(true);
                                 Utils.updatePregunta(activity,String.valueOf(listPreguntas.get(numeroPregunta).getIdRevision()),
                                         String.valueOf(listPreguntas.get(numeroPregunta).getIdChecklist()),String.valueOf(listPreguntas.get(numeroPregunta).getIdPregunta()),
@@ -1330,7 +1330,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                                 String.valueOf(evidencia.getIdBarco())});
 
                 Utils.message(activity,"Rechazada");
-                crearHistorico(evidencia,usuario,"RECHAZADO POR " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre() + "\nMotivo: " +
+                crearHistorico(evidencia,usuario,"RECHAZADO POR " + Utils.getRol(activity,usuario.getIdrol()).toUpperCase() + ": " + usuario.getNombre() + "\nMotivo: " +
                         motivoRechazo);
 
                 if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
