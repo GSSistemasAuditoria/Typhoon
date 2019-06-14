@@ -71,11 +71,13 @@ public class SincronizacionIndividualRequestService extends AsyncTask<String,Str
     private ApiInterface mApiService;
     private SharedPreferences sharedPreferences;
     private FolioRevision folio;
+    private Encryption encryption;
 
     public SincronizacionIndividualRequestService(Activity activity, Context context, int idRevision){
         this.activity = activity;
         this.context = context;
         this.idRevision = idRevision;
+        encryption = new Encryption();
     }
 
     public SincronizacionIndividualRequestService(ChecklistBarcos activity, Context context, int idRevision){
@@ -83,6 +85,7 @@ public class SincronizacionIndividualRequestService extends AsyncTask<String,Str
         this.context = context;
         this.idRevision = idRevision;
         this.checklistBarcos = activity;
+        encryption = new Encryption();
     }
 
     public SincronizacionIndividualRequestService(Activity activity, Context context, int idRevision,List<CatalogoBarco> listBarcos,List<Anexo> listAnexos,ChecklistBarcos checklistBarcos,AnexosActivity anexosActivity){
@@ -93,6 +96,7 @@ public class SincronizacionIndividualRequestService extends AsyncTask<String,Str
         this.listAnexos = listAnexos;
         this.checklistBarcos = checklistBarcos;
         this.anexosActivity = anexosActivity;
+        encryption = new Encryption();
     }
 
     protected void onPreExecute() {
@@ -341,7 +345,7 @@ public class SincronizacionIndividualRequestService extends AsyncTask<String,Str
     }
 
     private String sincronizaDatos(SincronizacionPost sincronizacionPost,int opcion){
-        Call<SincronizacionResponse> mService = mApiService.sincronizacion(Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD), sincronizacionPost);
+        Call<SincronizacionResponse> mService = mApiService.sincronizacion(encryption.decryptAES(Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD)), sincronizacionPost);
         try {
             Response<SincronizacionResponse> response = mService.execute();
             if (response != null) {
@@ -349,7 +353,7 @@ public class SincronizacionIndividualRequestService extends AsyncTask<String,Str
                     if (response.body().getSincronizacion().getExito()) {
                         //try {
 
-                        String jwt = response.headers().get("Authorization");
+                        String jwt = encryption.encryptAES(response.headers().get("Authorization"));
                         sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                         if (response.body().getSincronizacion().getSincronizacionResponseData().getListChecklist() != null) {

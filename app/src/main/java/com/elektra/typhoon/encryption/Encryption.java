@@ -52,7 +52,7 @@ public class Encryption {
             IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes());
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivParameterSpec);
             encrypted = cipher.doFinal(cleartext.getBytes());
-            encryptedText = new String(Base64.encode(encrypted,Base64.DEFAULT)).trim();
+            encryptedText = new String(Base64.encode(encrypted,Base64.NO_WRAP)).trim();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (InvalidKeyException e) {
@@ -75,7 +75,7 @@ public class Encryption {
             Cipher cipher = Cipher.getInstance(cI);
             SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes(), alg);
             IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes());
-            byte[] enc = Base64.decode(encrypted.getBytes(),Base64.DEFAULT);
+            byte[] enc = Base64.decode(encrypted.getBytes(),Base64.NO_WRAP);
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivParameterSpec);
             decrypted = cipher.doFinal(enc);
         } catch (NoSuchAlgorithmException e) {

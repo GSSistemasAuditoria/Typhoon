@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.TyphoonDataBase;
 import com.elektra.typhoon.database.UsuarioDBMethods;
+import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.response.CerrarSesionResponse;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
@@ -50,7 +51,7 @@ public class NuevaInstalacion extends AsyncTask<String,String,String> {
         ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
         ApiInterface mApiService = Utils.getInterfaceService();
         SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
-        String jwt = Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD);
+        String jwt = new Encryption().decryptAES(Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD));
         Call<CerrarSesionResponse> mService = mApiService.cerrarSesion(jwt,usuario.getIdUsuario());
         try {
             Response<CerrarSesionResponse> response = mService.execute();
@@ -58,8 +59,8 @@ public class NuevaInstalacion extends AsyncTask<String,String,String> {
                 if (response.body() != null) {
                     if (response.body().getCerrarSesion().getExito()) {
                         //try {
-                        String jwt2 = response.headers().get("Authorization");
-                        sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt2).apply();
+                        /*String jwt2 = response.headers().get("Authorization");
+                        sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt2).apply();*/
 
                         SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME,
                                 activity.MODE_PRIVATE);

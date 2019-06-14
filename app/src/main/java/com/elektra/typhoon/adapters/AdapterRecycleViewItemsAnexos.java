@@ -79,6 +79,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
     private String fechaRevision;
     private Anexo anexoHeader;
     private int estatusRevision;
+    private Encryption encryption;
 
     public class MyViewHolder extends RecyclerView.ViewHolder /*implements View.OnClickListener*/{
 
@@ -132,7 +133,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         final Anexo anexo = listAnexos.get(position);
 
         final SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME,Activity.MODE_PRIVATE);
-        final Encryption encryption = new Encryption();
+        encryption = new Encryption();
 
         holder.textViewTituloAnexo.setText(anexo.getDescripcion());
         if(anexo.getNombreArchivo() != null){
@@ -567,7 +568,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         final SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
 
         ApiInterface mApiService = Utils.getInterfaceService();
-        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(sharedPrefs.getString(Constants.SP_JWT_TAG, ""),idRevision, idPregunta);
+        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(encryption.decryptAES(sharedPrefs.getString(Constants.SP_JWT_TAG, "")),idRevision, idPregunta);
         mService.enqueue(new Callback<ResponseDescargaPdf>() {
             @Override
             public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {
@@ -577,7 +578,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                         if (response.body().getDescargaPDF().getExito()) {
                             //try {
 
-                            String jwt = response.headers().get("Authorization");
+                            String jwt = encryption.encryptAES(response.headers().get("Authorization"));
                             sharedPrefs.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                             if (response.body().getDescargaPDF().getDocumentoPDF() != null) {

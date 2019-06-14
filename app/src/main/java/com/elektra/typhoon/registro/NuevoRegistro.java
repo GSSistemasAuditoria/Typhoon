@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.constants.Constants;
+import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.login.MainActivity;
 import com.elektra.typhoon.objetos.response.ResponseNuevoUsuario;
 import com.elektra.typhoon.objetos.response.ResponseValidaUsuario;
@@ -48,13 +49,14 @@ public class NuevoRegistro extends AppCompatActivity {
     private EditText editTextConfirmaPassword;
     private LinearLayout linearLayoutContrasena;
     private LinearLayout linearLayoutConfirmarContrasena;
+    private Encryption encryption;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_registro);
         setContentView(R.layout.registro_layout);
-
+        encryption = new Encryption();
         registrar = (Button) findViewById(R.id.buttonRegistrarse);
         Button validar = (Button) findViewById(R.id.buttonValidar);
         editTextCorreo = (EditText) findViewById(R.id.editTextCorreo);
@@ -179,7 +181,7 @@ public class NuevoRegistro extends AppCompatActivity {
         ApiInterface mApiService = Utils.getInterfaceService();
 
         final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-        Call<ResponseValidaUsuario> mService = mApiService.validaUsuarioExterno(sharedPreferences.getString(Constants.SP_JWT_TAG,""),correo);
+        Call<ResponseValidaUsuario> mService = mApiService.validaUsuarioExterno(encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),correo);
         mService.enqueue(new Callback<ResponseValidaUsuario>() {
 
             @Override
@@ -189,8 +191,8 @@ public class NuevoRegistro extends AppCompatActivity {
                     if (response.body() != null) {
                         if (response.body().getValidaUsuario().getExito()) {
 
-                            String jwt = response.headers().get("Authorization");
-                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+                            /*String jwt = encryption.encryptAES(response.headers().get("Authorization"));
+                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();*/
 
                             registrar.setVisibility(View.VISIBLE);
                             linearLayoutContrasena.setVisibility(View.VISIBLE);
@@ -241,7 +243,7 @@ public class NuevoRegistro extends AppCompatActivity {
         ApiInterface mApiService = Utils.getInterfaceService();
 
         final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-        Call<ResponseNuevoUsuario> mService = mApiService.insertarNuevoUsuario(sharedPreferences.getString(Constants.SP_JWT_TAG,""),correo,password);
+        Call<ResponseNuevoUsuario> mService = mApiService.insertarNuevoUsuario(encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),correo,password);
         mService.enqueue(new Callback<ResponseNuevoUsuario>() {
 
             @Override
@@ -251,8 +253,8 @@ public class NuevoRegistro extends AppCompatActivity {
                     if (response.body() != null) {
                         if (response.body().getNuevoUsuario().getExito()) {
 
-                            String jwt = response.headers().get("Authorization");
-                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+                            /*String jwt = encryption.encryptAES(response.headers().get("Authorization"));
+                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();*/
 
                             Utils.message(getApplicationContext(), "Registro exitoso");
                             activity.finish();

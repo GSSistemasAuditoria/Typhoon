@@ -155,6 +155,8 @@ public class MainActivity extends AppCompatActivity {
                 }else{
                     Utils.message(getApplicationContext(),"Debe introducir id de empleado o su correo");
                 }
+                usuario = null;
+                contrasena = null;
             }
         });
 
@@ -306,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
                             new UsuarioDBMethods(getApplicationContext()).createUsuario(response.body().getValidarEmpleado().getUsuario());
                             SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
                             sharedPrefs.edit().putBoolean(Constants.SP_LOGIN_TAG, true).apply();
-                            sharedPrefs.edit().putString(Constants.SP_JWT_TAG, response.body().getValidarEmpleado().getUsuario().getJwt()).apply();
+                            sharedPrefs.edit().putString(Constants.SP_JWT_TAG, new Encryption().encryptAES(response.body().getValidarEmpleado().getUsuario().getJwt())).apply();
 
                             BarcoDBMethods barcoDBMethods = new BarcoDBMethods(getApplicationContext());
                             if (barcoDBMethods.readBarcos().size() == 0) {
@@ -512,7 +514,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             ApiInterface mApiService = Utils.getInterfaceService();
             final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-            Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(sharedPreferences.getString(Constants.SP_JWT_TAG, ""));
+            Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG, "")));
             mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
                 @Override
                 public void onResponse(Call<CatalogosTyphoonResponse> call, Response<CatalogosTyphoonResponse> response) {
@@ -521,7 +523,7 @@ public class MainActivity extends AppCompatActivity {
                             if (response.body().getCatalogos().getExito()) {
                                 //try {
 
-                                String jwt = response.headers().get("Authorization");
+                                String jwt = encryption.encryptAES(response.headers().get("Authorization"));
                                 sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                                 BarcoDBMethods barcoDBMethods = new BarcoDBMethods(MainActivity.this);
@@ -678,7 +680,7 @@ public class MainActivity extends AppCompatActivity {
         final NotificacionesDBMethods notificacionesDBMethods = new NotificacionesDBMethods(MainActivity.this);
 
         //Call<ResponseCartera> mService = mApiService.carteraRevisiones(requestCartera);
-        Call<ResponseNotificaciones> mService = mApiService.getNotificaciones(sharedPreferences.getString(Constants.SP_JWT_TAG,""),idRol);
+        Call<ResponseNotificaciones> mService = mApiService.getNotificaciones(new Encryption().decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),idRol);
         mService.enqueue(new Callback<ResponseNotificaciones>() {
 
             @Override
@@ -688,7 +690,7 @@ public class MainActivity extends AppCompatActivity {
                     if (response.body() != null) {
                         if (response.body().getNotificaciones().getExito()) {
 
-                            String jwt = response.headers().get("Authorization");
+                            String jwt = new Encryption().encryptAES(response.headers().get("Authorization"));
                             sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                             if(response.body().getNotificaciones().getNotificaciones() != null){

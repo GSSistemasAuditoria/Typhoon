@@ -16,7 +16,7 @@ public class NotificationSync {
 
     @SerializedName("IsNotification")
     @Expose
-    private boolean isNotification;
+    private boolean flagNotification;
 
     @SerializedName("RolesNotificationValidadas")
     @Expose
@@ -27,11 +27,11 @@ public class NotificationSync {
     private List<Integer> rolesNotificacionRechazadas;
 
     public boolean isNotification() {
-        return isNotification;
+        return flagNotification;
     }
 
     public void setNotification(boolean notification) {
-        isNotification = notification;
+        flagNotification = notification;
     }
 
     public List<Integer> getRolesNotificacionValidadas() {

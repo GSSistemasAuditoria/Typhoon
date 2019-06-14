@@ -109,11 +109,13 @@ public class CarteraFolios extends AppCompatActivity {
     private AdapterRecyclerViewCartera adapterRecyclerViewCartera;
     private TextView textViewNotificaciones;
     private ResponseLogin.Usuario usuario;
+    private Encryption encryption;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cartera_folios);
+        encryption = new Encryption();
 
         recyclerView = (RecyclerView)findViewById(R.id.recyclerViewFolios);
         recyclerView.setHasFixedSize(true);
@@ -326,7 +328,7 @@ public class CarteraFolios extends AppCompatActivity {
         final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
 
         //Call<ResponseCartera> mService = mApiService.carteraRevisiones(requestCartera);
-        Call<ResponseCartera> mService = mApiService.carteraRevisiones(sharedPreferences.getString(Constants.SP_JWT_TAG,""),requestCartera);
+        Call<ResponseCartera> mService = mApiService.carteraRevisiones(encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),requestCartera);
         mService.enqueue(new Callback<ResponseCartera>() {
 
             @Override
@@ -336,7 +338,7 @@ public class CarteraFolios extends AppCompatActivity {
                     if (response.body() != null) {
                         if (response.body().getCarteraRevisiones().getExito()) {
 
-                            String jwt = response.headers().get("Authorization");
+                            String jwt = encryption.encryptAES(response.headers().get("Authorization"));
                             sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                             FoliosDBMethods foliosDBMethods = new FoliosDBMethods(getApplicationContext());
@@ -423,7 +425,7 @@ public class CarteraFolios extends AppCompatActivity {
 
         ApiInterface mApiService = Utils.getInterfaceService();
         final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-        Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(sharedPreferences.getString(Constants.SP_JWT_TAG, ""));
+        Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG, "")));
         mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
             @Override
             public void onResponse(Call<CatalogosTyphoonResponse> call, Response<CatalogosTyphoonResponse> response) {
@@ -432,7 +434,7 @@ public class CarteraFolios extends AppCompatActivity {
                         if (response.body().getCatalogos().getExito()) {
                             //try {
 
-                            String jwt = response.headers().get("Authorization");
+                            String jwt = encryption.encryptAES(response.headers().get("Authorization"));
                             sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                             BarcoDBMethods barcoDBMethods = new BarcoDBMethods(CarteraFolios.this);
@@ -595,7 +597,7 @@ public class CarteraFolios extends AppCompatActivity {
         final NotificacionesDBMethods notificacionesDBMethods = new NotificacionesDBMethods(CarteraFolios.this);
 
         //Call<ResponseCartera> mService = mApiService.carteraRevisiones(requestCartera);
-        Call<ResponseNotificaciones> mService = mApiService.getNotificaciones(sharedPreferences.getString(Constants.SP_JWT_TAG,""),idRol);
+        Call<ResponseNotificaciones> mService = mApiService.getNotificaciones(encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),idRol);
         mService.enqueue(new Callback<ResponseNotificaciones>() {
 
             @Override
@@ -605,7 +607,7 @@ public class CarteraFolios extends AppCompatActivity {
                     if (response.body() != null) {
                         if (response.body().getNotificaciones().getExito()) {
 
-                            String jwt = response.headers().get("Authorization");
+                            String jwt = encryption.encryptAES(response.headers().get("Authorization"));
                             sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                             if(response.body().getNotificaciones().getNotificaciones() != null){

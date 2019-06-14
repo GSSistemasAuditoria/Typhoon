@@ -97,6 +97,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     private final Handler handler = new Handler();
     private AdapterRecycleViewPreguntas.MyViewHolder holderTemp;
     private RubroData rubroData;
+    private Encryption encryption;
 
     public int getIdRubro() {
         return idRubro;
@@ -168,6 +169,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
     @Override
     public void onBindViewHolder(@NonNull final AdapterRecycleViewPreguntas.MyViewHolder holder, final int position) {
+        encryption = new Encryption();
         //acciones
         final Pregunta pregunta = listPreguntas.get(position);
         final ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
@@ -1574,7 +1576,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         final SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
 
         ApiInterface mApiService = Utils.getInterfaceService();
-        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(sharedPrefs.getString(Constants.SP_JWT_TAG, ""),idRevision, idPregunta);
+        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(encryption.decryptAES(sharedPrefs.getString(Constants.SP_JWT_TAG, "")),idRevision, idPregunta);
         mService.enqueue(new Callback<ResponseDescargaPdf>() {
             @Override
             public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {
@@ -1584,7 +1586,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         if (response.body().getDescargaPDF().getExito()) {
                             //try {
 
-                            String jwt = response.headers().get("Authorization");
+                            String jwt = encryption.encryptAES(response.headers().get("Authorization"));
                             sharedPrefs.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                             if (response.body().getDescargaPDF().getDocumentoPDF() != null) {
