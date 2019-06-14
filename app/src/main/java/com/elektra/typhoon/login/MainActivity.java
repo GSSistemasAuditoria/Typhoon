@@ -137,14 +137,14 @@ public class MainActivity extends AppCompatActivity {
                 if(!usuario.equals("")){
                     if(usuarioDB == null){
                         if (!contrasena.equals("")) {
-                            iniciarSesion(usuario, contrasena,firebaseToken);
+                            iniciarSesion(usuario, contrasena,firebaseToken,0);
                         } else {
                             Utils.message(getApplicationContext(), "Debe introducir la contraseña");
                         }
                     }else {
                         if (usuarioDB.getCorreo().equals(usuario) || usuarioDB.getIdUsuario().equals(usuario)) {
                             if (!contrasena.equals("")) {
-                                iniciarSesion(usuario, contrasena,firebaseToken);
+                                iniciarSesion(usuario, contrasena,firebaseToken,0);
                             } else {
                                 Utils.message(getApplicationContext(), "Debe introducir la contraseña");
                             }
@@ -280,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
         return mInterfaceService;
     }
 
-    private void iniciarSesion(final String usuario, String contrasena, String token){
+    private void iniciarSesion(final String usuario, String contrasena, String token,int isLogout){
 
         final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this,"Iniciando sesión...");
 
@@ -291,7 +291,8 @@ public class MainActivity extends AppCompatActivity {
         login.setPassword(new Encryption().encryptAES(contrasena));
         login.setFbToken(token);
         //se agregara id dispositivo
-        //login.setAndroidID(Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
+        login.setAndroidID(Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
+        login.setIsLogout(isLogout);
 
         RequestLogin requestLogin = new RequestLogin();
         requestLogin.setLogin(login);
@@ -324,7 +325,15 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }//*/
                         } else {
-                            Utils.message(getApplicationContext(), response.body().getValidarEmpleado().getError());
+                            if(response.body().getValidarEmpleado().getUsuario() != null) {
+                                if (response.body().getValidarEmpleado().getUsuario().getIdUsuario().equals("1")) {
+                                    cerrarSesionDialog();
+                                } else {
+                                    Utils.message(getApplicationContext(), response.body().getValidarEmpleado().getError());
+                                }
+                            }else{
+                                Utils.message(getApplicationContext(), response.body().getValidarEmpleado().getError());
+                            }
                         }
                     } else {
                         if (response.errorBody() != null) {
@@ -493,6 +502,55 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 //new NuevaInstalacion(CarteraFolios.this).execute();
                 Utils.nuevaInstalacionDialog(MainActivity.this);
+                dialog.dismiss();
+            }
+        });
+    }
+
+    private void cerrarSesionDialog(){
+        LayoutInflater li = LayoutInflater.from(MainActivity.this);
+        LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_layout, null);
+
+        TextView textViewCancelar = (TextView) layoutDialog.findViewById(R.id.buttonCancelar);
+        TextView textViewAceptar = (TextView) layoutDialog.findViewById(R.id.buttonAceptar);
+        TextView textViewTitulo = (TextView) layoutDialog.findViewById(R.id.textViewDialogTitulo);
+        LinearLayout linearLayoutCancelar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCancelar);
+        LinearLayout linearLayoutAceptar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutAceptar);
+
+        textViewTitulo.setText("Ya existe un usuario firmado con estas credenciales, desea cerrar la otra sesión?");
+
+        final AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                .setView(layoutDialog)
+                .show();
+
+        textViewCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        linearLayoutCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        textViewAceptar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //new NuevaInstalacion(CarteraFolios.this).execute();
+                iniciarSesion(usuario, contrasena,firebaseToken,1);
+                dialog.dismiss();
+            }
+        });
+
+        linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //new NuevaInstalacion(CarteraFolios.this).execute();
+                iniciarSesion(usuario, contrasena,firebaseToken,1);
                 dialog.dismiss();
             }
         });

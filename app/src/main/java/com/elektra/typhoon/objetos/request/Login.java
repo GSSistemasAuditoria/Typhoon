@@ -24,9 +24,13 @@ public class Login {
     @Expose
     private String fbToken;
 
-    /*@SerializedName("ANDROID_ID")
+    @SerializedName("ANDROID_ID")
     @Expose
     private String androidID;//*/
+
+    @SerializedName("IS_LOGOUT")
+    @Expose
+    private int isLogout;
 
     public String getUserName() {
         return userName;
@@ -52,11 +56,19 @@ public class Login {
         this.fbToken = fbToken;
     }
 
-    /*public String getAndroidID() {
+    public String getAndroidID() {
         return androidID;
     }
 
     public void setAndroidID(String androidID) {
         this.androidID = androidID;
     }//*/
+
+    public int getIsLogout() {
+        return isLogout;
+    }
+
+    public void setIsLogout(int isLogout) {
+        this.isLogout = isLogout;
+    }
 }
