@@ -821,7 +821,8 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
     }
 
     private String sincronizaDatos(SincronizacionPost sincronizacionPost,int opcion){
-        Call<SincronizacionResponse> mService = mApiService.sincronizacion(jwt, sincronizacionPost);
+        String jwtSinc = Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD);
+        Call<SincronizacionResponse> mService = mApiService.sincronizacion(jwtSinc, sincronizacionPost);
         try {
             Response<SincronizacionResponse> response = mService.execute();
             if (response != null) {

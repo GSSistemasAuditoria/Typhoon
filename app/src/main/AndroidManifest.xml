@@ -16,9 +16,9 @@
     <application
         android:allowBackup="false"
         tools:replace="allowBackup"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icono_typhoon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/icono_typhoon"
         android:supportsRtl="true">
         <activity android:name=".login.MainActivity"
             android:theme="@style/AppThemeNoBar"

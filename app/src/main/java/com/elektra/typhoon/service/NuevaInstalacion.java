@@ -58,8 +58,8 @@ public class NuevaInstalacion extends AsyncTask<String,String,String> {
                 if (response.body() != null) {
                     if (response.body().getCerrarSesion().getExito()) {
                         //try {
-                        String jwt2 = response.headers().get("Authorization");
-                        sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt2).apply();
+                        //String jwt2 = response.headers().get("Authorization");
+                        //sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt2).apply();
 
                         SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME,
                                 activity.MODE_PRIVATE);

@@ -189,8 +189,8 @@ public class NuevoRegistro extends AppCompatActivity {
                     if (response.body() != null) {
                         if (response.body().getValidaUsuario().getExito()) {
 
-                            String jwt = response.headers().get("Authorization");
-                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+                            //String jwt = response.headers().get("Authorization");
+                            //sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                             registrar.setVisibility(View.VISIBLE);
                             linearLayoutContrasena.setVisibility(View.VISIBLE);
@@ -251,8 +251,8 @@ public class NuevoRegistro extends AppCompatActivity {
                     if (response.body() != null) {
                         if (response.body().getNuevoUsuario().getExito()) {
 
-                            String jwt = response.headers().get("Authorization");
-                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
+                            //String jwt = response.headers().get("Authorization");
+                            //sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                             Utils.message(getApplicationContext(), "Registro exitoso");
                             activity.finish();
