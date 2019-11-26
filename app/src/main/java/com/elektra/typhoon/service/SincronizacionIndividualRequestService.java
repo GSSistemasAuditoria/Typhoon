@@ -345,7 +345,7 @@ public class SincronizacionIndividualRequestService extends AsyncTask<String,Str
     }
 
     private String sincronizaDatos(SincronizacionPost sincronizacionPost,int opcion){
-        Call<SincronizacionResponse> mService = mApiService.sincronizacion(encryption.decryptAES(Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD)), sincronizacionPost);
+        Call<SincronizacionResponse> mService = mApiService.sincronizacion(Utils.getIPAddress(),encryption.decryptAES(Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD)), sincronizacionPost);
         try {
             Response<SincronizacionResponse> response = mService.execute();
             if (response != null) {

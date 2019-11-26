@@ -50,6 +50,7 @@ public class NuevoRegistro extends AppCompatActivity {
     private LinearLayout linearLayoutContrasena;
     private LinearLayout linearLayoutConfirmarContrasena;
     private Encryption encryption;
+    private Button validar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,7 +59,7 @@ public class NuevoRegistro extends AppCompatActivity {
         setContentView(R.layout.registro_layout);
         encryption = new Encryption();
         registrar = (Button) findViewById(R.id.buttonRegistrarse);
-        Button validar = (Button) findViewById(R.id.buttonValidar);
+        validar = (Button) findViewById(R.id.buttonValidar);
         editTextCorreo = (EditText) findViewById(R.id.editTextCorreo);
         editTextPassword = (EditText) findViewById(R.id.editTextContrasena);
         editTextConfirmaPassword = (EditText) findViewById(R.id.editTextConfirmarContrasena);
@@ -181,7 +182,7 @@ public class NuevoRegistro extends AppCompatActivity {
         ApiInterface mApiService = Utils.getInterfaceService();
 
         final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-        Call<ResponseValidaUsuario> mService = mApiService.validaUsuarioExterno(encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),correo);
+        Call<ResponseValidaUsuario> mService = mApiService.validaUsuarioExterno(Utils.getIPAddress(),encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),correo);
         mService.enqueue(new Callback<ResponseValidaUsuario>() {
 
             @Override
@@ -193,7 +194,7 @@ public class NuevoRegistro extends AppCompatActivity {
 
                             /*String jwt = encryption.encryptAES(response.headers().get("Authorization"));
                             sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();*/
-
+                            validar.setVisibility(View.GONE);
                             registrar.setVisibility(View.VISIBLE);
                             linearLayoutContrasena.setVisibility(View.VISIBLE);
                             linearLayoutConfirmarContrasena.setVisibility(View.VISIBLE);
@@ -243,7 +244,7 @@ public class NuevoRegistro extends AppCompatActivity {
         ApiInterface mApiService = Utils.getInterfaceService();
 
         final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-        Call<ResponseNuevoUsuario> mService = mApiService.insertarNuevoUsuario(encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),correo,password);
+        Call<ResponseNuevoUsuario> mService = mApiService.insertarNuevoUsuario(Utils.getIPAddress(),encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),correo,password);
         mService.enqueue(new Callback<ResponseNuevoUsuario>() {
 
             @Override

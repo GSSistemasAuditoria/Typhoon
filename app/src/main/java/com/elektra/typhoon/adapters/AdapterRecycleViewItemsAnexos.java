@@ -568,7 +568,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         final SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
 
         ApiInterface mApiService = Utils.getInterfaceService();
-        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(encryption.decryptAES(sharedPrefs.getString(Constants.SP_JWT_TAG, "")),idRevision, idPregunta);
+        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(Utils.getIPAddress(),encryption.decryptAES(sharedPrefs.getString(Constants.SP_JWT_TAG, "")),idRevision, idPregunta);
         mService.enqueue(new Callback<ResponseDescargaPdf>() {
             @Override
             public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {

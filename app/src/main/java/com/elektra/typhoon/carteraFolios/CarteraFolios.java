@@ -328,7 +328,7 @@ public class CarteraFolios extends AppCompatActivity {
         final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
 
         //Call<ResponseCartera> mService = mApiService.carteraRevisiones(requestCartera);
-        Call<ResponseCartera> mService = mApiService.carteraRevisiones(encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),requestCartera);
+        Call<ResponseCartera> mService = mApiService.carteraRevisiones(Utils.getIPAddress(),encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),requestCartera);
         mService.enqueue(new Callback<ResponseCartera>() {
 
             @Override
@@ -425,7 +425,7 @@ public class CarteraFolios extends AppCompatActivity {
 
         ApiInterface mApiService = Utils.getInterfaceService();
         final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-        Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG, "")));
+        Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(Utils.getIPAddress(),encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG, "")));
         mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
             @Override
             public void onResponse(Call<CatalogosTyphoonResponse> call, Response<CatalogosTyphoonResponse> response) {

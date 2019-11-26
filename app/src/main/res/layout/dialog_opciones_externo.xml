@@ -82,35 +82,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dialog_usuario_externo_margin_top__button"
-            android:background="@drawable/drawable_button_azul">
+            android:background="@drawable/drawable_button_azul"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_centerHorizontal="true">
+                android:layout_centerHorizontal="true"
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="@dimen/dialog_usuario_externo_icon_button_size"
                     android:layout_height="@dimen/dialog_usuario_externo_icon_button_size"
-                    android:src="@drawable/locked_padlock"
-                    android:layout_marginTop="@dimen/dialog_usuario_externo_margin_top_image_button"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginBottom="@dimen/dialog_usuario_externo_margin_top_image_button"
                     android:layout_marginEnd="@dimen/dialog_usuario_externo_separacion_button"
-                    android:layout_gravity="center_vertical"/>
+                    android:layout_marginTop="@dimen/dialog_usuario_externo_margin_top_image_button"
+                    android:src="@drawable/locked_padlock" />
 
                 <Button
                     android:id="@+id/buttonRestablecerContrasena"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAllCaps="false"
-                    android:background="@color/transparente"
-                    android:textColor="@color/blanco"
-                    android:textStyle="bold"
                     android:layout_gravity="center_vertical"
-                    android:textSize="@dimen/dialog_usuario_externo_text_button_size"
                     android:layout_marginStart="5dp"
-                    android:text="@string/restablecerContrasena" />
+                    android:background="@color/transparente"
+                    android:text="@string/restablecerContrasena"
+                    android:textAllCaps="false"
+                    android:textColor="@color/blanco"
+                    android:textSize="@dimen/dialog_usuario_externo_text_button_size"
+                    android:textStyle="bold" />
 
             </LinearLayout>
         </RelativeLayout>

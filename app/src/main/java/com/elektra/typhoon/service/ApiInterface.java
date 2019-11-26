@@ -28,35 +28,35 @@ public interface ApiInterface {
     //@GET("ValidarEmpleado")
     //Call<ResponseLogin> authenticate(@Query("idUsuario") String usuario, @Query("password") String contrasena);
     @POST("ValidarEmpleado")
-    Call<ResponseLogin> authenticate(@Body RequestLogin requestLogin);
+    Call<ResponseLogin> authenticate(@Header("X-IP_CLIENT") String ip, @Body RequestLogin requestLogin);
 
     @POST("GetCarteraRevisiones")
-    Call<ResponseCartera> carteraRevisiones(@Header("Authorization") String jwt, @Body RequestCartera requestCartera);
+    Call<ResponseCartera> carteraRevisiones(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt, @Body RequestCartera requestCartera);
 
     @GET("ValidarUsuarioExterno")
-    Call<ResponseValidaUsuario> validaUsuarioExterno(@Header("Authorization") String jwt,@Query("correo") String correo);
+    Call<ResponseValidaUsuario> validaUsuarioExterno(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt,@Query("correo") String correo);
 
     @GET("InsertaNuevoUsuario")
-    Call<ResponseNuevoUsuario> insertarNuevoUsuario(@Header("Authorization") String jwt,@Query("correo") String correo,@Query("LLAVE_MAESTRA") String password);
+    Call<ResponseNuevoUsuario> insertarNuevoUsuario(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt,@Query("correo") String correo,@Query("password") String password);
 
     @POST("Sincronizar")
-    Call<SincronizacionResponse> sincronizacion(@Header("Authorization") String jwt,@Body SincronizacionPost sincronizacionPost);
+    Call<SincronizacionResponse> sincronizacion(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt,@Body SincronizacionPost sincronizacionPost);
 
     @GET("GetCatalogosThyphoon")
-    Call<CatalogosTyphoonResponse> catalogosTyphoon(@Header("Authorization") String jwt);
+    Call<CatalogosTyphoonResponse> catalogosTyphoon(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt);
     //@POST("GetCatalogosThyphoon")
     //Call<CatalogosTyphoonResponse> catalogosTyphoon(@Header("Authorization") String jwt, RequestCatalogos requestCatalogos);
 
     @GET("DownloadInformePregunta")
-    Call<ResponseDescargaPdf> descargaPDF(@Header("Authorization") String jwt,@Query("idRevision") int idRevision,@Query("idPregunta") int idPregunta);
+    Call<ResponseDescargaPdf> descargaPDF(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt,@Query("idRevision") int idRevision,@Query("idPregunta") int idPregunta);
 
     @POST("GetDatosPorValidar")
     //Call<DatosPorValidarResponse> datosPorValidar(@Header("Authorization") String jwt, @Query("idRevision") int idRevision, @Query("idRol") int idRol);
-    Call<DatosPorValidarResponse> datosPorValidar(@Header("Authorization") String jwt, @Body ValidaDatosRequest validaDatosRequest);
+    Call<DatosPorValidarResponse> datosPorValidar(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt, @Body ValidaDatosRequest validaDatosRequest);
 
     @GET("GetTranNotificaciones")
     Call<ResponseNotificaciones> getNotificaciones(@Header("Authorization") String jwt, @Query("idRol") int idRol);
 
     @GET("CerrarSesion")
-    Call<CerrarSesionResponse> cerrarSesion(@Header("Authorization") String jwt, @Query("idUsuario") String idUsuario);
+    Call<CerrarSesionResponse> cerrarSesion(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt, @Query("idUsuario") String idUsuario);
 }

@@ -155,8 +155,6 @@ public class MainActivity extends AppCompatActivity {
                 }else{
                     Utils.message(getApplicationContext(),"Debe introducir id de empleado o su correo");
                 }
-                usuario = null;
-                contrasena = null;
             }
         });
 
@@ -268,6 +266,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        usuario = null;
+        contrasena = null;
     }
 
     private ApiInterface getInterfaceService() {
@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
         RequestLogin requestLogin = new RequestLogin();
         requestLogin.setLogin(login);
 
-        Call<ResponseLogin> mService = mApiService.authenticate(requestLogin);
+        Call<ResponseLogin> mService = mApiService.authenticate(Utils.getIPAddress(),requestLogin);
         mService.enqueue(new Callback<ResponseLogin>() {
             @Override
             public void onResponse(Call<ResponseLogin> call, Response<ResponseLogin> response) {
@@ -572,7 +572,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             ApiInterface mApiService = Utils.getInterfaceService();
             final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-            Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG, "")));
+            Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(Utils.getIPAddress(),encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG, "")));
             mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
                 @Override
                 public void onResponse(Call<CatalogosTyphoonResponse> call, Response<CatalogosTyphoonResponse> response) {

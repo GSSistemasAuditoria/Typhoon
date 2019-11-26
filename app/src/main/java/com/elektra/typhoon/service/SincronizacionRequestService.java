@@ -168,7 +168,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 SincronizacionPost sincronizacionPost = new SincronizacionPost();
                 sincronizacionPost.setSincronizacionData(sincronizacionData);
 
-                Call<SincronizacionResponse> mService = mApiService.sincronizacion(jwt, sincronizacionPost);
+                Call<SincronizacionResponse> mService = mApiService.sincronizacion(Utils.getIPAddress(),jwt, sincronizacionPost);
                 Response<SincronizacionResponse> response = mService.execute();
                 if (response != null) {
                     if (response.body() != null) {
@@ -289,7 +289,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                             ValidaDatosRequest validaDatosRequest = new ValidaDatosRequest();
                             validaDatosRequest.setDatosRequest(datosRequest);
 
-                            Call<DatosPorValidarResponse> mServiceValidar = mApiService.datosPorValidar(encryption.decryptAES(jwt),validaDatosRequest);
+                            Call<DatosPorValidarResponse> mServiceValidar = mApiService.datosPorValidar(Utils.getIPAddress(),encryption.decryptAES(jwt),validaDatosRequest);
                             try {
                                 Response<DatosPorValidarResponse> responseValidar = mServiceValidar.execute();
                                 if(responseValidar != null) {
@@ -297,7 +297,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                         if (responseValidar.body().getDatos() != null) {
                                             if (responseValidar.body().getDatos().getExito()) {
 
-                                                String jwt2 = encryption.encryptAES(response.headers().get("Authorization"));
+                                                String jwt2 = encryption.encryptAES(responseValidar.headers().get("Authorization"));
                                                 sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt2).apply();
 
                                                 loadDataSincronizacion();
@@ -417,7 +417,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 ValidaDatosRequest validaDatosRequest = new ValidaDatosRequest();
                 validaDatosRequest.setDatosRequest(datosRequest);
 
-                Call<DatosPorValidarResponse> mService = mApiService.datosPorValidar(jwt,validaDatosRequest);
+                Call<DatosPorValidarResponse> mService = mApiService.datosPorValidar(Utils.getIPAddress(),jwt,validaDatosRequest);
                 try {
                     Response<DatosPorValidarResponse> response = mService.execute();
                     if(response != null) {
@@ -824,8 +824,8 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
     }
 
     private String sincronizaDatos(SincronizacionPost sincronizacionPost,int opcion){
-        String jwtSinc = Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD);
-        Call<SincronizacionResponse> mService = mApiService.sincronizacion(jwtSinc, sincronizacionPost);
+        String jwtSinc = encryption.decryptAES(Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD));
+        Call<SincronizacionResponse> mService = mApiService.sincronizacion(Utils.getIPAddress(),jwtSinc, sincronizacionPost);
         try {
             Response<SincronizacionResponse> response = mService.execute();
             if (response != null) {

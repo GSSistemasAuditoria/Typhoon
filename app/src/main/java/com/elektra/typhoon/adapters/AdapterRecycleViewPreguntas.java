@@ -655,7 +655,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     if(evidencia != null) {
                         //bitmap = evidencia.getOriginalBitmap();descomentar si se requiere
                         //mostrarDocumento(view, identificador, numeroPregunta, activity, bitmap,evidencia.getContenido());descomentar si se requiere
-                        mostrarDocumento(view, identificador, numeroPregunta, activity, evidencia.getOriginalBitmap(),evidencia.getContenido());
+                        mostrarDocumento(view, identificador, numeroPregunta, activity, evidencia.getOriginalBitmap(),evidencia.getContenido(),evidencia.getLocation());
                     }else{
                         Utils.message(activity,"No se pudo cargar la imagen");
                     }
@@ -676,7 +676,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         return listPreguntas.size();
     }
 
-    private void mostrarDocumento(final View viewImagen, final String identificador, final int numeroPregunta, final Activity activity, final Bitmap documento, String documentoPDF){
+    private void mostrarDocumento(final View viewImagen, final String identificador, final int numeroPregunta, final Activity activity, final Bitmap documento, String documentoPDF,String location){
         LayoutInflater inflater = LayoutInflater.from(activity);
 
         String estatusString = "";
@@ -739,7 +739,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 longitud = evidencia.getLongitude();
                 latitud = evidencia.getLatitude();
                 barco = evidencia.getIdBarco();
-                localizacion = evidencia.getLocation();
+                localizacion = location;
 
                 /*List<Address> addresses;
                 Geocoder geocoder = new Geocoder(activity.getBaseContext(), Locale.getDefault());
@@ -1576,7 +1576,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         final SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
 
         ApiInterface mApiService = Utils.getInterfaceService();
-        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(encryption.decryptAES(sharedPrefs.getString(Constants.SP_JWT_TAG, "")),idRevision, idPregunta);
+        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(Utils.getIPAddress(),encryption.decryptAES(sharedPrefs.getString(Constants.SP_JWT_TAG, "")),idRevision, idPregunta);
         mService.enqueue(new Callback<ResponseDescargaPdf>() {
             @Override
             public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {
