@@ -52,7 +52,7 @@ public class NuevaInstalacion extends AsyncTask<String,String,String> {
         ApiInterface mApiService = Utils.getInterfaceService();
         SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
         String jwt = new Encryption().decryptAES(Normalizer.normalize(sharedPreferences.getString(Constants.SP_JWT_TAG, ""), Normalizer.Form.NFD));
-        Call<CerrarSesionResponse> mService = mApiService.cerrarSesion(Utils.getIPAddress(),jwt,usuario.getIdUsuario());
+        Call<CerrarSesionResponse> mService = mApiService.cerrarSesion(usuario.getIdUsuario());
         try {
             Response<CerrarSesionResponse> response = mService.execute();
             if (response != null) {

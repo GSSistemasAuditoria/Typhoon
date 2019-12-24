@@ -34,7 +34,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_margin="5dp"
+                    android:layout_margin="8dp"
                     android:textSize="@dimen/checklist_text_encabezado_size"
                     android:textColor="@color/azul"
                     />
@@ -48,16 +48,16 @@
                         android:id="@+id/imageViewSelect"
                         android:layout_width="@dimen/checklist_check_icon_size"
                         android:layout_height="@dimen/checklist_check_icon_size"
-                        android:layout_marginEnd="2dp"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginTop="8dp"
                         android:src="@mipmap/ic_uncheck_blue"/>
 
                     <ImageView
                         android:id="@+id/imageViewSincronizadoFlag"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
-                        android:layout_marginEnd="2dp"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginTop="8dp"
                         android:src="@drawable/status_1"/>
 
                 </LinearLayout>
@@ -68,7 +68,7 @@
                 android:id="@+id/myRadioGroup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/checklist_radiogroup_margin_bottom"
+                android:layout_margin="@dimen/checklist_radiogroup_margin_bottom"
                 android:orientation="horizontal" >
 
                 <RadioButton
@@ -112,6 +112,8 @@
                     android:id="@+id/imageViewAgregaEvidencias"
                     android:layout_width="@dimen/checklist_evidencias01_icono_width"
                     android:layout_height="@dimen/checklist_evidencias01_icono_height"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:src="@drawable/image"/>
 
                 <Button

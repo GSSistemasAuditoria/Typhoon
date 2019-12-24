@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<android.support.constraint.ConstraintLayout
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <android.support.v7.widget.Toolbar
@@ -10,7 +12,10 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme">
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -33,14 +38,14 @@
                     android:layout_width="35dp"
                     android:layout_height="35dp"
                     android:layout_marginEnd="10dp"
-                    android:background="@mipmap/ic_anexos02"/>
+                    android:background="@mipmap/ic_anexos02" />
 
                 <Button
                     android:id="@+id/buttonSincronizarChecklist"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
                     android:layout_marginEnd="10dp"
-                    android:background="@mipmap/ic_sincronizacion_blanco"/>
+                    android:background="@mipmap/ic_sincronizacion_blanco" />
 
             </LinearLayout>
 
@@ -52,9 +57,12 @@
         android:id="@+id/relativeLayoutUsuario"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
         android:layout_below="@+id/toolbarCartera"
-        android:background="@color/azulOscuro">
+        android:background="@color/azulOscuro"
+        android:padding="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarCartera">
 
         <LinearLayout
             android:id="@+id/linearLayoutUsuario"
@@ -68,34 +76,33 @@
                 android:layout_width="@dimen/icono_user_ancho"
                 android:layout_height="@dimen/icono_user_alto"
                 android:layout_marginEnd="5dp"
-                android:background="@mipmap/ic_user_tp"/>
+                android:background="@mipmap/ic_user_tp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/blanco"
-                android:textSize="@dimen/font_size_bienvenido"
                 android:layout_gravity="center_vertical"
-                android:text="@string/bienvenido_tag"/>
+                android:text="@string/bienvenido_tag"
+                android:textColor="@color/blanco"
+                android:textSize="@dimen/font_size_bienvenido" />
 
             <TextView
                 android:id="@+id/textViewNombreUsuario"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/blanco"
-                android:textSize="@dimen/font_size_bienvenido"
-                android:textStyle="bold"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="5dp"
-                />
+                android:textColor="@color/blanco"
+                android:textSize="@dimen/font_size_bienvenido"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/blanco"
-                android:textSize="@dimen/font_size_bienvenido"
                 android:layout_gravity="center_vertical"
-                android:text="@string/simbolo_exclamacion_tag"/>
+                android:text="@string/simbolo_exclamacion_tag"
+                android:textColor="@color/blanco"
+                android:textSize="@dimen/font_size_bienvenido" />
 
         </LinearLayout>
 
@@ -103,11 +110,11 @@
             android:id="@+id/textViewRol"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/blanco"
             android:layout_below="@+id/linearLayoutUsuario"
             android:layout_alignEnd="@+id/linearLayoutUsuario"
-            android:textSize="@dimen/font_size_bienvenido"
-            android:text="Rol"/>
+            android:text="Rol"
+            android:textColor="@color/blanco"
+            android:textSize="@dimen/font_size_bienvenido" />
 
     </RelativeLayout>
 
@@ -115,12 +122,15 @@
         android:id="@+id/relativeLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/relativeLayoutUsuario"
+        android:background="@color/azul"
         android:paddingStart="@dimen/checklist_padding_vertical_size"
+        android:paddingTop="@dimen/checklist_padding_horizontal_size"
         android:paddingEnd="@dimen/checklist_padding_vertical_size"
         android:paddingBottom="@dimen/checklist_padding_horizontal_size"
-        android:paddingTop="@dimen/checklist_padding_horizontal_size"
-        android:layout_below="@+id/relativeLayoutUsuario"
-        android:background="@color/azul">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/relativeLayoutUsuario">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -130,21 +140,21 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/blanco"
                 android:layout_marginEnd="3dp"
-                android:textStyle="bold"
+                android:text="@string/folio_tag"
+                android:textColor="@color/blanco"
                 android:textSize="@dimen/font_size_bienvenido"
-                android:text="@string/folio_tag"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textViewFolio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/azulClaro"
                 android:padding="3dp"
-                android:textStyle="bold"
+                android:text="1001"
+                android:textColor="@color/azulClaro"
                 android:textSize="@dimen/font_size_bienvenido"
-                android:text="1001"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -157,11 +167,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/blanco"
                 android:layout_marginEnd="3dp"
-                android:textStyle="bold"
+                android:text="@string/mes_revision_tag"
+                android:textColor="@color/blanco"
                 android:textSize="@dimen/font_size_bienvenido"
-                android:text="@string/mes_revision_tag"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textViewFechaInicio"
@@ -169,28 +179,27 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:padding="3dp"
-                android:textStyle="bold"
+                android:textColor="@color/azulClaro"
                 android:textSize="@dimen/font_size_bienvenido"
-                android:textColor="@color/azulClaro" />
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/blanco"
                 android:layout_marginEnd="3dp"
-                android:textStyle="bold"
+                android:text="@string/estatus_tag"
+                android:textColor="@color/blanco"
                 android:textSize="@dimen/font_size_bienvenido"
-                android:text="@string/estatus_tag"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textViewFechaFin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/azulClaro"
                 android:padding="3dp"
+                android:textColor="@color/azulClaro"
                 android:textSize="@dimen/font_size_bienvenido"
-                android:textStyle="bold"
-                />
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -200,8 +209,11 @@
         android:id="@+id/relativeLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/relativeLayout1"
         android:background="@color/gris_claro2"
-        android:layout_below="@+id/relativeLayout1">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/relativeLayout1">
 
         <LinearLayout
             android:id="@+id/linearLayout1"
@@ -216,70 +228,73 @@
                 android:layout_width="@dimen/checklist_icono_barco_width"
                 android:layout_height="@dimen/checklist_icono_barco_height"
                 android:layout_margin="5dp"
-                android:src="@drawable/ship"/>
+                android:src="@drawable/ship" />
 
             <TextView
                 android:id="@+id/textViewNombreBarco"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/azul"
-                android:textStyle="bold"
                 android:layout_gravity="center_vertical"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
                 android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"
+                android:text="Far Sentinel"
+                android:textColor="@color/azul"
                 android:textSize="@dimen/checklist_text_title_barco_size"
-                android:text="Far Sentinel"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 
         <Spinner
             android:id="@+id/spinnerBarcos"
+            style="@style/spinner_style"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
-            android:layout_centerVertical="true"
-            style="@style/spinner_style"
-            android:layout_toEndOf="@+id/linearLayout1"
-            />
+            android:layout_toEndOf="@+id/linearLayout1" />
 
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:id="@+id/relativeLayout3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_below="@+id/relativeLayout2"
-        android:background="@color/grisMedio">
+        android:background="@color/grisMedio"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/relativeLayout2">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="11dp"
-            android:padding="10dp"
-            android:background="@drawable/drawable_back_checklist">
+            android:background="@drawable/drawable_back_checklist"
+            android:padding="10dp">
 
             <TextView
                 android:id="@+id/textViewTituloChecklist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
                 android:layout_marginBottom="5dp"
-                android:textStyle="bold"
-                android:textSize="@dimen/checklist_text_title_barco_size"
+                android:gravity="center_horizontal"
                 android:textColor="@color/azul"
-                />
+                android:textSize="@dimen/checklist_text_title_barco_size"
+                android:textStyle="bold" />
 
             <android.support.v7.widget.CardView
                 android:id="@+id/cardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/textViewTituloChecklist"
                 android:layout_marginTop="@dimen/checklist_totales_margin_horizontal"
                 android:layout_marginBottom="@dimen/checklist_totales_margin_horizontal"
-                app:cardElevation="1dp"
+                app:cardBackgroundColor="@color/blanco"
                 app:cardCornerRadius="4dp"
-                android:layout_below="@+id/textViewTituloChecklist"
-                app:cardBackgroundColor="@color/blanco">
+                app:cardElevation="1dp">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -287,88 +302,88 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp">
 
-                        <LinearLayout
-                            android:id="@+id/marqueeLayout"
+                    <LinearLayout
+                        android:id="@+id/marqueeLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/textViewTagCumplen"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_centerHorizontal="true"
-                            android:orientation="horizontal">
+                            android:layout_marginEnd="5dp"
+                            android:text="@string/cumplen_tag"
+                            android:textColor="@color/azul"
+                            android:textSize="@dimen/font_size_bienvenido"
+                            android:textStyle="bold" />
 
-                            <TextView
-                                android:id="@+id/textViewTagCumplen"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/azul"
-                                android:textStyle="bold"
-                                android:layout_marginEnd="5dp"
-                                android:textSize="@dimen/font_size_bienvenido"
-                                android:text="@string/cumplen_tag"/>
+                        <TextView
+                            android:id="@+id/textViewCumplenValor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/checklist_separacion_totales_size"
+                            android:background="@drawable/drawable_back_textview_verde"
+                            android:paddingStart="7dp"
+                            android:paddingTop="1dp"
+                            android:paddingEnd="7dp"
+                            android:paddingBottom="1dp"
+                            android:text="0"
+                            android:textColor="@color/blanco"
+                            android:textSize="@dimen/font_size_bienvenido"
+                            android:textStyle="bold" />
 
-                            <TextView
-                                android:id="@+id/textViewCumplenValor"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/drawable_back_textview_verde"
-                                android:textStyle="bold"
-                                android:paddingTop="1dp"
-                                android:paddingBottom="1dp"
-                                android:paddingStart="7dp"
-                                android:paddingEnd="7dp"
-                                android:layout_marginEnd="@dimen/checklist_separacion_totales_size"
-                                android:textColor="@color/blanco"
-                                android:textSize="@dimen/font_size_bienvenido"
-                                android:text="0"/>
+                        <TextView
+                            android:id="@+id/textViewTagNoCumplen"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="5dp"
+                            android:text="@string/no_cumplen_tag"
+                            android:textColor="@color/azul"
+                            android:textSize="@dimen/font_size_bienvenido"
+                            android:textStyle="bold" />
 
-                            <TextView
-                                android:id="@+id/textViewTagNoCumplen"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/azul"
-                                android:textStyle="bold"
-                                android:layout_marginEnd="5dp"
-                                android:textSize="@dimen/font_size_bienvenido"
-                                android:text="@string/no_cumplen_tag"/>
+                        <TextView
+                            android:id="@+id/textViewNoCumplenValor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/checklist_separacion_totales_size"
+                            android:background="@drawable/drawable_back_textview_rojo"
+                            android:paddingStart="7dp"
+                            android:paddingTop="1dp"
+                            android:paddingEnd="7dp"
+                            android:paddingBottom="1dp"
+                            android:text="0"
+                            android:textColor="@color/blanco"
+                            android:textSize="@dimen/font_size_bienvenido"
+                            android:textStyle="bold" />
 
-                            <TextView
-                                android:id="@+id/textViewNoCumplenValor"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/drawable_back_textview_rojo"
-                                android:textStyle="bold"
-                                android:textColor="@color/blanco"
-                                android:paddingTop="1dp"
-                                android:paddingBottom="1dp"
-                                android:paddingStart="7dp"
-                                android:paddingEnd="7dp"
-                                android:textSize="@dimen/font_size_bienvenido"
-                                android:layout_marginEnd="@dimen/checklist_separacion_totales_size"
-                                android:text="0"/>
+                        <TextView
+                            android:id="@+id/textViewTagTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="5dp"
+                            android:text="@string/total_tag"
+                            android:textColor="@color/azul"
+                            android:textSize="@dimen/font_size_bienvenido"
+                            android:textStyle="bold" />
 
-                            <TextView
-                                android:id="@+id/textViewTagTotal"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/azul"
-                                android:textStyle="bold"
-                                android:layout_marginEnd="5dp"
-                                android:textSize="@dimen/font_size_bienvenido"
-                                android:text="@string/total_tag"/>
+                        <TextView
+                            android:id="@+id/textViewValorTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/drawable_back_textview"
+                            android:paddingStart="7dp"
+                            android:paddingTop="1dp"
+                            android:paddingEnd="7dp"
+                            android:paddingBottom="1dp"
+                            android:text="0"
+                            android:textColor="@color/blanco"
+                            android:textSize="@dimen/font_size_bienvenido"
+                            android:textStyle="bold" />
 
-                            <TextView
-                                android:id="@+id/textViewValorTotal"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/drawable_back_textview"
-                                android:textStyle="bold"
-                                android:textColor="@color/blanco"
-                                android:paddingTop="1dp"
-                                android:paddingBottom="1dp"
-                                android:paddingStart="7dp"
-                                android:paddingEnd="7dp"
-                                android:textSize="@dimen/font_size_bienvenido"
-                                android:text="0"/>
-
-                        </LinearLayout>
+                    </LinearLayout>
                 </RelativeLayout>
 
             </android.support.v7.widget.CardView>
@@ -377,8 +392,8 @@
                 android:id="@+id/expandableListViewChecklist"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:groupIndicator="@null"
-                android:layout_below="@+id/cardView">
+                android:layout_below="@+id/cardView"
+                android:groupIndicator="@null">
 
 
             </ExpandableListView>
@@ -387,4 +402,4 @@
 
     </RelativeLayout>
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

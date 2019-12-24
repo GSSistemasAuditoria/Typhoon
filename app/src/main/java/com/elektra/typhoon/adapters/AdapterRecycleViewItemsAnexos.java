@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -16,6 +17,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -81,7 +83,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
     private int estatusRevision;
     private Encryption encryption;
 
-    public class MyViewHolder extends RecyclerView.ViewHolder /*implements View.OnClickListener*/{
+    public class MyViewHolder extends RecyclerView.ViewHolder /*implements View.OnClickListener*/ {
 
         private TextView textViewTituloAnexo;
         private ImageView imageViewSubirArchivo;
@@ -105,7 +107,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         }//*/
     }
 
-    public AdapterRecycleViewItemsAnexos(List<Anexo> listAnexos, Activity activity,int header,AdapterExpandableAnexos adapterExpandableAnexos,String fechaRevision,Anexo anexoHeader,int estatusRevision){
+    public AdapterRecycleViewItemsAnexos(List<Anexo> listAnexos, Activity activity, int header, AdapterExpandableAnexos adapterExpandableAnexos, String fechaRevision, Anexo anexoHeader, int estatusRevision) {
         this.activity = activity;
         this.listAnexos = listAnexos;
         this.header = header;
@@ -132,19 +134,19 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         //acciones
         final Anexo anexo = listAnexos.get(position);
 
-        final SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME,Activity.MODE_PRIVATE);
+        final SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, Activity.MODE_PRIVATE);
         encryption = new Encryption();
 
         holder.textViewTituloAnexo.setText(anexo.getDescripcion());
-        if(anexo.getNombreArchivo() != null){
-            if(!anexo.getNombreArchivo().equals("")){
+        if (anexo.getNombreArchivo() != null) {
+            if (!anexo.getNombreArchivo().equals("")) {
                 holder.imageViewSubirArchivo.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_subir_azul));
                 holder.imageViewDescargarArchivo.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_show_document_green));
-            }else{
+            } else {
                 holder.imageViewSubirArchivo.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_subir_gris));
                 holder.imageViewDescargarArchivo.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_show_document_gray));
             }
-        }else{
+        } else {
             holder.imageViewSubirArchivo.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_subir_gris));
             holder.imageViewDescargarArchivo.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_show_document_gray));
         }
@@ -152,19 +154,19 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
             @Override
             public void onClick(View view) {
                 String flagValida = "false";
-                if(sharedPreferences.contains(Constants.SP_VALIDA_FECHA)){
-                    flagValida = encryption.decryptAES(sharedPreferences.getString(Constants.SP_VALIDA_FECHA,"false"));
+                if (sharedPreferences.contains(Constants.SP_VALIDA_FECHA)) {
+                    flagValida = encryption.decryptAES(sharedPreferences.getString(Constants.SP_VALIDA_FECHA, "false"));
                 }
-                if(flagValida.equals("true")) {
-                    if(Utils.validaFechaRevision(activity,fechaRevision)){
-                        if(Utils.checkPermission(activity)){
+                if (flagValida.equals("true")) {
+                    if (Utils.validaFechaRevision(activity, fechaRevision)) {
+                        if (Utils.checkPermission(activity)) {
                             seleccionarArchivo(position);
                         }
-                    }else{
-                        Utils.message(activity,"No se permite agregar documentos porque la revisión no es del mes actual");
+                    } else {
+                        Utils.message(activity, "No se permite agregar documentos porque la revisión no es del mes actual");
                     }
-                }else{
-                    if(Utils.checkPermission(activity)){
+                } else {
+                    if (Utils.checkPermission(activity)) {
                         seleccionarArchivo(position);
                     }
                 }//*/
@@ -185,8 +187,8 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                     Utils.message(activity,"No se ha agregado documento");
                 }//*/
 
-                if(anexo.getNombreArchivo() != null) {
-                    if(!anexo.getNombreArchivo().equals("")) {
+                if (anexo.getNombreArchivo() != null) {
+                    if (!anexo.getNombreArchivo().equals("")) {
                         AnexosDBMethods anexosDBMethods = new AnexosDBMethods(activity);
                         /*List<Anexo> anexoGuardado = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE " +
                                         "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ? AND ID_DOCUMENTO = ?"
@@ -199,7 +201,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                         if (anexoGuardado.size() != 0) {
                             Anexo tempAnexo = anexoGuardado.get(0);
 
-                            mostrarDocumento(activity, tempAnexo.getNombreArchivo(), tempAnexo.getBase64(),anexo);
+                            mostrarDocumento(activity, anexo.getDescripcion() + "\n" + tempAnexo.getNombreArchivo(), tempAnexo.getBase64(), anexo);
                         } else {
                             Utils.message(activity, "No se ha agregado documento");
                         }
@@ -213,20 +215,20 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         });
 
         ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
-        if(usuario != null){
-            if(usuario.getIdrol() != 1){
+        if (usuario != null) {
+            if (usuario.getIdrol() != 1) {
                 holder.imageViewSubirArchivo.setVisibility(View.GONE);
-            }else{
-                if(anexo.getIdEtapa() == 0 || anexo.getIdEtapa() == -1) {
+            } else {
+                if (anexo.getIdEtapa() == 0 || anexo.getIdEtapa() == -1) {
                     holder.imageViewSubirArchivo.setVisibility(View.VISIBLE);
-                }else{
+                } else {
                     holder.imageViewSubirArchivo.setVisibility(View.GONE);
                 }
             }
 
-            if(anexo.getNombreArchivo() == null){
+            if (anexo.getNombreArchivo() == null) {
                 holder.imageViewEtapa.setImageDrawable(null);
-            }else {
+            } else {
                 if (anexo.getIdEtapa() >= usuario.getIdrol()) {
                     holder.imageViewEtapa.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_cumple_verde));
                 } else if (anexo.getIdEtapa() == -1) {
@@ -242,22 +244,22 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         holder.imageViewSeleccionado.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(anexo.isSeleccionado()){
+                if (anexo.isSeleccionado()) {
                     anexo.setSeleccionado(false);
                     anexoHeader.setSeleccionado(false);
-                    Utils.updateAnexo(activity,String.valueOf(anexo.getIdRevision()),String.valueOf(anexo.getIdSubAnexo()),0);
+                    Utils.updateAnexo(activity, String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdSubAnexo()), 0);
                     adapterExpandableAnexos.notifyDataSetChanged();
-                }else{
+                } else {
                     anexo.setSeleccionado(true);
-                    Utils.updateAnexo(activity,String.valueOf(anexo.getIdRevision()),String.valueOf(anexo.getIdSubAnexo()),1);
+                    Utils.updateAnexo(activity, String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdSubAnexo()), 1);
                 }
                 notifyDataSetChanged();
             }
         });
 
-        if(anexo.isSeleccionado()) {
+        if (anexo.isSeleccionado()) {
             holder.imageViewSeleccionado.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_check_blue));
-        }else{
+        } else {
             holder.imageViewSeleccionado.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_uncheck_blue));
         }
 
@@ -265,25 +267,25 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
             holder.imageViewSubirArchivo.setVisibility(View.GONE);
         }//*/
 
-        if(anexo.getNombreArchivo() != null){
-            if(!anexo.getNombreArchivo().equals("")) {
+        if (anexo.getNombreArchivo() != null) {
+            if (!anexo.getNombreArchivo().equals("")) {
                 holder.imageViewSubirArchivo.setVisibility(View.GONE);
-            }else{
+            } else {
                 holder.imageViewSubirArchivo.setVisibility(View.VISIBLE);
             }
-        }else{
+        } else {
             holder.imageViewSubirArchivo.setVisibility(View.VISIBLE);
         }//*/
 
-        if(usuario.getIdrol() < 3){
+        if (usuario.getIdrol() < 3) {
             //holder.imageViewSubirArchivo.setVisibility(View.GONE);
-            if(anexo.getIdEtapa() == -1) {
-                if(usuario.getIdrol() == anexo.getIdRol()){
+            if (anexo.getIdEtapa() == -1) {
+                if (usuario.getIdrol() == anexo.getIdRol()) {
                     holder.imageViewSubirArchivo.setVisibility(View.VISIBLE);
-                }else{
+                } else {
                     holder.imageViewSubirArchivo.setVisibility(View.GONE);
                 }
-            }else{
+            } else {
                 //holder.imageViewSubirArchivo.setVisibility(View.GONE);
             }
         }
@@ -294,7 +296,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         return listAnexos.size();
     }
 
-    private void mostrarDocumento(final Activity activity, String nombrePDF, String documentoPDF, final Anexo anexo){
+    private void mostrarDocumento(final Activity activity, String nombrePDF, String documentoPDF, final Anexo anexo) {
         LayoutInflater inflater = LayoutInflater.from(activity);
         View dialogLayout = null;
         UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(activity);
@@ -325,33 +327,33 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
 
         buttonBorrar.setVisibility(View.GONE);
 
-        if(usuario.getIdrol() == 1){
+        if (usuario.getIdrol() == 1) {
             buttonNoCumple.setVisibility(View.GONE);
-            if(anexo.getIdEtapa() == -1){
+            if (anexo.getIdEtapa() == -1) {
                 buttonCumple.setVisibility(View.GONE);
-            }else{
+            } else {
                 buttonCumple.setVisibility(View.VISIBLE);
             }
 
-            if(anexo.getIdEtapa() > etapaAnexo){
+            if (anexo.getIdEtapa() > etapaAnexo) {
                 buttonCumple.setVisibility(View.GONE);
                 buttonNoCumple.setVisibility(View.GONE);
             }
-        }else{
-            if(anexo.getIdEtapa() == etapaAnexo){
+        } else {
+            if (anexo.getIdEtapa() == etapaAnexo) {
                 buttonCumple.setVisibility(View.VISIBLE);
-                if(anexo.getFechaSinc() == null){
+                if (anexo.getFechaSinc() == null) {
                     buttonNoCumple.setVisibility(View.GONE);
-                }else{
+                } else {
                     buttonNoCumple.setVisibility(View.VISIBLE);
                 }
-            }else if(anexo.getIdEtapa() > etapaAnexo){
+            } else if (anexo.getIdEtapa() > etapaAnexo) {
                 buttonCumple.setVisibility(View.GONE);
                 buttonNoCumple.setVisibility(View.GONE);
-            }else if(anexo.getIdEtapa() < etapaAnexo){
+            } else if (anexo.getIdEtapa() < etapaAnexo) {
                 buttonCumple.setVisibility(View.GONE);
                 buttonNoCumple.setVisibility(View.GONE);
-            }else if(anexo.getIdEtapa() == -1){
+            } else if (anexo.getIdEtapa() == -1) {
                 buttonCumple.setVisibility(View.GONE);
                 buttonNoCumple.setVisibility(View.GONE);
             }
@@ -368,10 +370,26 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
             buttonNoCumple.setVisibility(View.GONE);
         }//*/
 
+
         final AlertDialog alertDialog = new AlertDialog.Builder(activity)
                 .setView(dialogLayout)
                 .create();
         alertDialog.show();
+
+        int width = (int) (activity.getResources().getDisplayMetrics().widthPixels * 0.90);
+        int height = (int) (activity.getResources().getDisplayMetrics().heightPixels * 0.90);
+        alertDialog.getWindow().setLayout(width, height);
+
+        ViewGroup.LayoutParams params = pdfViewDocumento.getLayoutParams();
+        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        params.height = (int) (activity.getResources().getDisplayMetrics().heightPixels * 0.77);
+        pdfViewDocumento.requestLayout();
+
+        /*WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(alertDialog.getWindow().getAttributes());
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+        alertDialog.getWindow().setAttributes(lp);*/
 
         imageViewCerrarDialog.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -394,9 +412,9 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                 String finalEtapaString = "";
                 CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(activity);
                 List<EtapaSubAnexo> listCatalogo = catalogosDBMethods.readEtapaSubAnexo("SELECT ID_ETAPA,ID_USUARIO,DESCRIPCION FROM " + catalogosDBMethods.TP_CAT_ETAPA_SUBANEXO +
-                         " WHERE ID_ETAPA = ?",new String[]{String.valueOf(anexo.getIdEtapa())});
+                        " WHERE ID_ETAPA = ?", new String[]{String.valueOf(anexo.getIdEtapa())});
 
-                if(listCatalogo.size() != 0){
+                if (listCatalogo.size() != 0) {
                     finalEtapaString = listCatalogo.get(0).getDescripcion();
                 }
 
@@ -405,25 +423,25 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
 
                 HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(activity);
                 List<HistoricoAnexo> listHistoricoAnexo = historicoDBMethods.readHistoricoAnexo("SELECT ID_SUBANEXO,ID_REVISION,ID_ETAPA,ID_USUARIO,NOMBRE,MOTIVO_RECHAZO,FECHA_MOD,GUID,SUBANEXO_FCH_SINC,ID_ROL FROM " +
-                historicoDBMethods.TP_TRAN_HISTORIAL_SUBANEXO + " WHERE ID_SUBANEXO = ? AND ID_REVISION = ? ORDER BY FECHA_MOD DESC",new String[]{
-                        String.valueOf(anexo.getIdSubAnexo()),String.valueOf(anexo.getIdRevision())});
+                        historicoDBMethods.TP_TRAN_HISTORIAL_SUBANEXO + " WHERE ID_SUBANEXO = ? AND ID_REVISION = ? ORDER BY FECHA_MOD DESC", new String[]{
+                        String.valueOf(anexo.getIdSubAnexo()), String.valueOf(anexo.getIdRevision())});
 
                 List<Historico> listHistorico = new ArrayList<>();
 
-                for(HistoricoAnexo historicoAnexo:listHistoricoAnexo){
+                for (HistoricoAnexo historicoAnexo : listHistoricoAnexo) {
                     Historico historico = new Historico();
                     historico.setFechaMod(historicoAnexo.getFechaMod());
                     String descripcion = "";
-                    if(historicoAnexo.getIdEtapa() != -1){
-                        descripcion = "Validado por " + Utils.getRol(activity,historicoAnexo.getIdRol()).toLowerCase() + " " + historicoAnexo.getNombre();
-                    }else{
-                        descripcion = "Rechazado por " + Utils.getRol(activity,historicoAnexo.getIdRol()).toLowerCase() + " " + historicoAnexo.getNombre() + "\nMotivo: " + historicoAnexo.getMotivoRechazo();
+                    if (historicoAnexo.getIdEtapa() != -1) {
+                        descripcion = "Validado por " + Utils.getRol(activity, historicoAnexo.getIdRol()).toLowerCase() + " " + historicoAnexo.getNombre();
+                    } else {
+                        descripcion = "Rechazado por " + Utils.getRol(activity, historicoAnexo.getIdRol()).toLowerCase() + " " + historicoAnexo.getNombre() + "\nMotivo: " + historicoAnexo.getMotivoRechazo();
                     }
                     historico.setMotivo(descripcion);
                     listHistorico.add(historico);
                 }
 
-                HistoricoAdapter historicoAdapter = new HistoricoAdapter(activity,listHistorico);
+                HistoricoAdapter historicoAdapter = new HistoricoAdapter(activity, listHistorico);
                 listViewHistorico.setAdapter(historicoAdapter);
 
                 final AlertDialog alertDialogMotivo = new AlertDialog.Builder(activity)
@@ -446,9 +464,9 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
             public void onClick(View view) {
                 int idRol = usuario.getIdrol();
                 ContentValues contentValues = new ContentValues();
-                contentValues.put("ID_ETAPA",idRol);
-                new AnexosDBMethods(activity).updateAnexo(contentValues,"ID_REVISION = ? AND ID_SUBANEXO = ?",
-                        new String[]{String.valueOf(anexo.getIdRevision()),String.valueOf(anexo.getIdSubAnexo())});
+                contentValues.put("ID_ETAPA", idRol);
+                new AnexosDBMethods(activity).updateAnexo(contentValues, "ID_REVISION = ? AND ID_SUBANEXO = ?",
+                        new String[]{String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdSubAnexo())});
                 anexo.setIdEtapa(idRol);
 
                 HistoricoAnexo historicoAnexo = new HistoricoAnexo();
@@ -462,8 +480,8 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                 historicoAnexo.setIdRol(usuario.getIdrol());
                 new HistoricoDBMethods(activity).createHistoricoAnexo(historicoAnexo);
 
-                Utils.message(activity,"Validado");
-                Utils.updateAnexo(activity,String.valueOf(anexo.getIdRevision()),String.valueOf(anexo.getIdSubAnexo()),1);
+                Utils.message(activity, "Validado");
+                Utils.updateAnexo(activity, String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdSubAnexo()), 1);
                 anexo.setSeleccionado(true);
                 adapterExpandableAnexos.contarAnexosValidados();
                 adapterExpandableAnexos.getAdapterRecycleViewItemsAnexosTemp().notifyDataSetChanged();
@@ -487,8 +505,8 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
 
                 final AlertDialog alertDialogMotivo = new AlertDialog.Builder(activity)
                         .setView(dialogLayout)
-                        .setNegativeButton("",null)
-                        .setPositiveButton("",null)
+                        .setNegativeButton("", null)
+                        .setPositiveButton("", null)
                         .create();
                 alertDialogMotivo.show();
 
@@ -509,11 +527,11 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                 linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(!editTextMotivoRechazo.getText().toString().equals("")) {
+                        if (!editTextMotivoRechazo.getText().toString().equals("")) {
                             ContentValues contentValues = new ContentValues();
-                            contentValues.put("ID_ETAPA",-1);
-                            new AnexosDBMethods(activity).updateAnexo(contentValues,"ID_REVISION = ? AND ID_SUBANEXO = ?",
-                                    new String[]{String.valueOf(anexo.getIdRevision()),String.valueOf(anexo.getIdSubAnexo())});
+                            contentValues.put("ID_ETAPA", -1);
+                            new AnexosDBMethods(activity).updateAnexo(contentValues, "ID_REVISION = ? AND ID_SUBANEXO = ?",
+                                    new String[]{String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdSubAnexo())});
                             anexo.setIdEtapa(-1);
                             HistoricoAnexo historicoAnexo = new HistoricoAnexo();
                             historicoAnexo.setIdSubAnexo(anexo.getIdSubAnexo());
@@ -526,15 +544,15 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                             historicoAnexo.setGuid(UUID.randomUUID().toString());
                             historicoAnexo.setIdRol(usuario.getIdrol());
                             new HistoricoDBMethods(activity).createHistoricoAnexo(historicoAnexo);
-                            Utils.message(activity,"Rechazado");
-                            Utils.updateAnexo(activity,String.valueOf(anexo.getIdRevision()),String.valueOf(anexo.getIdSubAnexo()),1);
+                            Utils.message(activity, "Rechazado");
+                            Utils.updateAnexo(activity, String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdSubAnexo()), 1);
                             anexo.setSeleccionado(true);
                             adapterExpandableAnexos.contarAnexosValidados();
                             adapterExpandableAnexos.getAdapterRecycleViewItemsAnexosTemp().notifyDataSetChanged();
                             alertDialogMotivo.dismiss();
                             alertDialog.dismiss();
-                        }else{
-                            Utils.message(activity,"Debe especificar el motivo de rechazo");
+                        } else {
+                            Utils.message(activity, "Debe especificar el motivo de rechazo");
                         }
                     }
                 });
@@ -552,28 +570,28 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
     public void seleccionarArchivo(int position) {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
-        String[] mimetypes={"application/pdf"};//*/
+        String[] mimetypes = {"application/pdf"};//*/
         intent.setType("*/*");
-        intent.putExtra(Intent.EXTRA_MIME_TYPES,mimetypes);
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        activity.startActivityForResult(intent.createChooser(intent, "Selecciona el archivo"),position);
+        activity.startActivityForResult(intent.createChooser(intent, "Selecciona el archivo"), position);
     }
 
-    private void descargaPDF(int idRevision,int idPregunta){
+    private void descargaPDF(int idRevision, int idPregunta) {
 
-        final ProgressDialog progressDialog = Utils.typhoonLoader(activity,"Descargando informe...");
+        final ProgressDialog progressDialog = Utils.typhoonLoader(activity, "Descargando informe...");
 
         //try {
 
         final SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
 
         ApiInterface mApiService = Utils.getInterfaceService();
-        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(Utils.getIPAddress(),encryption.decryptAES(sharedPrefs.getString(Constants.SP_JWT_TAG, "")),idRevision, idPregunta);
+        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(Utils.getIPAddress(), encryption.decryptAES(sharedPrefs.getString(Constants.SP_JWT_TAG, "")), idRevision, idPregunta);
         mService.enqueue(new Callback<ResponseDescargaPdf>() {
             @Override
             public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {
                 progressDialog.dismiss();
-                if(response != null) {
+                if (response != null) {
                     if (response.body() != null) {
                         if (response.body().getDescargaPDF().getExito()) {
                             //try {
@@ -645,12 +663,12 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                                 String mensaje = "" + response.errorBody().string();
                                 int code = response.code();
                                 //if(!mensaje.contains("No tiene permiso para ver")) {
-                                if(code != 401) {
+                                if (code != 401) {
                                     Utils.message(activity, "Error al descargar informe: " + response.errorBody().string());
-                                }else{
+                                } else {
                                     sharedPrefs.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
                                     Utils.message(activity, "La sesión ha expirado");
-                                    Intent intent = new Intent(activity,MainActivity.class);
+                                    Intent intent = new Intent(activity, MainActivity.class);
                                     activity.startActivity(intent);
                                     activity.finish();
                                 }
@@ -663,7 +681,7 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                             Utils.message(activity, "Error al descargar informe");
                         }
                     }
-                }else{
+                } else {
                     Utils.message(activity, "Error al descargar informe");
                 }
             }

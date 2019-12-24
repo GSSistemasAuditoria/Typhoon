@@ -28,6 +28,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -79,6 +80,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -199,8 +201,7 @@ public class Utils {
                     file);
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, tempFileUri);
         } else {
-            Uri tempFileUri = Uri.fromFile(file);
-            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, tempFileUri);
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
         }
         activity.startActivityForResult(cameraIntent, requestCode);
     }
@@ -1174,8 +1175,9 @@ public class Utils {
                         String sAddr = addr.getHostAddress();
                         boolean isIPv4 = sAddr.indexOf(':')<0;
                         /*if (useIPv4) {*/
-                            if (isIPv4)
+                            if (isIPv4) {
                                 return sAddr;
+                            }
 /*                        } else {
                             if (!isIPv4) {
                                 int delim = sAddr.indexOf('%'); // drop ip6 port suffix
@@ -1185,7 +1187,10 @@ public class Utils {
                     }
                 }
             }
-        } catch (Exception ex) { } // for now eat exceptions
+        } catch (SocketException ex) {
+            Log.e(Utils.class.getName(), ex.getMessage());
+            ex.printStackTrace();
+        } // for now eat exceptions
         return "";
     }
 }

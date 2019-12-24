@@ -60,7 +60,7 @@
     <dimen name="checklist_separacion_totales_size">20dp</dimen>
     <dimen name="checklist_text_encabezado_size">20sp</dimen>
     <dimen name="checklist_expand_icon_size">30dp</dimen>
-    <dimen name="checklist_check_icon_size">40dp</dimen>
+    <dimen name="checklist_check_icon_size">50dp</dimen>
     <dimen name="checklist_text_encabezado_padding_size">14dp</dimen>
     <dimen name="checklist_evidencias01_icono_width">60dp</dimen>
     <dimen name="checklist_evidencias01_icono_height">70dp</dimen>

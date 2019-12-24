@@ -15,12 +15,14 @@ import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Build;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.text.Layout;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -168,7 +170,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final AdapterRecycleViewPreguntas.MyViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
         encryption = new Encryption();
         //acciones
         final Pregunta pregunta = listPreguntas.get(position);
@@ -177,6 +179,9 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         holder.radioGroup.setEnabled(false);
         pregunta.setRadioGroup(holder.radioGroup);
         holder.textViewPregunta.setText(pregunta.getDescripcion());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            holder.textViewPregunta.setJustificationMode(Layout.JUSTIFICATION_MODE_INTER_WORD);
+        }
         holderTemp = holder;
 
         holder.imageViewSincronizadoFlag.setVisibility(View.GONE);

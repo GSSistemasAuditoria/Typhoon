@@ -1,19 +1,19 @@
 package com.elektra.typhoon.login;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.provider.Settings;
+import android.net.Uri;
+import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -31,17 +31,16 @@ import com.elektra.typhoon.database.NotificacionesDBMethods;
 import com.elektra.typhoon.database.TyphoonDataBase;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
-import com.elektra.typhoon.gps.GPSTracker;
-import com.elektra.typhoon.objetos.request.Login;
-import com.elektra.typhoon.objetos.request.RequestLogin;
 import com.elektra.typhoon.objetos.response.Barco;
-import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
+import com.elektra.typhoon.objetos.response.CerrarSesionResponse;
 import com.elektra.typhoon.objetos.response.Configuracion;
 import com.elektra.typhoon.objetos.response.EstatusEvidencia;
 import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.EtapaEvidencia;
 import com.elektra.typhoon.objetos.response.EtapaSubAnexo;
+import com.elektra.typhoon.objetos.response.GenericResponseVO;
+import com.elektra.typhoon.objetos.response.LoginLlaveMaestraVO;
 import com.elektra.typhoon.objetos.response.Notificacion;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.ResponseNotificaciones;
@@ -50,12 +49,6 @@ import com.elektra.typhoon.objetos.response.TipoRespuesta;
 import com.elektra.typhoon.registro.NuevoRegistro;
 import com.elektra.typhoon.registro.RestablecerContrasena;
 import com.elektra.typhoon.service.ApiInterface;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import com.elektra.typhoon.utils.Utils;
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -63,6 +56,13 @@ import java.io.IOException;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.HttpUrl;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Proyecto: TYPHOON
@@ -73,6 +73,8 @@ import java.util.List;
  */
 
 public class MainActivity extends AppCompatActivity {
+    public static final String TAG = MainActivity.class.getName();
+
     private EditText editTextUsuario;
     private EditText editTextContrasena;
     private Button entrar;
@@ -85,31 +87,99 @@ public class MainActivity extends AppCompatActivity {
     private String firebaseToken;
     private SharedPreferences sharedPrefs;
 
+    private Button btnInterno;
+    private Button btnExterno;
+
+    private void getTokenFormUrl(String token) {
+        setFirebaseToken();
+        iniciarSesion(null, null, firebaseToken, token);
+    }
+
+    public void setFirebaseToken() {
+        if (sharedPrefs.contains(Constants.SP_FIREBASE_TOKEN)) {
+            String firebase = Normalizer.normalize(new Encryption().decryptAES(sharedPrefs.getString(Constants.SP_FIREBASE_TOKEN, "")), Normalizer.Form.NFD);
+            if (!firebase.equals("")) {
+                firebaseToken = firebase;
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_main);
         setContentView(R.layout.login_layout);
+        sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        Uri data = null;
+        if (getIntent() != null && getIntent().getData() != null) {
+            data = getIntent().getData();
+        }
+        if (data != null && !TextUtils.isEmpty(data.getScheme())) {
+            if ("typhoon".equals(data.getScheme())) {
+                String code = null;
+                for (String mValue : data.toString().split("&")) {
+                    String[] values = mValue.split("=");
+                    if (values[0].equals("access_token")) {
+                        code = values[1];
+                        break;
+                    }
+                }
+                if (!TextUtils.isEmpty(code)) {
+                    getTokenFormUrl(code);
+                }
+            }
+        }
 
         Utils.deviceLockVerification(this);
         Utils.installerVerification(this);
         //Utils.isDeviceRooted();
 
-        editTextUsuario = (EditText)findViewById(R.id.editTextUsuario);
-        editTextContrasena = (EditText)findViewById(R.id.editTextContrasena);
+        editTextUsuario = (EditText) findViewById(R.id.editTextUsuario);
+        editTextContrasena = (EditText) findViewById(R.id.editTextContrasena);
         entrar = (Button) findViewById(R.id.buttonEntrar);
-        registro = (Button)findViewById(R.id.buttonRegistro);
+        registro = (Button) findViewById(R.id.buttonRegistro);
 
+        btnInterno = findViewById(R.id.btnInterno);
+        btnExterno = findViewById(R.id.btnExterno);
+        View.OnClickListener mOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.btnInterno:
+                        HttpUrl authorizeUrl = HttpUrl.parse(Constants.URL_DSI + "oauth/nam/authz")
+                                .newBuilder()
+                                .addQueryParameter("client_id", getString(R.string.client_id))
+                                .addQueryParameter("scope", getString(R.string.scope))
+                                .addQueryParameter("redirect_uri", getString(R.string.redirect_uri))
+                                .addQueryParameter("response_type", getString(R.string.response_type))
+                                .addQueryParameter(new Encryption().decryptAES(getString(R.string.client_text)), getString(R.string.client))
+                                .addQueryParameter("acr_values", getString(R.string.acr_values))
+                                .build();
+                        Intent mIntent = new Intent(Intent.ACTION_VIEW);
+                        mIntent.setData(Uri.parse(String.valueOf(authorizeUrl.url())));
+                        startActivity(mIntent);
+                        break;
+                    case R.id.btnExterno:
+                        findViewById(R.id.clIngresar).setVisibility(View.GONE);
+                        findViewById(R.id.clExterno).setVisibility(View.VISIBLE);
+                        break;
+                    default:
+                        Log.w(TAG, String.valueOf(v.getId()));
+                        break;
+                }
+            }
+        };
+        btnInterno.setOnClickListener(mOnClickListener);
+        btnExterno.setOnClickListener(mOnClickListener);
         float scale = getResources().getConfiguration().fontScale;
         System.out.println("Escala del texto: " + scale);
 
-        sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
         if (sharedPrefs.contains(Constants.SP_LOGIN_TAG)) {
             if (sharedPrefs.getBoolean(Constants.SP_LOGIN_TAG, false)) {
                 Intent intent = new Intent(getApplicationContext(), CarteraFolios.class);
                 startActivity(intent);
                 finish();
-            }else{
+            } else {
                 Utils.checkPermission(this);
             }
         } else {
@@ -117,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
             ed = sharedPrefs.edit();
             ed.putBoolean(Constants.SP_LOGIN_TAG, false);
             ed.commit();
+
             Utils.checkPermission(this);
         }//*/
 
@@ -124,37 +195,26 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ResponseLogin.Usuario usuarioDB = new UsuarioDBMethods(getApplicationContext()).readUsuario();
-                usuario = Normalizer.normalize(editTextUsuario.getText().toString(), Normalizer.Form.NFD);
+                usuario = Normalizer.normalize(editTextUsuario.getText().toString().toLowerCase().trim(), Normalizer.Form.NFD);
                 contrasena = Normalizer.normalize(editTextContrasena.getText().toString(), Normalizer.Form.NFD);
-                if(sharedPrefs.contains(Constants.SP_FIREBASE_TOKEN)){
-                    String firebase = Normalizer.normalize(new Encryption().decryptAES(sharedPrefs.getString(Constants.SP_FIREBASE_TOKEN,"")), Normalizer.Form.NFD);
-                    if(!firebase.equals("")){
-                        firebaseToken = firebase;
-                    }
-                }
+                setFirebaseToken();
                 //usuario = editTextUsuario.getText().toString();
                 //contrasena = editTextContrasena.getText().toString();
-                if(!usuario.equals("")){
-                    if(usuarioDB == null){
-                        if (!contrasena.equals("")) {
-                            iniciarSesion(usuario, contrasena,firebaseToken,0);
-                        } else {
-                            Utils.message(getApplicationContext(), "Debe introducir la contraseña");
-                        }
-                    }else {
-                        if (usuarioDB.getCorreo().equals(usuario) || usuarioDB.getIdUsuario().equals(usuario)) {
-                            if (!contrasena.equals("")) {
-                                iniciarSesion(usuario, contrasena,firebaseToken,0);
-                            } else {
-                                Utils.message(getApplicationContext(), "Debe introducir la contraseña");
-                            }
-                        } else {
-                            nuevaInstalacionDialog(usuarioDB.getNombre());
-                        }
-                    }
-                }else{
-                    Utils.message(getApplicationContext(),"Debe introducir id de empleado o su correo");
+                if (usuario.equals("")) {
+                    Utils.message(getApplicationContext(), "Debe introducir id de empleado o su correo");
+                    return;
                 }
+                if (contrasena.equals("")) {
+                    Utils.message(getApplicationContext(), "Debe introducir la contraseña");
+                    return;
+                }
+                if (usuarioDB != null) {
+                    if (!usuarioDB.getCorreo().trim().equals(usuario.trim()) && !usuarioDB.getIdUsuario().trim().equals(usuario.trim())) {
+                        nuevaInstalacionDialog(usuarioDB.getNombre(), usuarioDB.getIdUsuario());
+                        return;
+                    }
+                }
+                iniciarSesion(usuario, contrasena, firebaseToken, null);
             }
         });
 
@@ -233,8 +293,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (!sharedPrefs.contains(Constants.SP_FIREBASE_TOKEN)) {
             String newToken = FirebaseInstanceId.getInstance().getToken();
-            if(newToken != null) {
-                if(!newToken.equals("")) {
+            if (newToken != null) {
+                if (!newToken.equals("")) {
                     SharedPreferences.Editor ed;
                     ed = sharedPrefs.edit();
                     ed.putString(Constants.SP_FIREBASE_TOKEN, encryption.encryptAES(newToken));
@@ -242,11 +302,11 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("Recuperar token: " + newToken);
                 }
             }
-        }else{
-            String firebase = Normalizer.normalize(new Encryption().decryptAES(sharedPrefs.getString(Constants.SP_FIREBASE_TOKEN,"")), Normalizer.Form.NFD);
+        } else {
+            String firebase = Normalizer.normalize(new Encryption().decryptAES(sharedPrefs.getString(Constants.SP_FIREBASE_TOKEN, "")), Normalizer.Form.NFD);
             System.out.println("Token firebase: " + firebase);
-            if(firebase != null) {
-                if(firebase.equals("")) {
+            if (firebase != null) {
+                if (firebase.equals("")) {
                     String newToken = FirebaseInstanceId.getInstance().getToken();
                     SharedPreferences.Editor ed;
                     ed = sharedPrefs.edit();
@@ -254,9 +314,9 @@ public class MainActivity extends AppCompatActivity {
                     ed.commit();
                     System.out.println("Recuperar token: " + newToken);
                 }
-            }else{
+            } else {
                 String newToken = FirebaseInstanceId.getInstance().getToken();
-                if(newToken != null) {
+                if (newToken != null) {
                     if (!newToken.equals("")) {
                         SharedPreferences.Editor ed;
                         ed = sharedPrefs.edit();
@@ -280,29 +340,69 @@ public class MainActivity extends AppCompatActivity {
         return mInterfaceService;
     }
 
-    private void iniciarSesion(final String usuario, String contrasena, String token,int isLogout){
+    private void iniciarSesion(String usuario, String contrasena, String token, String tokenDSI) {
+        final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this, "Iniciando sesión...");
+        final LoginLlaveMaestraVO mLlaveMaestraVO = new LoginLlaveMaestraVO();
+        mLlaveMaestraVO.setDatosRequest(mLlaveMaestraVO.new DataLoginMasterKey());
 
-        final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this,"Iniciando sesión...");
+        if (contrasena != null && !contrasena.equals("")) {
+            mLlaveMaestraVO.getDatosRequest().setUSER_NAME(new Encryption().encryptAES(usuario));
+            mLlaveMaestraVO.getDatosRequest().setLLAVE_MAESTRA(new Encryption().encryptAES(contrasena));
+        }
+        mLlaveMaestraVO.getDatosRequest().setOAUTHTOKEN(tokenDSI);
+        mLlaveMaestraVO.getDatosRequest().setFB_TOKEN(token);
+        mLlaveMaestraVO.getDatosRequest().setIS_MOVIL(true);
+        mLlaveMaestraVO.getDatosRequest().setIP_CLIENT(Utils.getIPAddress());
 
-        ApiInterface mApiService = this.getInterfaceService();
+        final ApiInterface mInterfaceService = getInterfaceService();
+        Call<GenericResponseVO> mServiceValida = mInterfaceService.validaSesion(mLlaveMaestraVO);
+        mServiceValida.enqueue(new Callback<GenericResponseVO>() {
+            @Override
+            public void onResponse(Call<GenericResponseVO> call, Response<GenericResponseVO> response) {
+                progressDialog.dismiss();
+                Log.e(TAG, response.raw().toString());
+                if (response != null) {
+                    if (response.body() != null) {
+                        if (!response.body().getmData().isExito()) {
+                            Call<ResponseLogin> mServiceLogin = mInterfaceService.loginLlaveMaestra(mLlaveMaestraVO.getDatosRequest().getIP_CLIENT(), mLlaveMaestraVO);
+                            getResponseServiceLogin(mServiceLogin);
+                        } else {
+                            cerrarSesionDialog(response.body().getmData().getData().getID_USUARIO());
+                        }
+                    } else {
+                        if (response.errorBody() != null) {
+                            try {
+                                Utils.message(getApplicationContext(), "Error al iniciar sesión: " + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Utils.message(getApplicationContext(), "Error al iniciar sesión: " + e.getMessage());
+                            }
+                        } else {
+                            Utils.message(getApplicationContext(), "Error al iniciar sesión");
+                        }
+                    }
+                } else {
+                    Utils.message(getApplicationContext(), "Error al iniciar sesión");
+                }
+            }
 
-        Login login = new Login();
-        login.setUserName(usuario);
-        login.setPassword(new Encryption().encryptAES(contrasena));
-        login.setFbToken(token);
-        //se agregara id dispositivo
-        login.setAndroidID(Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
-        login.setIsLogout(isLogout);
+            @Override
+            public void onFailure(Call<GenericResponseVO> call, Throwable t) {
+                progressDialog.dismiss();
+                Utils.message(MainActivity.this, Constants.MSG_ERR_CONN);
+            }
+        });
 
-        RequestLogin requestLogin = new RequestLogin();
-        requestLogin.setLogin(login);
+    }
 
-        Call<ResponseLogin> mService = mApiService.authenticate(Utils.getIPAddress(),requestLogin);
+    private void getResponseServiceLogin(Call<ResponseLogin> mService) {
+        final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this, "Iniciando sesión...");
         mService.enqueue(new Callback<ResponseLogin>() {
             @Override
             public void onResponse(Call<ResponseLogin> call, Response<ResponseLogin> response) {
                 progressDialog.dismiss();
-                if(response != null) {
+                Log.e(TAG, response.raw().toString());
+                if (response != null) {
                     if (response.body() != null) {
                         if (response.body().getValidarEmpleado().getExito()) {
                             //try {
@@ -325,13 +425,13 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }//*/
                         } else {
-                            if(response.body().getValidarEmpleado().getUsuario() != null) {
+                            if (response.body().getValidarEmpleado().getUsuario() != null) {
                                 if (response.body().getValidarEmpleado().getUsuario().getIdUsuario().equals("1")) {
-                                    cerrarSesionDialog();
+                                    cerrarSesionDialog(response.body().getValidarEmpleado().getUsuario().getIdUsuario());
                                 } else {
                                     Utils.message(getApplicationContext(), response.body().getValidarEmpleado().getError());
                                 }
-                            }else{
+                            } else {
                                 Utils.message(getApplicationContext(), response.body().getValidarEmpleado().getError());
                             }
                         }
@@ -347,10 +447,11 @@ public class MainActivity extends AppCompatActivity {
                             Utils.message(getApplicationContext(), "Error al iniciar sesión");
                         }
                     }
-                }else{
+                } else {
                     Utils.message(getApplicationContext(), "Error al iniciar sesión");
                 }
             }
+
             @Override
             public void onFailure(Call<ResponseLogin> call, Throwable t) {
                 progressDialog.dismiss();
@@ -359,7 +460,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private  boolean checkAndRequestPermissions() {
+    private boolean checkAndRequestPermissions() {
         int storagePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int locationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -376,7 +477,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]),200);
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), 200);
             return false;
         }
         return true;
@@ -458,15 +559,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }//*/
 
-    private void nuevaInstalacionDialog(String usuario){
-        LayoutInflater li = LayoutInflater.from(MainActivity.this);
+    private void nuevaInstalacionDialog(final String usuario, final String idUsuario) {
+        final LayoutInflater li = LayoutInflater.from(MainActivity.this);
         LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_layout, null);
-
-        TextView textViewCancelar = (TextView) layoutDialog.findViewById(R.id.buttonCancelar);
-        TextView textViewAceptar = (TextView) layoutDialog.findViewById(R.id.buttonAceptar);
-        TextView textViewTitulo = (TextView) layoutDialog.findViewById(R.id.textViewDialogTitulo);
-        LinearLayout linearLayoutCancelar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCancelar);
-        LinearLayout linearLayoutAceptar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutAceptar);
+        TextView textViewCancelar = layoutDialog.findViewById(R.id.buttonCancelar);
+        TextView textViewAceptar = layoutDialog.findViewById(R.id.buttonAceptar);
+        TextView textViewTitulo = layoutDialog.findViewById(R.id.textViewDialogTitulo);
+        LinearLayout linearLayoutCancelar = layoutDialog.findViewById(R.id.linearLayoutCancelar);
+        LinearLayout linearLayoutAceptar = layoutDialog.findViewById(R.id.linearLayoutAceptar);
 
         textViewTitulo.setText("La sesión iniciada corresponde a: " + usuario + ", desea iniciar sesión con otro usuario?");
 
@@ -474,40 +574,46 @@ public class MainActivity extends AppCompatActivity {
                 .setView(layoutDialog)
                 .show();
 
-        textViewCancelar.setOnClickListener(new View.OnClickListener() {
+        final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
+            public void onClick(View v) {
+                if (v.getId() == R.id.buttonAceptar || v.getId() == R.id.linearLayoutAceptar) {
+                    LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_nueva_instalacion_layout, null);
+                    TextView textViewCancelar = layoutDialog.findViewById(R.id.buttonCancelar);
+                    TextView textViewAceptar = layoutDialog.findViewById(R.id.buttonAceptar);
+                    LinearLayout linearLayoutCancelar = layoutDialog.findViewById(R.id.linearLayoutCancelar);
+                    LinearLayout linearLayoutAceptar = layoutDialog.findViewById(R.id.linearLayoutAceptar);
 
-        linearLayoutCancelar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
+                    final AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                            .setView(layoutDialog)
+                            .show();
 
-        textViewAceptar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //new NuevaInstalacion(CarteraFolios.this).execute();
-                Utils.nuevaInstalacionDialog(MainActivity.this);
-                dialog.dismiss();
-            }
-        });
+                    View.OnClickListener mOnClickListener = new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (v.getId() == R.id.buttonAceptar || v.getId() == R.id.linearLayoutAceptar) {
+                                cerrarSesionService(idUsuario, true);
+                            }
+                            dialog.dismiss();
+                        }
+                    };
 
-        linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //new NuevaInstalacion(CarteraFolios.this).execute();
-                Utils.nuevaInstalacionDialog(MainActivity.this);
+                    textViewCancelar.setOnClickListener(mOnClickListener);
+                    linearLayoutCancelar.setOnClickListener(mOnClickListener);
+                    textViewAceptar.setOnClickListener(mOnClickListener);
+                    linearLayoutAceptar.setOnClickListener(mOnClickListener);
+                }
                 dialog.dismiss();
             }
-        });
+        };
+
+        textViewCancelar.setOnClickListener(mOnClickListener);
+        linearLayoutCancelar.setOnClickListener(mOnClickListener);
+        textViewAceptar.setOnClickListener(mOnClickListener);
+        linearLayoutAceptar.setOnClickListener(mOnClickListener);
     }
 
-    private void cerrarSesionDialog(){
+    private void cerrarSesionDialog(final String idUsuario) {
         LayoutInflater li = LayoutInflater.from(MainActivity.this);
         LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_layout, null);
 
@@ -541,46 +647,89 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //new NuevaInstalacion(CarteraFolios.this).execute();
-                iniciarSesion(usuario, contrasena,firebaseToken,1);
-                dialog.dismiss();
-            }
-        });
-
-        linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //new NuevaInstalacion(CarteraFolios.this).execute();
-                iniciarSesion(usuario, contrasena,firebaseToken,1);
+                //iniciarSesion(usuario, contrasena, firebaseToken, 1);
+                cerrarSesionService(idUsuario, false);
                 dialog.dismiss();
             }
         });
     }
 
-    private void descargaCatalogos(final int opcion){
+    private void cerrarSesionService(String idUsuario, final boolean borrarData) {
+        Call<CerrarSesionResponse> mServiceCerrarSesion = getInterfaceService().cerrarSesion(idUsuario);
+        mServiceCerrarSesion.enqueue(new Callback<CerrarSesionResponse>() {
+            @Override
+            public void onResponse(Call<CerrarSesionResponse> call, Response<CerrarSesionResponse> response) {
+                if (response != null) {
+                    if (response.body() != null) {
+                        if (response.body().getCerrarSesion().getExito()) {
+                            if (borrarData) {
+                                sharedPrefs.edit().clear().apply();
+                                new TyphoonDataBase(MainActivity.this).deleteAll();
+                            }
+                            entrar.performClick();
+                        } else {
+                            //progressDialog.dismiss();
+                            Utils.message(MainActivity.this, response.body().getCerrarSesion().getError());
+                        }//*/
+                    } else {
+                        //progressDialog.dismiss();
+                        if (response.errorBody() != null) {
+                            try {
+                                String mensaje = "" + response.errorBody().string();
+                                int code = response.code();
+                                //if(!mensaje.contains("No tiene permiso para ver")) {
+                                if (code != 401) {
+                                    //Utils.message(getApplicationContext(), "Error al descargar folios: " + response.errorBody().string());
+                                    Utils.message(MainActivity.this, "No se pudo realizar la nueva instalación: " + response.errorBody().string());
+                                } else {
+                                    Utils.message(MainActivity.this, "La sesion ha expirado");
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Utils.message(MainActivity.this, "No se pudo realizar la nueva instalación");
+                        }
+                    }
+                } else {
+                    //progressDialog.dismiss();
+                    Utils.message(MainActivity.this, "No se pudo realizar la nueva instalación");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CerrarSesionResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void descargaCatalogos(final int opcion) {
 
         String titulo = "";
-        if(opcion == 1){
+        if (opcion == 1) {
             titulo = "Descargando catálogos...";
-        }else{
+        } else {
             titulo = "Actualizando catálogos...";
         }
 
-        final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this,titulo);
+        final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this, titulo);
 
         final Encryption encryption = new Encryption();
 
         try {
             ApiInterface mApiService = Utils.getInterfaceService();
             final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-            Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(Utils.getIPAddress(),encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG, "")));
+            Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(Utils.getIPAddress(), encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG, "")));
             mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
                 @Override
                 public void onResponse(Call<CatalogosTyphoonResponse> call, Response<CatalogosTyphoonResponse> response) {
-                    if(response != null) {
+                    if (response != null) {
+                        Log.e(TAG, response.raw().toString());
                         if (response.body() != null) {
                             if (response.body().getCatalogos().getExito()) {
                                 //try {
-
+                                //Log.e(MainActivity.class.getName(), response.raw().toString());
                                 String jwt = encryption.encryptAES(response.headers().get("Authorization"));
                                 sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
@@ -648,7 +797,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 if (response.body().getCatalogos().getCatalogosData().getListEtapasSubAnexo() != null) {
                                     catalogosDBMethods.deleteEtapaSubAnexo();
-                                    for (EtapaSubAnexo etapaSubAnexo: response.body().getCatalogos().getCatalogosData().getListEtapasSubAnexo()) {
+                                    for (EtapaSubAnexo etapaSubAnexo : response.body().getCatalogos().getCatalogosData().getListEtapasSubAnexo()) {
                                         catalogosDBMethods.createEtapaSubAnexo(etapaSubAnexo);
                                     }
                                 }
@@ -688,12 +837,12 @@ public class MainActivity extends AppCompatActivity {
                                     String mensaje = "" + response.errorBody().string();
                                     int code = response.code();
                                     //if(!mensaje.contains("No tiene permiso para ver")) {
-                                    if(code != 401) {
+                                    if (code != 401) {
                                         Utils.message(MainActivity.this, "Error al descargar catálogos: " + response.errorBody().string());
-                                    }else{
+                                    } else {
                                         sharedPreferences.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
                                         Utils.message(getApplicationContext(), "La sesión ha expirado");
-                                        Intent intent = new Intent(MainActivity.this,MainActivity.class);
+                                        Intent intent = new Intent(MainActivity.this, MainActivity.class);
                                         startActivity(intent);
                                         finish();
                                     }
@@ -706,7 +855,7 @@ public class MainActivity extends AppCompatActivity {
                                 Utils.message(MainActivity.this, "Error al descargar catálogos");
                             }
                         }
-                    }else{
+                    } else {
                         Utils.message(MainActivity.this, "Error al descargar catálogos");
                     }
                 }
@@ -717,19 +866,19 @@ public class MainActivity extends AppCompatActivity {
                     Utils.message(MainActivity.this, Constants.MSG_ERR_CONN);
                 }
             });
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             progressDialog.dismiss();
             Utils.message(MainActivity.this, "Error al descargar catálogos: " + e.getMessage());
-        }catch (Error e){
+        } catch (Error e) {
             progressDialog.dismiss();
             Utils.message(MainActivity.this, "Error al descargar catálogos: ");
         }//*/
     }
 
-    private void obtenerNotificaciones(int idRol, final int opcion){
+    private void obtenerNotificaciones(int idRol, final int opcion) {
 
-        final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this,"Descargando notificaciones...");
+        final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this, "Descargando notificaciones...");
 
         ApiInterface mApiService = Utils.getInterfaceService();
 
@@ -738,21 +887,21 @@ public class MainActivity extends AppCompatActivity {
         final NotificacionesDBMethods notificacionesDBMethods = new NotificacionesDBMethods(MainActivity.this);
 
         //Call<ResponseCartera> mService = mApiService.carteraRevisiones(requestCartera);
-        Call<ResponseNotificaciones> mService = mApiService.getNotificaciones(new Encryption().decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),idRol);
+        Call<ResponseNotificaciones> mService = mApiService.getNotificaciones(new Encryption().decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG, "")), idRol);
         mService.enqueue(new Callback<ResponseNotificaciones>() {
 
             @Override
             public void onResponse(Call<ResponseNotificaciones> call, Response<ResponseNotificaciones> response) {
                 progressDialog.dismiss();
-                if(response != null) {
+                if (response != null) {
                     if (response.body() != null) {
                         if (response.body().getNotificaciones().getExito()) {
 
                             String jwt = new Encryption().encryptAES(response.headers().get("Authorization"));
                             sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
-                            if(response.body().getNotificaciones().getNotificaciones() != null){
-                                for(Notificacion notificacion:response.body().getNotificaciones().getNotificaciones()){
+                            if (response.body().getNotificaciones().getNotificaciones() != null) {
+                                for (Notificacion notificacion : response.body().getNotificaciones().getNotificaciones()) {
                                     notificacionesDBMethods.createNotificacion(notificacion);
                                 }
                                 //loadNotificaciones(usuario.getIdrol());
@@ -771,12 +920,12 @@ public class MainActivity extends AppCompatActivity {
                                 String mensaje = "" + response.errorBody().string();
                                 int code = response.code();
                                 //if(!mensaje.contains("No tiene permiso para ver")) {
-                                if(code != 401) {
+                                if (code != 401) {
                                     Utils.message(getApplicationContext(), "Error al descargar notificaciones: " + response.errorBody().string());
-                                }else{
+                                } else {
                                     sharedPreferences.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
                                     Utils.message(getApplicationContext(), "La sesión ha expirado");
-                                    Intent intent = new Intent(MainActivity.this,MainActivity.class);
+                                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
                                     startActivity(intent);
                                     finish();
                                 }
@@ -789,7 +938,7 @@ public class MainActivity extends AppCompatActivity {
                             Utils.message(getApplicationContext(), "Error al descargar notificaciones");
                         }
                     }
-                }else{
+                } else {
                     Utils.message(getApplicationContext(), "Error al descargar notificaciones");
                 }
             }

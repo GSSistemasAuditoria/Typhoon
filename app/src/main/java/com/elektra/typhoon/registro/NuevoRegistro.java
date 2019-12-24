@@ -244,7 +244,7 @@ public class NuevoRegistro extends AppCompatActivity {
         ApiInterface mApiService = Utils.getInterfaceService();
 
         final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-        Call<ResponseNuevoUsuario> mService = mApiService.insertarNuevoUsuario(Utils.getIPAddress(),encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")),correo,password);
+        Call<ResponseNuevoUsuario> mService = mApiService.insertarNuevoUsuario(Utils.getIPAddress(),encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG,"")), correo, encryption.encryptAES(password));
         mService.enqueue(new Callback<ResponseNuevoUsuario>() {
 
             @Override

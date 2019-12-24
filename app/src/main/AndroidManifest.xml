@@ -27,6 +27,12 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="typhoon" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".registro.NuevoRegistro"
@@ -69,13 +75,15 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <service android:name=".firebase.NotificationService">
+        <service android:name=".firebase.NotificationService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
 
-        <service android:name=".firebase.NotificationIdService">
+        <service android:name=".firebase.NotificationIdService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>

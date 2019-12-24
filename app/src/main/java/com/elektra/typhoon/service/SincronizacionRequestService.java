@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ExpandableListView;
@@ -132,7 +133,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
         }//*/
         textViewDialog.setText(textoDialog);
 
-        progressDialog = new ProgressDialog(context,R.style.ThemeTranslucent);
+        progressDialog = new ProgressDialog(context, R.style.ThemeTranslucent);
         progressDialog.setCancelable(false);
         progressDialog.show();
         progressDialog.setContentView(layoutDialog);
@@ -429,6 +430,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                     sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                                     loadDataSincronizacion();
+
                                     return executeSincronizacionCompleta(response,true);
                                     //return "Sincronizado correctamente";
                                 } else {

@@ -1,13 +1,14 @@
 package com.elektra.typhoon.service;
 
 import com.elektra.typhoon.objetos.request.RequestCartera;
-import com.elektra.typhoon.objetos.request.RequestCatalogos;
 import com.elektra.typhoon.objetos.request.RequestLogin;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
 import com.elektra.typhoon.objetos.request.ValidaDatosRequest;
 import com.elektra.typhoon.objetos.response.CatalogosTyphoonResponse;
 import com.elektra.typhoon.objetos.response.CerrarSesionResponse;
 import com.elektra.typhoon.objetos.response.DatosPorValidarResponse;
+import com.elektra.typhoon.objetos.response.GenericResponseVO;
+import com.elektra.typhoon.objetos.response.LoginLlaveMaestraVO;
 import com.elektra.typhoon.objetos.response.ResponseCartera;
 import com.elektra.typhoon.objetos.response.ResponseDescargaPdf;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
@@ -58,5 +59,11 @@ public interface ApiInterface {
     Call<ResponseNotificaciones> getNotificaciones(@Header("Authorization") String jwt, @Query("idRol") int idRol);
 
     @GET("CerrarSesion")
-    Call<CerrarSesionResponse> cerrarSesion(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt, @Query("idUsuario") String idUsuario);
+    Call<CerrarSesionResponse> cerrarSesion(@Query("idUsuario") String idUsuario);
+
+    @POST("IsUserSesion")
+    Call<GenericResponseVO> validaSesion(@Body LoginLlaveMaestraVO loginLlaveMaestraVO);
+
+    @POST("LoginoAuth")
+    Call<ResponseLogin> loginLlaveMaestra(@Header("X-IP_CLIENT") String ip, @Body LoginLlaveMaestraVO loginLlaveMaestraVO);
 }
