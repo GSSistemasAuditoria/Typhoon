@@ -22,6 +22,7 @@ public class Constants {
     //SP2
     public static String URL_PUBLIC = "4KyixEVLzWvCxpff3GzyEtrWvoIZqTWAk+RdY/8owt2hhfZzM4s0hMvTD+1UXMSXPdrmQ+QpKkpuyb7Z/+vMk6b7z4Fe9+9GYKdV6tL+VS0=";
 
+
     //DSI
     public static final String URL_DSI = "https://authns.desadsi.gs/nidp/";
 

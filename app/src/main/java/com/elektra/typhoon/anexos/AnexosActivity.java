@@ -21,14 +21,20 @@ import android.widget.TextView;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.adapters.AdapterExpandableAnexos;
+import com.elektra.typhoon.checklist.ChecklistBarcos;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.AnexosDBMethods;
 import com.elektra.typhoon.database.CatalogosDBMethods;
+import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.objetos.response.Anexo;
+import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.EstatusRevision;
+import com.elektra.typhoon.objetos.response.Evidencia;
+import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
+import com.elektra.typhoon.objetos.response.RubroData;
 import com.elektra.typhoon.service.SincronizacionIndividualRequestService;
 import com.elektra.typhoon.service.SincronizacionRequestService;
 import com.elektra.typhoon.utils.Utils;
@@ -55,6 +61,8 @@ public class AnexosActivity extends AppCompatActivity {
     private AdapterExpandableAnexos adapterExpandableAnexos;
     private TextView textViewCumplen;
     private TextView textViewNoCumplen;
+    private TextView tvPorCargarValor;
+    private TextView tvPorValidarValor;
     private TextView textViewTotal;
     private Button buttonSincronizarAnexos;
     private List<Anexo> listAnexos;
@@ -75,6 +83,8 @@ public class AnexosActivity extends AppCompatActivity {
 
         textViewCumplen = findViewById(R.id.textViewCumplenValor);
         textViewNoCumplen = findViewById(R.id.textViewNoCumplenValor);
+        tvPorCargarValor = findViewById(R.id.tvPorCargarValor);
+        tvPorValidarValor = findViewById(R.id.tvPorValidarValor);
         textViewTotal = findViewById(R.id.textViewValorTotal);
 
         TextView textViewFolio = findViewById(R.id.textViewFolio);
@@ -87,11 +97,11 @@ public class AnexosActivity extends AppCompatActivity {
         AnexosDBMethods anexosDBMethods = new AnexosDBMethods(this);
 
         List<EstatusRevision> listEstatusRevision = catalogosDBMethods.readEstatusRevision(
-                "SELECT ID_ESTATUS,DESCRIPCION,SRC FROM " + catalogosDBMethods.TP_CAT_ESTATUS_REVISION + " WHERE ID_ESTATUS = ?",new String[]{String.valueOf(estatus)});
+                "SELECT ID_ESTATUS,DESCRIPCION,SRC FROM " + catalogosDBMethods.TP_CAT_ESTATUS_REVISION + " WHERE ID_ESTATUS = ?", new String[]{String.valueOf(estatus)});
 
         textViewFolio.setText("" + folio);
         textViewFechaInicio.setText(Utils.getDateMonth(fechaInicio));
-        if(listEstatusRevision.size() != 0){
+        if (listEstatusRevision.size() != 0) {
             textViewFechaFin.setText(listEstatusRevision.get(0).getDescripcion());
         }
 
@@ -102,7 +112,7 @@ public class AnexosActivity extends AppCompatActivity {
 
             @Override
             public void onGroupExpand(int groupPosition) {
-                if(groupPosition != previousItem ) {
+                if (groupPosition != previousItem) {
                     expandableListView.collapseGroup(previousItem);
                 }
                 previousItem = groupPosition;
@@ -111,28 +121,28 @@ public class AnexosActivity extends AppCompatActivity {
 
         UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(this);
         ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario();
-        if(usuario != null){
+        if (usuario != null) {
             textViewNombreUsuario.setText(usuario.getNombre());
-            textViewRol.setText(Utils.getRol(this,usuario.getIdrol()));
+            textViewRol.setText(Utils.getRol(this, usuario.getIdrol()));
         }
 
         List<Integer> listRelaciones = anexosDBMethods.readRelacionRevisionAnexo(folio);
 
         listAnexos = new ArrayList<>();
 
-        for(int idAnexo:listRelaciones) {
+        for (int idAnexo : listRelaciones) {
             List<Anexo> tempListAnexos = anexosDBMethods.readCatalogoAnexos("SELECT ID_ANEXO,ID_SUBANEXO,DESCRIPCION FROM " + anexosDBMethods.TP_CAT_ANEXOS + " WHERE " +
                     "ID_SUBANEXO = 0 AND ID_ANEXO = ?", new String[]{String.valueOf(idAnexo)});
-            for(Anexo anexo:tempListAnexos){
+            for (Anexo anexo : tempListAnexos) {
                 listAnexos.add(anexo);
             }
         }
 
-        for(Anexo anexo:listAnexos){
+        for (Anexo anexo : listAnexos) {
             List<Anexo> listSubAnexos = anexosDBMethods.readCatalogoAnexos("SELECT ID_ANEXO,ID_SUBANEXO,DESCRIPCION FROM " + anexosDBMethods.TP_CAT_ANEXOS + " WHERE " +
-                    "ID_SUBANEXO != 0 AND ID_ANEXO = ?",new String[]{String.valueOf(anexo.getIdAnexo())});
+                    "ID_SUBANEXO != 0 AND ID_ANEXO = ?", new String[]{String.valueOf(anexo.getIdAnexo())});
             anexo.setListSubAnexos(listSubAnexos);
-            for(Anexo subanexo:listSubAnexos){
+            for (Anexo subanexo : listSubAnexos) {
                 //subanexo.setSeleccionado(true);
                 /*List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
@@ -142,7 +152,7 @@ public class AnexosActivity extends AppCompatActivity {
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdSubAnexo())});
 
-                if(listDatosAnexos.size() != 0){
+                if (listDatosAnexos.size() != 0) {
                     //subanexo.setIdDocumento(listDatosAnexos.get(0).getIdDocumento());
                     subanexo.setNombreArchivo(listDatosAnexos.get(0).getNombreArchivo());
                     subanexo.setIdEtapa(listDatosAnexos.get(0).getIdEtapa());
@@ -171,19 +181,19 @@ public class AnexosActivity extends AppCompatActivity {
         listBitacoras.add(new Anexo("Bitácora 3"));
         listBitacoras.add(new Anexo("Bitácora 4"));
 
-        listHeader.add(new Anexo("Inspecciónes",listInspeccion));
-        listHeader.add(new Anexo("Bitácoras",listBitacoras));
+        listHeader.add(new Anexo("Inspecciónes", listInspeccion));
+        listHeader.add(new Anexo("Bitácoras", listBitacoras));
 
         contarAnexosValidados(listAnexos);
 
-        adapterExpandableAnexos = new AdapterExpandableAnexos(listAnexos,this,textViewCumplen,textViewNoCumplen,textViewTotal,fechaInicio,estatus);
+        adapterExpandableAnexos = new AdapterExpandableAnexos(listAnexos, this, textViewCumplen, textViewNoCumplen, textViewTotal, fechaInicio, estatus);
         expandableListView.setAdapter(adapterExpandableAnexos);
 
         buttonSincronizarAnexos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //new SincronizacionIndividualRequestService(AnexosActivity.this,AnexosActivity.this,folio,null,listAnexos).execute();
-                sincronizacionDialog(AnexosActivity.this,folio);
+                sincronizacionDialog(AnexosActivity.this, folio);
             }
         });
 
@@ -198,8 +208,8 @@ public class AnexosActivity extends AppCompatActivity {
         }//*/
     }
 
-    private void contarAnexosValidados(List<Anexo> listAnexosHeader){
-        ResponseLogin.Usuario usuario = new UsuarioDBMethods(this).readUsuario();
+    public void contarAnexosValidados(List<Anexo> listAnexosHeader) {
+        /*ResponseLogin.Usuario usuario = new UsuarioDBMethods(this).readUsuario();
         int aplica = 0;
         int noAplica = 0;
         int total = 0;
@@ -220,6 +230,38 @@ public class AnexosActivity extends AppCompatActivity {
 
         textViewCumplen.setText(String.valueOf(aplica));
         textViewNoCumplen.setText(String.valueOf(noAplica));
+        textViewTotal.setText(String.valueOf(total));*/
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(getApplicationContext()).readUsuario();
+        int cumple = 0;
+        int noCumple = 0;
+        int porValidar = 0;
+        int porCargar = 0;
+        int total = 0;
+
+        for (Anexo mAnexo : listAnexosHeader)
+            for (Anexo subAnexo : mAnexo.getListSubAnexos()) {
+                total++;
+                if (subAnexo.getNombreArchivo() == null || subAnexo.getNombreArchivo().isEmpty()) {
+                    porCargar++;
+                } else {
+                    if ((usuario.getIdrol() == 1 && subAnexo.getIdEtapa() >= 1) ||
+                            (usuario.getIdrol() == 2 && subAnexo.getIdEtapa() >= 2) ||
+                            (usuario.getIdrol() == 3 && (subAnexo.getIdEtapa() >= 3 || subAnexo.getIdEtapa() == 1)) ||
+                            (usuario.getIdrol() == 4 && (subAnexo.getIdEtapa() == 1 || subAnexo.getIdEtapa() >= 4 || subAnexo.getIdEtapa() == 2))) {
+                        cumple++;
+                    } else if (subAnexo.getIdEtapa() == -1) {
+                        noCumple++;
+                    } else {
+                        porValidar++;
+                    }
+                }
+            }
+
+
+        textViewCumplen.setText(String.valueOf(cumple));
+        textViewNoCumplen.setText(String.valueOf(noCumple));
+        tvPorCargarValor.setText(String.valueOf(porCargar));
+        tvPorValidarValor.setText(String.valueOf(porValidar));
         textViewTotal.setText(String.valueOf(total));
     }
 
@@ -232,21 +274,21 @@ public class AnexosActivity extends AppCompatActivity {
         }
     }
 
-    class GuardandoAnexosTask extends AsyncTask<String,String,String> {
+    class GuardandoAnexosTask extends AsyncTask<String, String, String> {
 
         private ProgressDialog statusDialog;
         private Context context;
         private Intent data;
         private int requestCode;
 
-        public GuardandoAnexosTask(Context context,Intent data,int requestCode){
+        public GuardandoAnexosTask(Context context, Intent data, int requestCode) {
             this.context = context;
             this.data = data;
             this.requestCode = requestCode;
         }
 
         protected void onPreExecute() {
-            statusDialog = Utils.typhoonLoader(context,"Guardando anexo...");
+            statusDialog = Utils.typhoonLoader(context, "Guardando anexo...");
         }
 
         @Override
@@ -265,18 +307,19 @@ public class AnexosActivity extends AppCompatActivity {
             String respuesta = guardarEvidencia();
             statusDialog.dismiss();
             //if(!result.equals("OK")){
-            if(!respuesta.equals("OK")){
+            if (!respuesta.equals("OK")) {
                 //Utils.message(context,result);
-                Utils.message(context,respuesta);
-            }else{
+                Utils.message(context, respuesta);
+            } else {
                 //adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
-                Utils.message(context,"Evidencia guardada");
+                Utils.message(context, "Evidencia guardada");
+                contarAnexosValidados(listAnexos);
             }
         }
 
-        private String guardarEvidencia(){
+        private String guardarEvidencia() {
             boolean flagCrea = true;
-            if(data != null) {
+            if (data != null) {
                 Uri uri = data.getData();
                 String nombre = Utils.getRealPathFromURI(AnexosActivity.this, uri);
                 int idrubro = adapterExpandableAnexos.getAdapterRecycleViewItemsAnexosTemp().getHeader();
@@ -284,7 +327,7 @@ public class AnexosActivity extends AppCompatActivity {
                     try {
                         String base64 = Utils.fileToBase64(AnexosActivity.this, uri);
                         Anexo anexo = adapterExpandableAnexos.getListAnexosHeader().get(idrubro).getListSubAnexos().get(requestCode);
-                        if(anexo.getNombreArchivo() != null){
+                        if (anexo.getNombreArchivo() != null) {
                             flagCrea = false;
                         }
                         anexo.setBase64(base64);
@@ -298,26 +341,26 @@ public class AnexosActivity extends AppCompatActivity {
                         }//*/
                         ResponseLogin.Usuario usuario = new UsuarioDBMethods(getApplicationContext()).readUsuario();
                         anexo.setIdRevision(folio);
-                        if(usuario != null) {
+                        if (usuario != null) {
                             anexo.setIdEtapa(usuario.getIdrol() - 1);
-                        }else {
+                        } else {
                             anexo.setIdEtapa(0);
                         }
                         anexo.setIdRol(usuario.getIdrol());
                         anexo.setIdUsuario(usuario.getIdUsuario());
                         System.out.println();
-                        if(flagCrea) {
+                        if (flagCrea) {
                             new AnexosDBMethods(getApplicationContext()).createAnexo(anexo);
-                        }else{
+                        } else {
                             anexo.setFechaSinc(null);
                             ContentValues contentValues = new ContentValues();
-                            contentValues.put("ID_ETAPA",anexo.getIdEtapa());
-                            contentValues.put("DOCUMENTO",anexo.getBase64());
-                            contentValues.put("NOMBRE",anexo.getNombreArchivo());
+                            contentValues.put("ID_ETAPA", anexo.getIdEtapa());
+                            contentValues.put("DOCUMENTO", anexo.getBase64());
+                            contentValues.put("NOMBRE", anexo.getNombreArchivo());
                             String valueNull = null;
-                            contentValues.put("SUBANEXO_FCH_SINC",valueNull);
+                            contentValues.put("SUBANEXO_FCH_SINC", valueNull);
                             new AnexosDBMethods(getApplicationContext()).updateAnexo(contentValues,
-                                    "ID_REVISION = ? AND ID_SUBANEXO = ?",new String[]{String.valueOf(anexo.getIdRevision()),String.valueOf(anexo.getIdSubAnexo())});
+                                    "ID_REVISION = ? AND ID_SUBANEXO = ?", new String[]{String.valueOf(anexo.getIdRevision()), String.valueOf(anexo.getIdSubAnexo())});
                         }
                         anexo.setBase64(null);
                         adapterExpandableAnexos.getAdapterRecycleViewItemsAnexosTemp().notifyDataSetChanged();
@@ -384,7 +427,7 @@ public class AnexosActivity extends AppCompatActivity {
                     } catch (IOException e) {
                         e.printStackTrace();
                         return "No se pudo guardar la imagen: " + e.getMessage();
-                    }catch (IndexOutOfBoundsException e) {
+                    } catch (IndexOutOfBoundsException e) {
                         e.printStackTrace();
                         return "No se pudo guardar la imagen: " + e.getMessage();
                     }
@@ -394,7 +437,7 @@ public class AnexosActivity extends AppCompatActivity {
         }
     }
 
-    private void sincronizacionDialog(final Activity activity, final int idRevision){
+    private void sincronizacionDialog(final Activity activity, final int idRevision) {
         LayoutInflater li = LayoutInflater.from(activity);
         LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_sincronizacion_layout, null);
 
@@ -427,7 +470,7 @@ public class AnexosActivity extends AppCompatActivity {
         textViewSincronizar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new SincronizacionRequestService(activity,activity,idRevision).execute();
+                new SincronizacionRequestService(activity, activity, idRevision).execute();
                 //new SincronizacionIndividualRequestService(activity,activity,idRevision,listCatalogoBarcos,null).execute();
                 //new SincronizacionIndividualRequestService(AnexosActivity.this,AnexosActivity.this,folio,null,listAnexos,null,AnexosActivity.this).execute();
                 dialog.dismiss();
@@ -437,32 +480,32 @@ public class AnexosActivity extends AppCompatActivity {
         linearLayoutSincronizar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new SincronizacionRequestService(activity,activity,idRevision).execute();
+                new SincronizacionRequestService(activity, activity, idRevision).execute();
                 //new SincronizacionIndividualRequestService(AnexosActivity.this,AnexosActivity.this,folio,null,listAnexos,null,AnexosActivity.this).execute();
                 dialog.dismiss();
             }
         });
     }
 
-    public void loadData(){
+    public void loadData() {
         AnexosDBMethods anexosDBMethods = new AnexosDBMethods(this);
         List<Integer> listRelaciones = anexosDBMethods.readRelacionRevisionAnexo(folio);
 
         listAnexos = new ArrayList<>();
 
-        for(int idAnexo:listRelaciones) {
+        for (int idAnexo : listRelaciones) {
             List<Anexo> tempListAnexos = anexosDBMethods.readCatalogoAnexos("SELECT ID_ANEXO,ID_SUBANEXO,DESCRIPCION FROM " + anexosDBMethods.TP_CAT_ANEXOS + " WHERE " +
                     "ID_SUBANEXO = 0 AND ID_ANEXO = ?", new String[]{String.valueOf(idAnexo)});
-            for(Anexo anexo:tempListAnexos){
+            for (Anexo anexo : tempListAnexos) {
                 listAnexos.add(anexo);
             }
         }
 
-        for(Anexo anexo:listAnexos){
+        for (Anexo anexo : listAnexos) {
             List<Anexo> listSubAnexos = anexosDBMethods.readCatalogoAnexos("SELECT ID_ANEXO,ID_SUBANEXO,DESCRIPCION FROM " + anexosDBMethods.TP_CAT_ANEXOS + " WHERE " +
-                    "ID_SUBANEXO != 0 AND ID_ANEXO = ?",new String[]{String.valueOf(anexo.getIdAnexo())});
+                    "ID_SUBANEXO != 0 AND ID_ANEXO = ?", new String[]{String.valueOf(anexo.getIdAnexo())});
             anexo.setListSubAnexos(listSubAnexos);
-            for(Anexo subanexo:listSubAnexos){
+            for (Anexo subanexo : listSubAnexos) {
                 /*List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE " +
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdAnexo()), String.valueOf(subanexo.getIdSubAnexo())});//*/
@@ -471,7 +514,7 @@ public class AnexosActivity extends AppCompatActivity {
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdSubAnexo())});
 
-                if(listDatosAnexos.size() != 0){
+                if (listDatosAnexos.size() != 0) {
                     //subanexo.setIdDocumento(listDatosAnexos.get(0).getIdDocumento());
                     subanexo.setNombreArchivo(listDatosAnexos.get(0).getNombreArchivo());
                     subanexo.setIdEtapa(listDatosAnexos.get(0).getIdEtapa());
@@ -487,16 +530,16 @@ public class AnexosActivity extends AppCompatActivity {
 
         contarAnexosValidados(listAnexos);
 
-        adapterExpandableAnexos = new AdapterExpandableAnexos(listAnexos,this,textViewCumplen,textViewNoCumplen,textViewTotal,fechaInicio,estatus);
+        adapterExpandableAnexos = new AdapterExpandableAnexos(listAnexos, this, textViewCumplen, textViewNoCumplen, textViewTotal, fechaInicio, estatus);
         expandableListView.setAdapter(adapterExpandableAnexos);
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME,MODE_PRIVATE);
-        if(sharedPreferences.contains(Constants.SP_LOGIN_TAG)){
-            if(!sharedPreferences.getBoolean(Constants.SP_LOGIN_TAG,false)){
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+        if (sharedPreferences.contains(Constants.SP_LOGIN_TAG)) {
+            if (!sharedPreferences.getBoolean(Constants.SP_LOGIN_TAG, false)) {
                 finish();
             }
         }

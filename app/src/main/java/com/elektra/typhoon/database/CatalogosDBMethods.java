@@ -12,6 +12,7 @@ import com.elektra.typhoon.objetos.response.EtapaEvidencia;
 import com.elektra.typhoon.objetos.response.EtapaSubAnexo;
 import com.elektra.typhoon.objetos.response.RolUsuario;
 import com.elektra.typhoon.objetos.response.TipoRespuesta;
+import com.elektra.typhoon.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,7 @@ public class CatalogosDBMethods {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ContentValues values = new ContentValues();
         values.put("ID_ESTATUS",estatusEvidencia.getIdEstatus());
-        values.put("DESCRIPCION",estatusEvidencia.getDescripcion());
+        values.put("DESCRIPCION", Utils.removeSpecialCharacters(estatusEvidencia.getDescripcion()));
         db.insertWithOnConflict(TP_CAT_CL_ESTATUS_EVIDENCIA, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -94,7 +95,7 @@ public class CatalogosDBMethods {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ContentValues values = new ContentValues();
         values.put("ID_ETAPA",etapaEvidencia.getIdEtapa());
-        values.put("DESCRIPCION",etapaEvidencia.getDescripcion());
+        values.put("DESCRIPCION", Utils.removeSpecialCharacters(etapaEvidencia.getDescripcion()));
         values.put("ID_USUARIO",etapaEvidencia.getIdUsuario());
         db.insertWithOnConflict(TP_CAT_CL_ETAPA_EVIDENCIA, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
@@ -144,7 +145,7 @@ public class CatalogosDBMethods {
         ContentValues values = new ContentValues();
         values.put("ID_RESPUESTA",tipoRespuesta.getIdRespuesta());
         values.put("ID_TIPO_RESPUESTA",tipoRespuesta.getIdTipoRespuesta());
-        values.put("DESCRIPCION",tipoRespuesta.getDescripcion());
+        values.put("DESCRIPCION", Utils.removeSpecialCharacters(tipoRespuesta.getDescripcion()));
         db.insertWithOnConflict(TP_CAT_CL_RESPUESTA, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -192,7 +193,7 @@ public class CatalogosDBMethods {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ContentValues values = new ContentValues();
         values.put("ID_ESTATUS",estatusRevision.getIdEstatus());
-        values.put("DESCRIPCION",estatusRevision.getDescripcion());
+        values.put("DESCRIPCION", Utils.removeSpecialCharacters(estatusRevision.getDescripcion()));
         values.put("SRC",estatusRevision.getImagen());
         db.insertWithOnConflict(TP_CAT_ESTATUS_REVISION, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
@@ -234,13 +235,15 @@ public class CatalogosDBMethods {
 
     public static String QUERY_CREATE_TABLE_ROLES_USUARIO = "CREATE TABLE " + TP_CAT_ROLES_USUARIO + " (" +
             "ID_ROL INTEGER PRIMARY KEY, " +
-            "DESCRIPCION TEXT)";
+            "DESCRIPCION TEXT, " +
+            "IS_GEOCERCA INT)";
 
     public void createRolUsuario(RolUsuario rolUsuario){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ContentValues values = new ContentValues();
         values.put("ID_ROL",rolUsuario.getIdRol());
         values.put("DESCRIPCION",rolUsuario.getDescripcion());
+        values.put("IS_GEOCERCA", (rolUsuario.isGeocerca())? 1 : 0);
         db.insertWithOnConflict(TP_CAT_ROLES_USUARIO, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -261,6 +264,7 @@ public class CatalogosDBMethods {
                     RolUsuario rolUsuario = new RolUsuario();
                     rolUsuario.setIdRol(cursor.getInt(0));
                     rolUsuario.setDescripcion(cursor.getString(1));
+                    rolUsuario.setGeocerca((cursor.getInt(2)) == 1);
                     listRolesUsuario.add(rolUsuario);
                 }while(cursor.moveToNext());
             }

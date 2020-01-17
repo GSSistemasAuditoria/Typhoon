@@ -2,6 +2,7 @@ package com.elektra.typhoon.service;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -63,8 +64,8 @@ public class NuevaInstalacion extends AsyncTask<String,String,String> {
                         sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt2).apply();*/
 
                         SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME,
-                                activity.MODE_PRIVATE);
-                        sharedPrefs.edit().clear().commit();
+                                Context.MODE_PRIVATE);
+                        sharedPrefs.edit().clear().apply();
                         new TyphoonDataBase(activity).deleteAll();
 
                     } else {

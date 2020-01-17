@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
+import com.elektra.typhoon.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,7 @@ public class UsuarioDBMethods {
         ContentValues values = new ContentValues();
         values.put("ID_USUARIO",usuario.getIdUsuario());
         values.put("CORREO",usuario.getCorreo());
-        values.put("NOMBRE",usuario.getNombre());
+        values.put("NOMBRE", Utils.removeSpecialCharacters(usuario.getNombre()));
         //values.put("PASSWORD",usuario.getPassword());
         if(usuario.getInterno()) {
             values.put("INTERNO", 1);

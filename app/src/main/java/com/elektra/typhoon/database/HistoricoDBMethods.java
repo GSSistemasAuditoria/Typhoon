@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.objetos.response.Historico;
 import com.elektra.typhoon.objetos.response.HistoricoAnexo;
+import com.elektra.typhoon.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,7 @@ public class HistoricoDBMethods {
         values.put("ID_EVIDENCIA",historico.getIdEvidencia());
         values.put("ID_ETAPA",historico.getIdEtapa());
         values.put("ID_USUARIO",historico.getIdUsuario());
-        values.put("MOTIVO",historico.getMotivo());
+        values.put("MOTIVO", Utils.removeSpecialCharacters(historico.getMotivo()));
         values.put("CONSEC",historico.getConsec());
         values.put("ID_REVISION",historico.getIdRevision());
         values.put("ID_CHECKLIST",historico.getIdChecklist());
@@ -117,7 +118,7 @@ public class HistoricoDBMethods {
         values.put("ID_ETAPA",historicoAnexo.getIdEtapa());
         values.put("ID_USUARIO",historicoAnexo.getIdUsuario());
         values.put("NOMBRE",historicoAnexo.getNombre());
-        values.put("MOTIVO_RECHAZO",historicoAnexo.getMotivoRechazo());
+        values.put("MOTIVO_RECHAZO", Utils.removeSpecialCharacters(historicoAnexo.getMotivoRechazo()));
         values.put("FECHA_MOD",historicoAnexo.getFechaMod());
         values.put("GUID",historicoAnexo.getGuid());
         values.put("SUBANEXO_FCH_SINC",historicoAnexo.getFechaSincronizacion());

@@ -38,7 +38,7 @@ public class CatalogosData {
     @Expose
     private List<RolUsuario> listRolesUsuario;
 
-    @SerializedName("CatalogoAppSettings")
+        @SerializedName("CatalogoAppSettings")
     @Expose
     private List<Configuracion> listConfiguracion;
 

@@ -37,7 +37,7 @@ public class FoliosDBMethods {
             "FECHA_FIN TEXT, " +
             "ESTATUS INTEGER)";
 
-    public void createFolio(FolioRevision folioRevision){
+    public void createFolio(FolioRevision folioRevision){// folios was creating from web services
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ContentValues values = new ContentValues();
         values.put("ID_REVISION",folioRevision.getIdRevision());
@@ -55,7 +55,9 @@ public class FoliosDBMethods {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         List<FolioRevision> listFolios = new ArrayList<>();
         StringBuilder query = new StringBuilder();
-        query.append("SELECT ID_REVISION,NOMBRE,ID_TIPO_REVISION,ID_USUARIO,FECHA_INICIO,FECHA_FIN,ESTATUS FROM ").append(TP_TRAN_REVISION);
+        query.append("SELECT ID_REVISION,NOMBRE,ID_TIPO_REVISION,ID_USUARIO,FECHA_INICIO,FECHA_FIN,ESTATUS FROM ")
+                .append(TP_TRAN_REVISION)
+                .append(" ORDER BY FECHA_INICIO DESC");
         Cursor cursor = db.rawQuery(query.toString(),null);
         if(cursor != null){
             if(cursor.moveToFirst()){

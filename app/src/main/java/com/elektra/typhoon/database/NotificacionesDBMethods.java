@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.objetos.response.Notificacion;
+import com.elektra.typhoon.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +42,8 @@ public class NotificacionesDBMethods {
         ContentValues values = new ContentValues();
         values.put("ID_NOTIFICACION",notificacion.getIdNotificacion());
         values.put("ID_ROL",notificacion.getIdRol());
-        values.put("TITLE",notificacion.getTitle());
-        values.put("BODY",notificacion.getBody());
+        values.put("TITLE", Utils.removeSpecialCharacters(notificacion.getTitle()));
+        values.put("BODY", Utils.removeSpecialCharacters(notificacion.getBody()));
         values.put("FECHA_MOD",notificacion.getFchMod());
         db.insertWithOnConflict(TP_TRAN_NOTIFICACIONES, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();

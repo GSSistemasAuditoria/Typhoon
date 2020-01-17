@@ -65,4 +65,9 @@
     <string name="redirect_uri">typhoon://login</string>
     <string name="response_type">token</string>
     <string name="acr_values">gs/customEnrolamiento/uri</string>
+
+    <string name="por_cargar">Por cargar</string>
+    <string name="por_validar">Por validar</string>
+    <string name="title_dialog_gps">GPS desactivado</string>
+    <string name="question_gps_turn_on">Necesita activar el GPS para continuar con la revisión</string>
 </resources>

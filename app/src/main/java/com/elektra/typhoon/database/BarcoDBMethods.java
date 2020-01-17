@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.objetos.response.Barco;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
+import com.elektra.typhoon.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,7 @@ public class BarcoDBMethods {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ContentValues values = new ContentValues();
         values.put("ID_BARCO",barco.getIdBarco());
-        values.put("NOMBRE",barco.getNombre());
+        values.put("NOMBRE", Utils.removeSpecialCharacters(barco.getNombre()));
         values.put("LATITUDE",barco.getLatitud());
         values.put("LONGITUDE",barco.getLongitud());
         values.put("RADIO",barco.getRadio());

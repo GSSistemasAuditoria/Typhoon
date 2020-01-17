@@ -22,4 +22,4 @@
 -dontwarn okhttp3.internal.platform.*
 -dontwarn okio.**
 -dontwarn org.codehaus.mojo.**
-	
+-keep class com.elektra.typhoon.objetos.** { *; }

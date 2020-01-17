@@ -17,6 +17,8 @@ import com.elektra.typhoon.objetos.response.ResponseNuevoUsuario;
 import com.elektra.typhoon.objetos.response.ResponseValidaUsuario;
 import com.elektra.typhoon.objetos.response.SincronizacionResponse;
 
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;

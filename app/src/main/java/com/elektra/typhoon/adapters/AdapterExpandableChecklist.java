@@ -13,9 +13,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.elektra.typhoon.R;
+import com.elektra.typhoon.checklist.ChecklistBarcos;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
+import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
@@ -33,7 +35,7 @@ import java.util.List;
  * Empresa: Elektra
  * Area: Auditoria Sistemas y Monitoreo de Alarmas
  */
-public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
+public class AdapterExpandableChecklist extends BaseExpandableListAdapter {
 
     private List<RubroData> listRubros;
     private Activity activity;
@@ -41,6 +43,8 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
     private AdapterRecycleViewPreguntas adapterRecycleViewPreguntasTemp;
     private TextView textViewCumplen;
     private TextView textViewNoCumplen;
+    private TextView tvPorValidarValor;
+    private TextView tvPorCargarValor;
     private String fechaFolio;
     private int idBarco;
     private ProgressDialog progressDialog;
@@ -57,11 +61,14 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         return rubroPosition;
     }
 
-    public AdapterExpandableChecklist(List<RubroData> listRubros, Activity activity,TextView textViewCumplen,TextView textViewNoCumplen,String fechaFolio,int idBarco){
+    public AdapterExpandableChecklist(List<RubroData> listRubros, Activity activity, TextView textViewCumplen, TextView textViewNoCumplen,
+                                      TextView tvPorCargarValor, TextView tvPorValidarValor, String fechaFolio, int idBarco) {
         this.listRubros = listRubros;
         this.activity = activity;
         this.textViewCumplen = textViewCumplen;
         this.textViewNoCumplen = textViewNoCumplen;
+        this.tvPorCargarValor = tvPorCargarValor;
+        this.tvPorValidarValor = tvPorValidarValor;
         this.fechaFolio = fechaFolio;
         this.idBarco = idBarco;
     }
@@ -111,7 +118,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         }
 
         TextView textViewTituloEncabezado = view.findViewById(R.id.textViewTituloHeader);
-        ImageView imageView =  view.findViewById(R.id.imageViewIconoGrupo);
+        ImageView imageView = view.findViewById(R.id.imageViewIconoGrupo);
         ImageView imageViewSelect = view.findViewById(R.id.imageViewSelect);
         textViewTituloEncabezado.setText(rubro.getNombre());
 
@@ -128,30 +135,30 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         imageViewSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(rubro.isSeleccionado()){
+                if (rubro.isSeleccionado()) {
                     rubro.setSeleccionado(false);
-                    for(Pregunta pregunta:rubro.getListPreguntasTemp()){
+                    for (Pregunta pregunta : rubro.getListPreguntasTemp()) {
                         pregunta.setSeleccionado(false);
-                        Utils.updatePregunta(activity,String.valueOf(pregunta.getIdRevision()),
-                                String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),
-                                String.valueOf(pregunta.getIdRubro()),0);//*/
+                        Utils.updatePregunta(activity, String.valueOf(pregunta.getIdRevision()),
+                                String.valueOf(pregunta.getIdChecklist()), String.valueOf(pregunta.getIdPregunta()),
+                                String.valueOf(pregunta.getIdRubro()), 0);//*/
                     }
-                }else{
+                } else {
                     rubro.setSeleccionado(true);
-                    for(Pregunta pregunta:rubro.getListPreguntasTemp()){
+                    for (Pregunta pregunta : rubro.getListPreguntasTemp()) {
                         pregunta.setSeleccionado(true);
-                        Utils.updatePregunta(activity,String.valueOf(pregunta.getIdRevision()),
-                                String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdPregunta()),
-                                String.valueOf(pregunta.getIdRubro()),1);//*/
+                        Utils.updatePregunta(activity, String.valueOf(pregunta.getIdRevision()),
+                                String.valueOf(pregunta.getIdChecklist()), String.valueOf(pregunta.getIdPregunta()),
+                                String.valueOf(pregunta.getIdRubro()), 1);//*/
                     }
                 }
                 notifyDataSetChanged();
             }
         });
 
-        if(rubro.isSeleccionado()) {
+        if (rubro.isSeleccionado()) {
             imageViewSelect.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_check_white));
-        }else{
+        } else {
             imageViewSelect.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_uncheck_white));
         }
 
@@ -162,10 +169,10 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         return view;
     }
 
-    private boolean cuentaPreguntasDeshabilitadas(List<Pregunta> preguntas){
-        for(Pregunta pregunta:preguntas){
-            if(pregunta.isSeleccionado()){
-               return false;
+    private boolean cuentaPreguntasDeshabilitadas(List<Pregunta> preguntas) {
+        for (Pregunta pregunta : preguntas) {
+            if (pregunta.isSeleccionado()) {
+                return false;
             }
         }
         return true;
@@ -188,7 +195,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
 
         EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
 
-        for(Pregunta pregunta:rubro.getListPreguntasTemp()){
+        for (Pregunta pregunta : rubro.getListPreguntasTemp()) {
             try {
                 List<Evidencia> listEvidencias = evidenciasDBMethods.readEvidencias("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
                                 "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR,NUEVO,FECHA_MOD," +
@@ -197,7 +204,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
                                 " AND ID_ESTATUS != 2",
                         new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
                                 String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),
-                                String.valueOf(idBarco)},false);
+                                String.valueOf(idBarco)}, false);
                 pregunta.setListEvidencias(listEvidencias);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -209,8 +216,8 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         }//*/
 
         //textViewTituloRubro.setText("Rubro " + i);
-        AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntasTemp(),activity,i,
-                textViewCumplen,textViewNoCumplen,this,fechaFolio,idBarco,rubro);
+        AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntasTemp(), activity, i,
+                textViewCumplen, textViewNoCumplen, this, fechaFolio, idBarco, rubro);
         recyclerViewPreguntas.setAdapter(adapterRecycleViewPreguntas);
         LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
         recyclerViewPreguntas.setLayoutManager(layoutManager);
@@ -224,13 +231,13 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         return false;
     }
 
-    public void contarPreguntasCumplen(int idBarco){
+    public void contarPreguntasCumplen(int idBarco) {
         /*int cumple = 0;
         int noCumple = 0;
         int numeroPreguntas = 0;//*/
         int folio = 0;
         int checklist = 0;
-        for(RubroData rubro:listRubros){
+        for (RubroData rubro : listRubros) {
             folio = rubro.getIdRevision();
             checklist = rubro.getIdChecklist();
             /*for(Pregunta pregunta:rubro.getListPreguntasTemp()){
@@ -243,7 +250,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
             }//*/
         }
 
-        ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
+        /*ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
 
         ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
 
@@ -285,7 +292,73 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter{
         }
 
         textViewCumplen.setText(String.valueOf(cumple));
+        textViewNoCumplen.setText(String.valueOf(noCumple));*/
+
+
+        int cumple = 0;
+        int noCumple = 0;
+        int porValidar = 0;
+        int porCargar = 0;
+
+        EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
+        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
+
+        for (RubroData mRubroData : listRubros)
+            for (Pregunta mPregunta : mRubroData.getListPreguntasTemp()) {
+                if ((usuario.getIdrol() == 3 || !mPregunta.isTierra())) {
+                    if (mPregunta.getListEvidencias() == null) {
+                        List<Evidencia> listEvidencias;
+                        listEvidencias = evidenciasDBMethods.readEvidencias("SELECT ID_ESTATUS,ID_ETAPA FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
+                                        " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?" +
+                                        " AND ID_ESTATUS != 2",
+                                new String[]{String.valueOf(mPregunta.getIdRevision()), String.valueOf(mPregunta.getIdChecklist()),
+                                        String.valueOf(mPregunta.getIdRubro()), String.valueOf(mPregunta.getIdPregunta()),
+                                        String.valueOf(idBarco)});
+                        mPregunta.setListEvidencias(listEvidencias);
+                    }
+                    if (mPregunta.getListEvidencias() == null || mPregunta.getListEvidencias().size() == 0) {
+                        porCargar++;
+                    } else {
+                        int valida = 0;
+                        int cump = 0;
+                        int noCump = 0;
+                        for (Evidencia mEvidencia : mPregunta.getListEvidencias()) {
+                            if ((usuario.getIdrol() == 1 && mEvidencia.getIdEtapa() != 1 && mEvidencia.getIdEstatus() == 1) ||
+                                    (mEvidencia.getIdEtapa() > usuario.getIdrol() && mEvidencia.getIdEstatus() == 1) ||
+                                    (mEvidencia.getIdEtapa() == 2 && mEvidencia.getIdEstatus() == 1 && usuario.getIdrol() == 3) ||
+                                    ((mEvidencia.getIdEtapa() == 3 || mEvidencia.getIdEtapa() == 2) && (mEvidencia.getIdEstatus() == 2 || mEvidencia.getIdEstatus() == 1) && usuario.getIdrol() == 4)) {
+                                cump++;
+                            } else if ((usuario.getIdrol() == 1 && (mEvidencia.getIdEtapa() == 1 || mEvidencia.getIdEtapa() == 2) && mEvidencia.getIdEstatus() == 3) ||
+                                    ((mEvidencia.getIdEtapa() == 1 || mEvidencia.getIdEtapa() == 2) && mEvidencia.getIdEstatus() == 3)) {
+                                noCump++;
+                            } else {
+                                valida++;
+                            }
+                        }
+                        if (noCump > 0) {
+                            noCumple++;
+                        }else {
+                            if (valida > 0) {
+                                porValidar++;
+                            } else {
+                                if (cump > 0) {
+                                    cumple++;
+                                }
+                            }
+                        }
+                    }
+                    if (mPregunta.getListEvidencias() != null && mPregunta.getListEvidencias().size() > 0 && mPregunta.getListEvidencias().get(0).getIdEvidencia() == null)
+                        mPregunta.setListEvidencias(null);
+                }
+            }
+
+
+        textViewCumplen.setText(String.valueOf(cumple));
         textViewNoCumplen.setText(String.valueOf(noCumple));
+        tvPorCargarValor.setText(String.valueOf(porCargar));
+        tvPorValidarValor.setText(String.valueOf(porValidar));
+
+
 
         /*ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
         ChecklistData checklist = checklistDBMethods.readChecklist("WHERE ID_REVISION = ?",new String[]{String.valueOf(folio)});

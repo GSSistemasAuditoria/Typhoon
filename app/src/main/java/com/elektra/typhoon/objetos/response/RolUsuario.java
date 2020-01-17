@@ -20,6 +20,10 @@ public class RolUsuario {
     @Expose
     private String descripcion;
 
+    @SerializedName("IS_GEOCERCA")
+    @Expose
+    private boolean geocerca;
+
     public int getIdRol() {
         return idRol;
     }
@@ -34,5 +38,13 @@ public class RolUsuario {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+
+    public boolean isGeocerca() {
+        return geocerca;
+    }
+
+    public void setGeocerca(boolean geocerca) {
+        this.geocerca = geocerca;
     }
 }

@@ -623,7 +623,7 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout linearLayoutCancelar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutCancelar);
         LinearLayout linearLayoutAceptar = (LinearLayout) layoutDialog.findViewById(R.id.linearLayoutAceptar);
 
-        textViewTitulo.setText("Ya existe un usuario firmado con estas credenciales, desea cerrar la otra sesión?");
+        textViewTitulo.setText("Ya existe un usuario firmado con estas credenciales, desea cerrar la sesión?");
 
         final AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                 .setView(layoutDialog)

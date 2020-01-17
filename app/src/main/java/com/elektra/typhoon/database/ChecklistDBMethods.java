@@ -14,6 +14,7 @@ import com.elektra.typhoon.objetos.response.ResponseCartera;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
+import com.elektra.typhoon.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,8 +150,8 @@ public class ChecklistDBMethods {
         values.put("ID_REVISION",rubroData.getIdRevision());
         values.put("ID_CHECKLIST",rubroData.getIdChecklist());
         values.put("ID_RUBRO",rubroData.getIdRubro());
-        values.put("ESTATUS",rubroData.getEstatus());
-        values.put("NOMBRE",rubroData.getNombre());
+        values.put("ESTATUS", rubroData.getEstatus());
+        values.put("NOMBRE", Utils.removeSpecialCharacters(rubroData.getNombre()));
         db.insertWithOnConflict(TP_CAT_CL_RUBRO, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -206,7 +207,7 @@ public class ChecklistDBMethods {
         values.put("ID_PREGUNTA",preguntaData.getIdPregunta());
         values.put("ID_TIPO_RESPUESTA",preguntaData.getIdTipoRespuesta());
         values.put("ESTATUS",preguntaData.getEstatus());
-        values.put("DESCRIPCION",preguntaData.getDescripcion());
+        values.put("DESCRIPCION", Utils.removeSpecialCharacters(preguntaData.getDescripcion()));
         if(preguntaData.isTierra()){
             values.put("IS_TIERRA",1);
         }else{
@@ -218,7 +219,7 @@ public class ChecklistDBMethods {
     }
 
     public List<Pregunta> readPregunta(String condition, String[] args){
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE,null);
         List<Pregunta> listPreguntas = new ArrayList<>();
         /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA FROM ").append(TP_CAT_CL_PREGUNTA);

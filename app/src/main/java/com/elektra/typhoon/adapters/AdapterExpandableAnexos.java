@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.elektra.typhoon.R;
+import com.elektra.typhoon.anexos.AnexosActivity;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.objetos.response.Anexo;
@@ -32,7 +33,7 @@ import java.util.List;
 public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
 
     private List<Anexo> listAnexosHeader;
-    private Activity activity;
+    private AnexosActivity activity;
     private int header;
     private AdapterRecycleViewItemsAnexos adapterRecycleViewItemsAnexosTemp;
     private TextView textViewCumplen;
@@ -41,7 +42,7 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
     private String fechaRevision;
     private int estatusRevision;
 
-    public AdapterExpandableAnexos(List<Anexo> listAnexosHeader, Activity activity,TextView textViewCumplen,TextView textViewNoCumplen,TextView textViewTotal,String fechaRevision,int estatusRevision){
+    public AdapterExpandableAnexos(List<Anexo> listAnexosHeader, AnexosActivity activity, TextView textViewCumplen, TextView textViewNoCumplen, TextView textViewTotal, String fechaRevision, int estatusRevision){
         this.listAnexosHeader = listAnexosHeader;
         this.activity = activity;
         this.textViewCumplen = textViewCumplen;
@@ -177,7 +178,8 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
     }
 
     public void contarAnexosValidados(){
-        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
+        activity.contarAnexosValidados(listAnexosHeader);
+        /*ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
         int aplica = 0;
         int noAplica = 0;
         int total = 0;
@@ -198,6 +200,6 @@ public class AdapterExpandableAnexos extends BaseExpandableListAdapter{
 
         textViewCumplen.setText(String.valueOf(aplica));
         textViewNoCumplen.setText(String.valueOf(noAplica));
-        textViewTotal.setText(String.valueOf(total));
+        textViewTotal.setText(String.valueOf(total));*/
     }
 }

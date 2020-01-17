@@ -59,8 +59,8 @@ public class EvidenciasDBMethods {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         ContentValues values = new ContentValues();
         values.put("ID_EVIDENCIA",evidencia.getIdEvidencia());
-        values.put("NOMBRE",evidencia.getNombre());
-        values.put("CONTENIDO",evidencia.getContenido());
+        values.put("NOMBRE", Utils.removeSpecialCharacters(evidencia.getNombre()));
+        values.put("CONTENIDO",evidencia.getContenido()); // Contenido pdf en base 64
         if(evidencia.getContenidoPreview() == null){
             try {
                 if(!evidencia.getNombre().contains(".pdf") && !evidencia.getNombre().contains(".PDF")) {
@@ -145,6 +145,33 @@ public class EvidenciasDBMethods {
                     evidencia.setIdRol(cursor.getInt(18));
                     evidencia.setIdUsuario(cursor.getString(19));
                     evidencia.setAgregadoLider(cursor.getInt(20));
+                    listEvidencia.add(evidencia);
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return listEvidencia;
+    }
+
+    public List<Evidencia> readEvidencias(String condition, String[] args){
+        CursorWindowFixer.fix();
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        List<Evidencia> listEvidencia = new ArrayList<>();
+        /*StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
+                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM ").append(TP_TRAN_CL_EVIDENCIA);
+        if(condition != null){
+            query.append(" ").append(condition);
+        }
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition,args);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    Evidencia evidencia = new Evidencia();
+                    evidencia.setIdEstatus(cursor.getInt(cursor.getColumnIndexOrThrow("ID_ESTATUS")));
+                    evidencia.setIdEtapa(cursor.getInt(cursor.getColumnIndexOrThrow("ID_ETAPA")));
                     listEvidencia.add(evidencia);
                 }while(cursor.moveToNext());
             }

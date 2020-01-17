@@ -15,6 +15,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -118,6 +119,7 @@ public class CarteraFolios extends AppCompatActivity {
     private TextView textViewNotificaciones;
     private ResponseLogin.Usuario usuario;
     private Encryption encryption;
+    private SwipeRefreshLayout swipeRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +131,14 @@ public class CarteraFolios extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(CarteraFolios.this);
         recyclerView.setLayoutManager(layoutManager);
+        swipeRefresh = findViewById(R.id.swipeRefresh);
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                obtenerFolios(-1,-1,-1);
+                swipeRefresh.setRefreshing(false);
+            }
+        });
 
         final Spinner spinnerAnio = (Spinner) findViewById(R.id.spinnerAnio);
         final Spinner spinnerMes = (Spinner) findViewById(R.id.spinnerMes);
@@ -262,36 +272,38 @@ public class CarteraFolios extends AppCompatActivity {
                 menuBuilder.setCallback(new MenuBuilder.Callback() {
                     @Override
                     public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
-
                         if (item.getItemId() == R.id.cerrarSesion) {
-                            SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+                            Utils.cerrarSesionService((usuario.getInterno()) ? usuario.getIdUsuario() : usuario.getCorreo(),
+                                    false, CarteraFolios.this);
+                            /*SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
                             sharedPrefs.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
                             Call<CerrarSesionResponse> mServiceCloseSession = Utils.getInterfaceService().cerrarSesion(usuario.getIdUsuario());
                             mServiceCloseSession.enqueue(new Callback<CerrarSesionResponse>() {
                                 @Override
                                 public void onResponse(Call<CerrarSesionResponse> call, Response<CerrarSesionResponse> response) {
                                     if (response.body().getCerrarSesion().getExito()) {
-                                        if (usuario.getInterno()) {
+                                        /*if (usuario.getInterno()) {
                                             HttpUrl authorizeUrl2 = HttpUrl.parse(Constants.URL_DSI + "jsp/logoutSuccess_latest.jsp?rp=" + getString(R.string.redirect_uri))
                                                     .newBuilder()
                                                     .build();
                                             Intent mIntent2 = new Intent(Intent.ACTION_VIEW);
                                             mIntent2.setData(Uri.parse(String.valueOf(authorizeUrl2.url())));
                                             startActivity(mIntent2);
-                                        } else {
+                                        //} else {
                                             Intent intent = new Intent(CarteraFolios.this, MainActivity.class);
                                             startActivity(intent);
                                             finish();
-                                        }
+                                        //}
                                     }else
                                         Utils.message(CarteraFolios.this, response.body().getCerrarSesion().getError());
+
                                 }
 
                                 @Override
                                 public void onFailure(Call<CerrarSesionResponse> call, Throwable t) {
                                     Utils.message(CarteraFolios.this, "Error al cerrar sesión");
                                 }
-                            });
+                            });*/
                         } else if (item.getItemId() == R.id.actualizarCatalogos) {
                             //Utils.descargaCatalogos(CarteraFolios.this,2);
                             descargaCatalogos(2);

@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.objetos.response.Anexo;
+import com.elektra.typhoon.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ public class AnexosDBMethods {
         ContentValues values = new ContentValues();
         values.put("ID_ANEXO",anexo.getIdAnexo());
         values.put("ID_SUBANEXO",anexo.getIdSubAnexo());
-        values.put("DESCRIPCION",anexo.getDescripcion());
+        values.put("DESCRIPCION", Utils.removeSpecialCharacters(anexo.getDescripcion()));
         db.insertWithOnConflict(TP_CAT_ANEXOS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
@@ -143,7 +144,7 @@ public class AnexosDBMethods {
         //values.put("ID_DOCUMENTO",anexo.getIdDocumento());
         values.put("ID_ETAPA",anexo.getIdEtapa());
         values.put("DOCUMENTO",anexo.getBase64());
-        values.put("NOMBRE",anexo.getNombreArchivo());
+        values.put("NOMBRE", Utils.removeSpecialCharacters(anexo.getNombreArchivo()));
         values.put("SUBANEXO_FCH_SINC",anexo.getFechaSinc());
         values.put("SUBANEXO_FCH_MOD",anexo.getFechaMod());
         values.put("SELECCIONADO",0);

@@ -309,6 +309,9 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
         byte[] pdf = Utils.base64ToFile(documentoPDF);
         pdfViewDocumento.fromBytes(pdf).load();
 
+        dialogLayout.setMinimumWidth((int) (activity.getResources().getDisplayMetrics().widthPixels * 0.90));
+        dialogLayout.setMinimumHeight((int) (activity.getResources().getDisplayMetrics().heightPixels * 0.90));
+
         final Drawable drawableCumpleVerde = activity.getDrawable(R.mipmap.ic_cumple_verde);
         final Drawable drawableNoCumpleRojo = activity.getDrawable(R.mipmap.ic_nocumple_rojo);
         final Drawable drawableCumpleGris = activity.getDrawable(R.mipmap.ic_cumple_gris);
@@ -376,14 +379,14 @@ public class AdapterRecycleViewItemsAnexos extends RecyclerView.Adapter<AdapterR
                 .create();
         alertDialog.show();
 
-        int width = (int) (activity.getResources().getDisplayMetrics().widthPixels * 0.90);
+        /*int width = (int) (activity.getResources().getDisplayMetrics().widthPixels * 0.90);
         int height = (int) (activity.getResources().getDisplayMetrics().heightPixels * 0.90);
         alertDialog.getWindow().setLayout(width, height);
 
         ViewGroup.LayoutParams params = pdfViewDocumento.getLayoutParams();
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        params.height = (int) (activity.getResources().getDisplayMetrics().heightPixels * 0.77);
-        pdfViewDocumento.requestLayout();
+        params.height = (int) (activity.getResources().getDisplayMetrics().heightPixels * 0.75);
+        pdfViewDocumento.requestLayout();*/
 
         /*WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
         lp.copyFrom(alertDialog.getWindow().getAttributes());

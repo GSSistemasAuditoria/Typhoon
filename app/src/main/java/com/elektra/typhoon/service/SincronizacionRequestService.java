@@ -22,6 +22,7 @@ import com.elektra.typhoon.checklist.ChecklistBarcos;
 import com.elektra.typhoon.constants.Constants;
 import com.elektra.typhoon.database.AnexosDBMethods;
 import com.elektra.typhoon.database.BarcoDBMethods;
+import com.elektra.typhoon.database.CatalogosDBMethods;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.EvidenciasDBMethods;
 import com.elektra.typhoon.database.FoliosDBMethods;
@@ -42,6 +43,7 @@ import com.elektra.typhoon.objetos.response.Anexo;
 import com.elektra.typhoon.objetos.response.CatalogoBarco;
 import com.elektra.typhoon.objetos.response.ChecklistData;
 import com.elektra.typhoon.objetos.response.DatosPorValidarResponse;
+import com.elektra.typhoon.objetos.response.EstatusRevision;
 import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.FolioRevision;
 import com.elektra.typhoon.objetos.response.Historico;
@@ -1016,6 +1018,22 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                         contentValues.put("FECHA_FIN",sincronizacionResponseData.getFechaFin());
                         contentValues.put("ESTATUS",sincronizacionResponseData.getEstatus());
 
+                        if (checklistBarcos != null){
+                            CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(checklistBarcos);
+                            final List<EstatusRevision> listEstatusRevision = catalogosDBMethods.readEstatusRevision(
+                                    "SELECT ID_ESTATUS,DESCRIPCION,SRC FROM " + catalogosDBMethods.TP_CAT_ESTATUS_REVISION + " WHERE ID_ESTATUS = ?",
+                                    new String[]{String.valueOf(sincronizacionResponseData.getEstatus())});
+
+                            if (listEstatusRevision.size() != 0) {
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        ((TextView)checklistBarcos.findViewById(R.id.textViewFechaFin)).setText(listEstatusRevision.get(0).getDescripcion());
+                                    }
+                                });
+
+                            }
+                        }
                         new FoliosDBMethods(activity).updateFolio(contentValues,"ID_REVISION = ?",new String[]{String.valueOf(sincronizacionResponseData.getIdRevision())});
 
                         //updateDialogText("Sincronizado correctamente");
