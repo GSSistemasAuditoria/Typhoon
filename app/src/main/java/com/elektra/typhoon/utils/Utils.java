@@ -276,13 +276,12 @@ public class Utils {
      * @param texto
      * @return
      */
-    public static ProgressDialog typhoonLoader(Context context, String texto) {
+    public static ProgressDialog typhoonLoader(final Activity context, String texto) {
         LayoutInflater li = LayoutInflater.from(context);
         View layoutDialog = li.inflate(R.layout.typhoon_loader_layout, null);
 
-        ImageView imageViewLoader = layoutDialog.findViewById(R.id.imageViewLoader);
+        final ImageView imageViewLoader = layoutDialog.findViewById(R.id.imageViewLoader);
         Glide.with(context).load(R.raw.loader3).into(imageViewLoader);
-
         TextView textView = (TextView) layoutDialog.findViewById(R.id.textViewLoader);
         textView.setText(texto);
 

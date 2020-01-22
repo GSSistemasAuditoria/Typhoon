@@ -1,5 +1,6 @@
 package com.elektra.typhoon.service;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -10,11 +11,11 @@ public class AsyncTaskGral extends AsyncTask<String, String, String> {
     public static final String TAG = AsyncTaskGral.class.getName();
 
     private Delegate mDelegate;
-    private Context mContext;
+    private Activity mContext;
     private ProgressDialog statusDialog;
     private String message;
 
-    public AsyncTaskGral(Context mContext, Delegate mDelegate, String message) {
+    public AsyncTaskGral(Activity mContext, Delegate mDelegate, String message) {
         this.mDelegate = mDelegate;
         this.mContext = mContext;
         this.message = message;

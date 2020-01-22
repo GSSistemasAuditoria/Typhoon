@@ -85,7 +85,6 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     private String fechaFolio;
     private int idBarco;
     private AdapterRecycleViewPreguntas adapterRecycleViewPreguntas;
-    private final Handler handler = new Handler();
     private AdapterRecycleViewPreguntas.MyViewHolder holderTemp;
     private RubroData rubroData;
     private Encryption encryption;

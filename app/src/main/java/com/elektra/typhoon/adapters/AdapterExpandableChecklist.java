@@ -23,6 +23,8 @@ import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.RespuestaData;
 import com.elektra.typhoon.objetos.response.RubroData;
+import com.elektra.typhoon.service.AsyncTaskGral;
+import com.elektra.typhoon.service.Delegate;
 import com.elektra.typhoon.utils.Utils;
 
 import java.io.IOException;
@@ -179,50 +181,65 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter {
     }
 
     @Override
-    public View getChildView(int i, int i1, boolean b, View view, ViewGroup viewGroup) {
-        RubroData rubro = listRubros.get(i);
-        if (view == null) {
+    public View getChildView(final int i, int i1, boolean b, View view, ViewGroup viewGroup) {
+        final RubroData rubro = listRubros.get(i);
+        //if (view == null) {
             LayoutInflater layoutInflater = (LayoutInflater) activity.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = layoutInflater.inflate(R.layout.child_layout, null);
-        }
+        //}
 
         //TextView textViewTituloRubro = (TextView) view.findViewById(R.id.textViewTituloRubro);
         TextView textViewCumplenValor = view.findViewById(R.id.textViewCumplenValor);
         TextView textViewNoCumpleValor = view.findViewById(R.id.textViewNoCumplenValor);
         TextView textViewValorTotal = view.findViewById(R.id.textViewValorTotal);
-        RecyclerView recyclerViewPreguntas = view.findViewById(R.id.recyclerViewPreguntas);
+        final RecyclerView recyclerViewPreguntas = view.findViewById(R.id.recyclerViewPreguntas);
 
-        EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
-
-        for (Pregunta pregunta : rubro.getListPreguntasTemp()) {
-            try {
-                List<Evidencia> listEvidencias = evidenciasDBMethods.readEvidencias("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
-                                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR,NUEVO,FECHA_MOD," +
-                                "LOCATION,ID_ROL,ID_USUARIO,AGREGADO_LIDER FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
-                                " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?" +
-                                " AND ID_ESTATUS != 2",
-                        new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
-                                String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),
-                                String.valueOf(idBarco)}, false);
-                pregunta.setListEvidencias(listEvidencias);
-            } catch (IOException e) {
-                e.printStackTrace();
+        new AsyncTaskGral(activity, new Delegate() {
+            @Override
+            public void getDelegate(String result) {
             }
-        }
+
+            @Override
+            public String executeInBackground() {
+                EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
+
+                for (Pregunta pregunta : rubro.getListPreguntasTemp()) {
+                    try {
+                        List<Evidencia> listEvidencias = evidenciasDBMethods.readEvidencias("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
+                                        "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR,NUEVO,FECHA_MOD," +
+                                        "LOCATION,ID_ROL,ID_USUARIO,AGREGADO_LIDER FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
+                                        " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?" +
+                                        " AND ID_ESTATUS != 2",
+                                new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
+                                        String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),
+                                        String.valueOf(idBarco)}, false);
+                        pregunta.setListEvidencias(listEvidencias);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
 
         /*if(b) {
             progressDialog.dismiss();
         }//*/
 
-        //textViewTituloRubro.setText("Rubro " + i);
-        AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntasTemp(), activity, i,
-                textViewCumplen, textViewNoCumplen, this, fechaFolio, idBarco, rubro);
-        recyclerViewPreguntas.setAdapter(adapterRecycleViewPreguntas);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
-        recyclerViewPreguntas.setLayoutManager(layoutManager);
-        recyclerViewPreguntas.setNestedScrollingEnabled(false);
-        adapterRecycleViewPreguntasTemp = adapterRecycleViewPreguntas;
+                //textViewTituloRubro.setText("Rubro " + i);
+                final AdapterRecycleViewPreguntas adapterRecycleViewPreguntas = new AdapterRecycleViewPreguntas(rubro.getListPreguntasTemp(), activity, i,
+                        textViewCumplen, textViewNoCumplen, AdapterExpandableChecklist.this, fechaFolio, idBarco, rubro);
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        recyclerViewPreguntas.setAdapter(adapterRecycleViewPreguntas);
+                        LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
+                        recyclerViewPreguntas.setLayoutManager(layoutManager);
+                        recyclerViewPreguntas.setNestedScrollingEnabled(false);
+                        adapterRecycleViewPreguntasTemp = adapterRecycleViewPreguntas;
+                    }
+                });
+                return null;
+            }
+        }, null).execute();
         return view;
     }
 
@@ -337,7 +354,7 @@ public class AdapterExpandableChecklist extends BaseExpandableListAdapter {
                         }
                         if (noCump > 0) {
                             noCumple++;
-                        }else {
+                        } else {
                             if (valida > 0) {
                                 porValidar++;
                             } else {

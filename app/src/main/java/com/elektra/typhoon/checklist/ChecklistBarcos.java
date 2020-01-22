@@ -714,10 +714,10 @@ public class ChecklistBarcos extends AppCompatActivity {
     class CargaDatosChecklistTask extends AsyncTask<String, String, String> {
 
         private ProgressDialog statusDialog;
-        private Context context;
+        private Activity context;
         private int position;
 
-        public CargaDatosChecklistTask(Context context, int position) {
+        public CargaDatosChecklistTask(Activity context, int position) {
             this.context = context;
             this.position = position;
         }
@@ -931,11 +931,11 @@ public class ChecklistBarcos extends AppCompatActivity {
     class GuardandoEvidenciasTask extends AsyncTask<String, String, String> {
 
         private ProgressDialog statusDialog;
-        private Context context;
+        private Activity context;
         private Intent data;
         private int requestCode;
 
-        public GuardandoEvidenciasTask(Context context, Intent data, int requestCode) {
+        public GuardandoEvidenciasTask(Activity context, Intent data, int requestCode) {
             this.context = context;
             this.data = data;
             this.requestCode = requestCode;

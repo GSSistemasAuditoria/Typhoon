@@ -277,11 +277,11 @@ public class AnexosActivity extends AppCompatActivity {
     class GuardandoAnexosTask extends AsyncTask<String, String, String> {
 
         private ProgressDialog statusDialog;
-        private Context context;
+        private Activity context;
         private Intent data;
         private int requestCode;
 
-        public GuardandoAnexosTask(Context context, Intent data, int requestCode) {
+        public GuardandoAnexosTask(Activity context, Intent data, int requestCode) {
             this.context = context;
             this.data = data;
             this.requestCode = requestCode;
