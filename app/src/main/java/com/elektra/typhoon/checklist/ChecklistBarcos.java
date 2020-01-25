@@ -15,6 +15,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
@@ -25,7 +26,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
@@ -34,6 +37,7 @@ import android.widget.TextView;
 
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.adapters.AdapterExpandableChecklist;
+import com.elektra.typhoon.adapters.AdapterRecycleViewPreguntas;
 import com.elektra.typhoon.adapters.SpinnerBarcosAdapter;
 import com.elektra.typhoon.anexos.AnexosActivity;
 import com.elektra.typhoon.constants.Constants;
@@ -52,6 +56,7 @@ import com.elektra.typhoon.objetos.response.Evidencia;
 import com.elektra.typhoon.objetos.response.Pregunta;
 import com.elektra.typhoon.objetos.response.ResponseLogin;
 import com.elektra.typhoon.objetos.response.RespuestaData;
+import com.elektra.typhoon.objetos.response.Rubro;
 import com.elektra.typhoon.objetos.response.RubroData;
 import com.elektra.typhoon.service.AsyncTaskGral;
 import com.elektra.typhoon.service.Delegate;
@@ -88,6 +93,8 @@ public class ChecklistBarcos extends AppCompatActivity {
     private List<CatalogoBarco> listCatalogoBarcos;
     private ExpandableListView expandableListView;
     private AdapterExpandableChecklist adapterExpandableChecklist;
+    private AdapterRecycleViewPreguntas mAdapterRecycleViewPreguntas;
+
     private int folio;
     private String fechaInicio;
     private String fechaFin;
@@ -106,6 +113,10 @@ public class ChecklistBarcos extends AppCompatActivity {
     private double latitude;
     private double longitude;
     private int countToGetLocation;
+    private Encryption mEncryption;
+
+    private List<RubroData> lstRubros;
+    private ChecklistDBMethods checklistDBMethods;
 
     @Override
     protected void onPause() {
@@ -152,31 +163,38 @@ public class ChecklistBarcos extends AppCompatActivity {
         }
     }
 
+    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.buttonSincronizarChecklist:
+                    sincronizacionDialog(ChecklistBarcos.this, folio);
+                    break;
+                case R.id.buttonAnexos:
+                    Intent intent = new Intent(ChecklistBarcos.this, AnexosActivity.class);
+                    intent.putExtra(Constants.INTENT_FOLIO_TAG, mEncryption.encryptAES(String.valueOf(folio)));
+                    intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG, mEncryption.encryptAES(fechaInicio));
+                    intent.putExtra(Constants.INTENT_ESTATUS_TAG, mEncryption.encryptAES(String.valueOf(estatus)));
+                    startActivity(intent);
+                    break;
+            }
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.checklist_layout);
         initLocationGPS();
-        final Encryption encryption = new Encryption();
+        listCatalogoBarcos = new BarcoDBMethods(this).readBarcos();
+        mEncryption = new Encryption();
+        folio = Integer.parseInt(mEncryption.decryptAES(getIntent().getStringExtra(Constants.INTENT_FOLIO_TAG)));
+        fechaInicio = mEncryption.decryptAES(Normalizer.normalize(getIntent().getStringExtra(Constants.INTENT_FECHA_INICIO_TAG), Normalizer.Form.NFD));
+        spinnerBarco = findViewById(R.id.spinnerBarcos);
+        textViewNombreBarco = findViewById(R.id.textViewNombreBarco);
+        estatus = Integer.parseInt(mEncryption.decryptAES(getIntent().getStringExtra(Constants.INTENT_ESTATUS_TAG)));
 
-        /*folio = getIntent().getIntExtra(Constants.INTENT_FOLIO_TAG, 0);
-        fechaInicio = getIntent().getStringExtra(Constants.INTENT_FECHA_INICIO_TAG);
-        fechaFin = getIntent().getStringExtra(Constants.INTENT_FECHA_FIN_TAG);
-        estatus = getIntent().getIntExtra(Constants.INTENT_ESTATUS_TAG,0);//*/
-
-        folio = Integer.parseInt(encryption.decryptAES(getIntent().getStringExtra(Constants.INTENT_FOLIO_TAG)));
-        fechaInicio = encryption.decryptAES(Normalizer.normalize(getIntent().getStringExtra(Constants.INTENT_FECHA_INICIO_TAG), Normalizer.Form.NFD));
-        /*if(getIntent().hasExtra(Constants.INTENT_FECHA_FIN_TAG)){
-            fechaFin = encryption.decryptAES(Normalizer.normalize(getIntent().getStringExtra(Constants.INTENT_FECHA_FIN_TAG), Normalizer.Form.NFD));
-        }else{
-            fechaFin = "";
-        }//*/
-        estatus = Integer.parseInt(encryption.decryptAES(getIntent().getStringExtra(Constants.INTENT_ESTATUS_TAG)));
-
-        spinnerBarco = (Spinner) findViewById(R.id.spinnerBarcos);
-        textViewNombreBarco = (TextView) findViewById(R.id.textViewNombreBarco);
-        expandableListView = (ExpandableListView) findViewById(R.id.expandableListViewChecklist);
-
+        /*expandableListView = findViewById(R.id.expandableListViewChecklist);
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             private int previousItem = -1;
 
@@ -221,7 +239,7 @@ public class ChecklistBarcos extends AppCompatActivity {
                     }
                 }, null).execute();
             }
-        });
+        });*/
 
         textViewValorTotal = findViewById(R.id.textViewValorTotal);
         textViewCumplenValor = findViewById(R.id.textViewCumplenValor);
@@ -229,99 +247,86 @@ public class ChecklistBarcos extends AppCompatActivity {
         tvPorValidarValor = findViewById(R.id.tvPorValidarValor);
         tvPorCargarValor = findViewById(R.id.tvPorCargarValor);
 
-        TextView textViewFolio = findViewById(R.id.textViewFolio);
-        TextView textViewFechaInicio = findViewById(R.id.textViewFechaInicio);
-        TextView textViewFechaFin = findViewById(R.id.textViewFechaFin);
-        textViewTituloChecklist = findViewById(R.id.textViewTituloChecklist);
-
-        TextView textViewNombreUsuario = (TextView) findViewById(R.id.textViewNombreUsuario);
-        TextView textViewRol = findViewById(R.id.textViewRol);
-
-        UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(this);
-        ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario();
-        if (usuario != null) {
-            textViewNombreUsuario.setText(usuario.getNombre());
-            textViewRol.setText(Utils.getRol(this, usuario.getIdrol()));
-        }
-
-        buttonSincronizar = (Button) findViewById(R.id.buttonSincronizarChecklist);
-
-        buttonSincronizar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sincronizacionDialog(ChecklistBarcos.this, folio);
-            }
-        });
-
-        //buttonSincronizar.setVisibility(View.GONE);
-
-        final Button buttonAnexos = findViewById(R.id.buttonAnexos);
-        buttonAnexos.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(ChecklistBarcos.this, AnexosActivity.class);
-                intent.putExtra(Constants.INTENT_FOLIO_TAG, encryption.encryptAES(String.valueOf(folio)));
-                intent.putExtra(Constants.INTENT_FECHA_INICIO_TAG, encryption.encryptAES(fechaInicio));
-                intent.putExtra(Constants.INTENT_ESTATUS_TAG, encryption.encryptAES(String.valueOf(estatus)));
-                startActivity(intent);
-            }
-        });
-        //buttonAnexos.setVisibility(View.GONE);
+        ((TextView) findViewById(R.id.textViewFolio)).setText(String.valueOf(folio));
+        ((TextView) findViewById(R.id.textViewFechaInicio)).setText(Utils.getDateMonth(fechaInicio));
 
         CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(this);
-        List<EstatusRevision> listEstatusRevision = catalogosDBMethods.readEstatusRevision(
-                "SELECT ID_ESTATUS,DESCRIPCION,SRC FROM " + catalogosDBMethods.TP_CAT_ESTATUS_REVISION + " WHERE ID_ESTATUS = ?", new String[]{String.valueOf(estatus)});
-
-        textViewFolio.setText("" + folio);
-        textViewFechaInicio.setText(Utils.getDateMonth(fechaInicio));
-        if (listEstatusRevision.size() != 0) {
-            textViewFechaFin.setText(listEstatusRevision.get(0).getDescripcion());
+        String descripcion = catalogosDBMethods.readEstatusDescription(estatus);
+        if (descripcion != null) {
+            ((TextView) findViewById(R.id.textViewFechaFin)).setText(descripcion);
         }
 
-        listCatalogoBarcos = new BarcoDBMethods(this).readBarcos();
-        ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(this);
-        EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(this);
-        //UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(this);
+        textViewTituloChecklist = findViewById(R.id.textViewTituloChecklist);
 
-        //ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario(null,null);
+        UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(this);
+        final ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario();
+        if (usuario != null) {
+            ((TextView) findViewById(R.id.textViewNombreUsuario)).setText(usuario.getNombre());
+            ((TextView) findViewById(R.id.textViewRol)).setText(catalogosDBMethods.readRolUsuario(usuario.getIdrol()));
+        }
 
-        List<ChecklistData> listChecklist = checklistDBMethods.readChecklists(
-                "SELECT ID_REVISION,ID_CHECKLIST,ID_ESTATUS,ID_LOGO,ID_TIPO_REVISION,NOMBRE,PONDERACION FROM " + checklistDBMethods.TP_CAT_CHEKLIST + " WHERE ID_REVISION = ?",
-                new String[]{String.valueOf(folio)});
+        findViewById(R.id.buttonSincronizarChecklist).setOnClickListener(mOnClickListener);
+        findViewById(R.id.buttonAnexos).setOnClickListener(mOnClickListener);
 
-        if (listChecklist.size() != 0) {
-            ChecklistData checklistData = listChecklist.get(0);
-            textViewTituloChecklist.setText(checklistData.getNombre());
-            for (CatalogoBarco catalogoBarco : listCatalogoBarcos) {
-                List<RubroData> listRubros = checklistDBMethods.readRubro(
-                        "SELECT ID_REVISION,ID_CHECKLIST,ID_RUBRO,ESTATUS,NOMBRE FROM " + checklistDBMethods.TP_CAT_CL_RUBRO + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ?",
-                        new String[]{String.valueOf(checklistData.getIdRevision()), String.valueOf(checklistData.getIdChecklist())});
-                for (RubroData rubroData : listRubros) {
-                    String query = null;
-                    //rubroData.setSeleccionado(true);
-                    if (usuario.getIdrol() == 3) {
-                        query = "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA,SELECCIONADO FROM " +
-                                checklistDBMethods.TP_CAT_CL_PREGUNTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ?";
-                    } else {
-                        query = "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA,SELECCIONADO FROM " +
-                                checklistDBMethods.TP_CAT_CL_PREGUNTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND IS_TIERRA = 0";
-                    }
-                    List<Pregunta> listPreguntas = checklistDBMethods.readPregunta(query,
-                            new String[]{String.valueOf(rubroData.getIdRevision()), String.valueOf(rubroData.getIdChecklist()),
-                                    String.valueOf(rubroData.getIdRubro())});
+        //SpinnerBarcosAdapter spinnerBarcosAdapter = new SpinnerBarcosAdapter(ChecklistBarcos.this, R.layout.item_spinner_layout, listCatalogoBarcos);
+        spinnerBarco.setAdapter(new ArrayAdapter<CatalogoBarco>(this, R.layout.item_spinner_layout, listCatalogoBarcos) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_spinner_layout, parent, false);
+                ((TextView) convertView.findViewById(R.id.textViewSpinnerItem)).setText(getItem(position).getNombre());
+                return convertView;
+            }
+        });
 
-                    rubroData.setListPreguntasTemp(listPreguntas);
+        checklistDBMethods = new ChecklistDBMethods(this);
+        spinnerBarco.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                //new CargaDatosChecklistTask(ChecklistBarcos.this, i).execute();
+                new AsyncTaskGral(ChecklistBarcos.this, new Delegate() {
+                    @Override
+                    public void getDelegate(String result) {}
 
-                    List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
-                            "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA,SINCRONIZADO FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_BARCO = ?"
-                            , new String[]{String.valueOf(rubroData.getIdRevision()), String.valueOf(rubroData.getIdChecklist()),
-                                    String.valueOf(rubroData.getIdRubro()), String.valueOf(catalogoBarco.getIdBarco())});
+                    @Override
+                    public String executeInBackground() {
+                        List<ChecklistData> listChecklist = checklistDBMethods.readChecklists(
+                                "SELECT ID_REVISION,ID_CHECKLIST,ID_ESTATUS,ID_LOGO,ID_TIPO_REVISION,NOMBRE,PONDERACION FROM " + ChecklistDBMethods.TP_CAT_CHEKLIST + " WHERE ID_REVISION = ?",
+                                new String[]{String.valueOf(folio)});
 
-                    rubroData.setListRespuestas(listRespuestas);
+                        if (listChecklist.size() != 0) {
+                            ChecklistData checklistData = listChecklist.get(0);
+                            textViewTituloChecklist.setText(checklistData.getNombre());
 
-                    //try {
-                    for (Pregunta pregunta : listPreguntas) {
-                        //pregunta.setSeleccionado(true);
+                            checklistDBMethods.updateRubros(
+                                    "SELECT ID_REVISION,ID_CHECKLIST,ID_RUBRO,ESTATUS,NOMBRE FROM " + ChecklistDBMethods.TP_CAT_CL_RUBRO + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ?",
+                                    new String[]{String.valueOf(checklistData.getIdRevision()), String.valueOf(checklistData.getIdChecklist())}, lstRubros);
+                            for (RubroData rubroData : lstRubros) {
+                                String query;
+                                //rubroData.setSeleccionado(true);
+                                if (usuario.getIdrol() == 3) {
+                                    query = "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA,SELECCIONADO FROM " +
+                                            ChecklistDBMethods.TP_CAT_CL_PREGUNTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ?";
+                                } else {
+                                    query = "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_TIPO_RESPUESTA,ID_RUBRO,ESTATUS,DESCRIPCION,IS_TIERRA,SELECCIONADO FROM " +
+                                            ChecklistDBMethods.TP_CAT_CL_PREGUNTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND IS_TIERRA = 0";
+                                }
+                                List<Pregunta> listPreguntas = checklistDBMethods.readPregunta(query,
+                                        new String[]{String.valueOf(rubroData.getIdRevision()), String.valueOf(rubroData.getIdChecklist()),
+                                                String.valueOf(rubroData.getIdRubro())});
+
+                                rubroData.setListPreguntasTemp(listPreguntas);
+
+                                List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
+                                        "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA,SINCRONIZADO FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_BARCO = ?"
+                                        , new String[]{String.valueOf(rubroData.getIdRevision()), String.valueOf(rubroData.getIdChecklist()),
+                                                String.valueOf(rubroData.getIdRubro()), String.valueOf(((CatalogoBarco) spinnerBarco.getSelectedItem()).getIdBarco())});
+
+                                rubroData.setListRespuestas(listRespuestas);
+
+                                //try {
+                                //for (Pregunta pregunta : listPreguntas) {
+                                //pregunta.setSeleccionado(true);
                             /*List<Evidencia> listEvidencias = evidenciasDBMethods.readEvidencias("" +
                                             "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
                                             "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
@@ -331,42 +336,36 @@ public class ChecklistBarcos extends AppCompatActivity {
                                             String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),
                                             String.valueOf(catalogoBarco.getIdBarco())},false);
                             pregunta.setListEvidencias(listEvidencias);//*/
-                        pregunta.setIdBarco(catalogoBarco.getIdBarco());
-                        pregunta.setSeleccionado(Utils.isPreguntaSeleccionada(listRespuestas, pregunta));
-                    }
+                                //   pregunta.setIdBarco(catalogoBarco.getIdBarco());
+                                //    pregunta.setSeleccionado(Utils.isPreguntaSeleccionada(listRespuestas, pregunta));
+                                //}
                     /*} catch (IOException e) {
                         e.printStackTrace();
                     }//*/
-                }
-                for (int i = 0; i < listRubros.size(); i++) {
-                    if (listRubros.get(i).getListPreguntasTemp() != null) {
-                        if (listRubros.get(i).getListPreguntasTemp().size() == 0) {
+                            }
+                    /*for (int i = 0; i < listRubros.size(); i++) {
+                        if (listRubros.get(i).getListPreguntasTemp() != null) {
+                            if (listRubros.get(i).getListPreguntasTemp().size() == 0) {
+                                listRubros.remove(i);
+                            }
+                        } else {
                             listRubros.remove(i);
                         }
-                    } else {
-                        listRubros.remove(i);
+                    }*/
+                        }
+                        return null;
                     }
-                }
-                catalogoBarco.setListRubros(listRubros);
-            }
-            System.out.println();
-        }
-
-        SpinnerBarcosAdapter spinnerBarcosAdapter = new SpinnerBarcosAdapter(ChecklistBarcos.this, R.layout.item_spinner_layout, listCatalogoBarcos);
-        spinnerBarco.setAdapter(spinnerBarcosAdapter);
-
-        spinnerBarco.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-                new CargaDatosChecklistTask(ChecklistBarcos.this, i).execute();
+                }, "Cargando Checklist").execute();
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
         });
+
+        expandableListView = findViewById(R.id.expandableListViewChecklist);
+        adapterExpandableChecklist = new AdapterExpandableChecklist(lstRubros, ChecklistBarcos.this,
+                fechaInicio, listCatalogoBarcos.get(spinnerBarco.getSelectedItemPosition()).getIdBarco());
+        expandableListView.setAdapter(adapterExpandableChecklist);
     }
 
     /*private void timerDelayRunForScroll(long time) {
@@ -380,10 +379,10 @@ public class ChecklistBarcos extends AppCompatActivity {
         }, time);
     }//*/
 
-    public void reloadData() {
+    /*public void reloadData() {
         loadData();
         new CargaDatosChecklistTask(ChecklistBarcos.this, spinnerBarco.getSelectedItemPosition()).execute();
-    }
+    }*/
 
     private String fechaSinHoras(String fecha) {
         if (fecha.contains(" ")) {

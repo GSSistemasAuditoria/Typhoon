@@ -95,6 +95,33 @@ public class Evidencia {
         this.idEvidencia = idEvidencia;
     }
 
+    public Evidencia(Evidencia mEvidencia) {
+        this.idEvidencia = mEvidencia.idEvidencia;
+        this.nombre = mEvidencia.nombre;
+        this.contenido = mEvidencia.contenido;
+        this.idEstatus = mEvidencia.idEstatus;
+        this.idEtapa = mEvidencia.idEtapa;
+        this.idRegistro = mEvidencia.idRegistro;
+        this.latitude = mEvidencia.latitude;
+        this.longitude = mEvidencia.longitude;
+        this.listHistorico = mEvidencia.listHistorico;
+        this.fechaMod = mEvidencia.fechaMod;
+        this.location = mEvidencia.location;
+        this.idRol = mEvidencia.idRol;
+        this.idUsuario = mEvidencia.idUsuario;
+        this.smallBitmap = mEvidencia.smallBitmap;
+        this.originalBitmap = mEvidencia.originalBitmap;
+        this.idRevision = mEvidencia.idRevision;
+        this.idChecklist = mEvidencia.idChecklist;
+        this.idRubro = mEvidencia.idRubro;
+        this.idPregunta = mEvidencia.idPregunta;
+        this.contenidoPreview = mEvidencia.contenidoPreview;
+        this.idBarco = mEvidencia.idBarco;
+        this.agregadoCoordinador = mEvidencia.agregadoCoordinador;
+        this.agregadoLider = mEvidencia.agregadoLider;
+        this.nuevo = mEvidencia.nuevo;
+    }
+
     public String getIdEvidencia() {
         return idEvidencia;
     }

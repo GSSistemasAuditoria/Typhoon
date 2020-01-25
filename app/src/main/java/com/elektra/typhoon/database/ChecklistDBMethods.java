@@ -184,6 +184,33 @@ public class ChecklistDBMethods {
         return listRubro;
     }
 
+    public void updateRubros(String condition, String[] args, List<RubroData> lstRubros){
+        lstRubros.clear();
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        /*StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_REVISION,ID_CHECKLIST,ID_RUBRO,ESTATUS,NOMBRE FROM ").append(TP_CAT_CL_RUBRO);
+        if(condition != null){
+            query.append(" ").append(condition);
+        }
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition,args);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    RubroData rubroData = new RubroData();
+                    rubroData.setIdRevision(cursor.getInt(0));
+                    rubroData.setIdChecklist(cursor.getInt(1));
+                    rubroData.setIdRubro(cursor.getInt(2));
+                    rubroData.setEstatus(cursor.getInt(3));
+                    rubroData.setNombre(cursor.getString(4));
+                    lstRubros.add(rubroData);
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+    }
+
     //**********************************************************************************************
 
     public static String QUERY_CREATE_TABLE_TP_CAT_CL_PREGUNTA = "CREATE TABLE " + TP_CAT_CL_PREGUNTA + " (" +

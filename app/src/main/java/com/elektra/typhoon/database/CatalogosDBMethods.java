@@ -225,6 +225,24 @@ public class CatalogosDBMethods {
         return listEstatusRevision;
     }
 
+    public String readEstatusDescription(int idEstatus){
+        String descripcion = null;
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        List<EstatusRevision> listEstatusRevision = new ArrayList<>();
+        Cursor cursor = db.rawQuery("SELECT DESCRIPCION FROM " + CatalogosDBMethods.TP_CAT_ESTATUS_REVISION + " WHERE ID_ESTATUS = ?",
+                new String[]{String.valueOf(idEstatus)});
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    descripcion = cursor.getString(cursor.getColumnIndexOrThrow("DESCRIPCION"));
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return descripcion;
+    }
+
     public void deleteEstatusRevision(){
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         db.execSQL("delete from "+ TP_CAT_ESTATUS_REVISION);
@@ -272,6 +290,23 @@ public class CatalogosDBMethods {
         cursor.close();
         db.close();
         return listRolesUsuario;
+    }
+
+    public String readRolUsuario(Integer idRol){
+        String descripcion = null;
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE,null);
+        Cursor cursor = db.rawQuery("SELECT DESCRIPCION FROM " + TP_CAT_ROLES_USUARIO + " WHERE ID_ROL = ?",
+                new String[]{String.valueOf(idRol)});
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    descripcion = cursor.getString(cursor.getColumnIndexOrThrow("DESCRIPCION"));
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return descripcion;
     }
 
     public void deleteRolesUsuario(){
