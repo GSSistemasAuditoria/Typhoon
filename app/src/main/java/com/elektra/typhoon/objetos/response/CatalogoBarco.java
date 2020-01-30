@@ -34,6 +34,18 @@ public class CatalogoBarco {
     @Expose
     private float radio;
 
+    public CatalogoBarco() {
+    }
+
+    public void updateBarco(CatalogoBarco mBarco) {
+        this.idBarco = mBarco.idBarco;
+        this.nombre = mBarco.nombre;
+        this.longitud = mBarco.longitud;
+        this.latitud = mBarco.latitud;
+        this.radio = mBarco.radio;
+        this.listRubros = mBarco.listRubros;
+    }
+
     private List<RubroData> listRubros;
 
     public int getIdBarco() {

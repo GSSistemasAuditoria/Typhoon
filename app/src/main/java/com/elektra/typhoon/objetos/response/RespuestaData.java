@@ -119,4 +119,12 @@ public class RespuestaData {
     public void setSincronizado(int sincronizado) {
         this.sincronizado = sincronizado;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RespuestaData){
+            return this.idPregunta == ((RespuestaData) obj).idPregunta;
+        }
+        return super.equals(obj);
+    }
 }

@@ -549,9 +549,9 @@ public class SincronizacionIndividualRequestService extends AsyncTask<String,Str
     @Override
     protected void onPostExecute(String result) {
         //ocultar dialogo
-        Utils.message(activity,result);
+        Utils.message(activity, result);
         if(checklistBarcos != null){
-            checklistBarcos.reloadData();
+            checklistBarcos.loadBarco();
         }
         if(anexosActivity != null){
             anexosActivity.loadData();

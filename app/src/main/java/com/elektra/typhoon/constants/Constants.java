@@ -12,7 +12,7 @@ import android.os.Environment;
 public class Constants {
 
     //108
-    public static String URL_PUBLIC = "PvNI3N9gGpvQqKsqGRbt8Nhx+46FExYXFBcSyaRedhgB7ahOqJicHA1dLGudNZ81CIoMlPNYfBZea8rM5p41NQ==";
+    //public static String URL_PUBLIC = "PvNI3N9gGpvQqKsqGRbt8Nhx+46FExYXFBcSyaRedhgB7ahOqJicHA1dLGudNZ81CIoMlPNYfBZea8rM5p41NQ==";
     //CARLOS
     //public static String URL_PUBLIC = "ofjcUcZ+Cnrw2m6EQ/yxhnkcZ6r6+elNXbDnDzaLtZwVFNVvn8+DbM0Sb+tRqDCWEqfizoSFlBQXRzZLRU1trA==";
     //ARTUR
@@ -20,7 +20,7 @@ public class Constants {
     //SP1
     //public static String URL_PUBLIC = "4KyixEVLzWvCxpff3GzyEtrWvoIZqTWAk+RdY/8owt3bY77EKveLaKzihai9kyUfJ8DIauaZdXYF+Dkiu3GjQg==";
     //SP2
-    //public static String URL_PUBLIC = "4KyixEVLzWvCxpff3GzyEtrWvoIZqTWAk+RdY/8owt2hhfZzM4s0hMvTD+1UXMSXPdrmQ+QpKkpuyb7Z/+vMk6b7z4Fe9+9GYKdV6tL+VS0=";
+    public static String URL_PUBLIC = "4KyixEVLzWvCxpff3GzyEtrWvoIZqTWAk+RdY/8owt2hhfZzM4s0hMvTD+1UXMSXPdrmQ+QpKkpuyb7Z/+vMk6b7z4Fe9+9GYKdV6tL+VS0=";
 
 
     //DSI

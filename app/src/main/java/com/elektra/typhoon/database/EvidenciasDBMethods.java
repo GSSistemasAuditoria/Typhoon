@@ -104,7 +104,7 @@ public class EvidenciasDBMethods {
 
     public List<Evidencia> readEvidencias(String condition, String[] args,boolean flagJson) throws IOException {
         CursorWindowFixer.fix();
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,Context.MODE_PRIVATE,null);
         List<Evidencia> listEvidencia = new ArrayList<>();
         /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
@@ -210,7 +210,7 @@ public class EvidenciasDBMethods {
 
     public Evidencia readEvidencia(String condition, String[] args) throws IOException {
         CursorWindowFixer.fix();
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE,null);
         Evidencia evidencia = null;
         /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
@@ -255,6 +255,35 @@ public class EvidenciasDBMethods {
         cursor.close();
         db.close();
         return evidencia;
+    }
+
+    public void readJustEvidencia(String[] args, Evidencia mEvidencia) throws IOException {
+        CursorWindowFixer.fix();
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE,null);
+        /*StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
+                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM ").append(TP_TRAN_CL_EVIDENCIA);
+        if(condition != null){
+            query.append(" ").append(condition);
+        }
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery("SELECT CONTENIDO FROM " + EvidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
+                " WHERE ID_EVIDENCIA = ? ", args);
+                //"AND ID_REVISION = ? " + "AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", args);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    if(!mEvidencia.getNombre().contains(".pdf") && !mEvidencia.getNombre().contains(".PDF")) {
+                        mEvidencia.setOriginalBitmap(Utils.base64ToBitmap(
+                                cursor.getString(cursor.getColumnIndexOrThrow("CONTENIDO"))));
+                    }
+                    mEvidencia.setContenido(
+                            cursor.getString(cursor.getColumnIndexOrThrow("CONTENIDO")));
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
     }
 
     public void updateEvidencia(ContentValues values,String condition,String[] args){

@@ -805,7 +805,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
         }
 
         if(checklistBarcos != null){
-            checklistBarcos.reloadData();
+            checklistBarcos.loadBarco();
         }else{
             Intent intent = new Intent(activity, ChecklistBarcos.class);
 

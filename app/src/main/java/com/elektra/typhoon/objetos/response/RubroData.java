@@ -107,4 +107,13 @@ public class RubroData {
     public void setSeleccionado(boolean seleccionado) {
         this.seleccionado = seleccionado;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RubroData)
+            return this.idRubro == ((RubroData) obj).idRubro;
+        else if (obj instanceof Integer)
+            return this.idRubro == ((Integer) obj).intValue();
+        return false;
+    }
 }

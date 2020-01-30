@@ -77,21 +77,15 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
     private List<Pregunta> listPreguntas;
     private Activity activity;
-    private int idRubro;
-    //private int idPregunta;
-    private TextView textViewCumplen;
-    private TextView textViewNoCumplen;
     private AdapterExpandableChecklist adapterExpandableChecklist;
     private String fechaFolio;
-    private int idBarco;
+    private CatalogoBarco mBarco;
     private AdapterRecycleViewPreguntas adapterRecycleViewPreguntas;
-    private AdapterRecycleViewPreguntas.MyViewHolder holderTemp;
-    private RubroData rubroData;
     private Encryption encryption;
-
-    public int getIdRubro() {
-        return idRubro;
-    }
+    private ResponseLogin.Usuario mUsuario;
+    private List<RolUsuario> lstRoles;
+    private RubroData mRubro;
+    private ChecklistDBMethods mChecklistDBMethods;
 
     public class MyViewHolder extends RecyclerView.ViewHolder /*implements View.OnClickListener*/ {
 
@@ -134,19 +128,29 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         }//*/
     }
 
-    public AdapterRecycleViewPreguntas(List<Pregunta> listPreguntas, Activity activity, int idRubro, TextView textViewCumplen,
-                                       TextView textViewNoCumplen, AdapterExpandableChecklist adapterExpandableChecklist,
-                                       String fechaFolio, int idBarco, RubroData rubroData) {
+    public AdapterRecycleViewPreguntas(RubroData mRubro, Activity activity, AdapterExpandableChecklist adapterExpandableChecklist,
+                                       String fechaFolio, CatalogoBarco mBarco) {
         this.activity = activity;
-        this.listPreguntas = listPreguntas;
-        this.idRubro = idRubro;
-        this.textViewCumplen = textViewCumplen;
-        this.textViewNoCumplen = textViewNoCumplen;
+        //this.listPreguntas = mRubro.getListPreguntasTemp();
         this.adapterExpandableChecklist = adapterExpandableChecklist;
         this.fechaFolio = fechaFolio;
-        this.idBarco = idBarco;
+        this.mBarco = mBarco;
         this.adapterRecycleViewPreguntas = this;
-        this.rubroData = rubroData;
+        this.mRubro = mRubro;
+        mUsuario = new UsuarioDBMethods(activity).readUsuario();
+        lstRoles = new CatalogosDBMethods(activity).readRolesUsuario(
+                "SELECT ID_ROL,DESCRIPCION,IS_GEOCERCA FROM " + CatalogosDBMethods.TP_CAT_ROLES_USUARIO + " WHERE ID_ROL = ?",
+                new String[]{String.valueOf(mUsuario.getIdrol())});
+        //mChecklistDBMethods = new ChecklistDBMethods(activity);
+    }
+
+    public void setmRubro(RubroData mRubro) {
+        this.mRubro = mRubro;
+        this.listPreguntas = mRubro.getListPreguntasTemp();
+    }
+
+    public RubroData getmRubro() {
+        return mRubro;
     }
 
     @NonNull
@@ -158,7 +162,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final MyViewHolder holder, int position) {
         encryption = new Encryption();
         //acciones
         final Pregunta pregunta = listPreguntas.get(position);
@@ -170,18 +174,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             holder.textViewPregunta.setJustificationMode(Layout.JUSTIFICATION_MODE_INTER_WORD);
         }
-        holderTemp = holder;
 
         holder.imageViewSincronizadoFlag.setVisibility(View.GONE);
 
-        ChecklistDBMethods checklistDBMethods = new ChecklistDBMethods(activity);
-        List<RespuestaData> listRespuestas = checklistDBMethods.readRespuesta(
-                "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA,SINCRONIZADO FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? " +
-                        "AND ID_PREGUNTA = ? AND ID_RUBRO = ? AND ID_BARCO = ?", new String[]{String.valueOf(pregunta.getIdRevision()),
-                        String.valueOf(pregunta.getIdChecklist()), String.valueOf(pregunta.getIdPregunta()), String.valueOf(pregunta.getIdRubro()),
-                        String.valueOf(idBarco)});
-
-        if (usuario.getIdrol() == 1 || usuario.getIdrol() == 2) {
+        if (usuario.getIdrol() == 1 || usuario.getIdrol() == 2 ||
+                (usuario.getIdrol() == 3 && pregunta.isTierra())) {
             holder.imageViewAddEvidencia.setVisibility(View.VISIBLE);
             holder.imageViewAgregaEvidencia.setVisibility(View.VISIBLE);
             holder.textViewAddEvidencias.setVisibility(View.VISIBLE);
@@ -189,138 +186,19 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             holder.imageViewAddEvidencia.setVisibility(View.GONE);
             holder.imageViewAgregaEvidencia.setVisibility(View.GONE);
             holder.textViewAddEvidencias.setVisibility(View.GONE);
-            if (usuario.getIdrol() == 3 && pregunta.isTierra()) {
-                holder.imageViewAddEvidencia.setVisibility(View.VISIBLE);
-                holder.imageViewAgregaEvidencia.setVisibility(View.VISIBLE);
-                holder.textViewAddEvidencias.setVisibility(View.VISIBLE);
-            } else {
-                holder.imageViewAddEvidencia.setVisibility(View.GONE);
-                holder.imageViewAgregaEvidencia.setVisibility(View.GONE);
-                holder.textViewAddEvidencias.setVisibility(View.GONE);
-            }
         }
 
-        holder.imageViewDescargaPdf.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (usuario.getIdrol() == 3) {
-                    descargaPDF(pregunta.getIdRevision(), pregunta.getIdPregunta());
-                } else {
-                    Utils.message(activity, "No cuenta con el permiso para visualizar el documento");
-                }
-            }
-        });
+        holder.imageViewDescargaPdf.setTag(holder);
+        holder.imageViewDescargaPdf.setOnClickListener(mOnClickListener);
 
-        holder.textViewAddEvidencias.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (Utils.checkPermission(activity)) {
-                    if (Utils.validaConfiguracionApp(activity)) {
-                        List<RolUsuario> listRoles = new CatalogosDBMethods(activity).readRolesUsuario(
-                                "SELECT ID_ROL,DESCRIPCION,IS_GEOCERCA FROM " + CatalogosDBMethods.TP_CAT_ROLES_USUARIO + " WHERE ID_ROL = ?",
-                                new String[]{String.valueOf(usuario.getIdrol())});
-                        String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
-                        //if (flagGPS.equals("true")) {
-                            /*if (Utils.validaGeocerca(activity)) {
-                                agregarEvidencias(pregunta.getListEvidencias(), holder.textViewAddEvidencias, position);
-                            } else {
-                                Utils.message(activity, "No se encuentra dentro de la zona");
-                            }//*/
-                        if (listRoles.get(0).isGeocerca()) {
-                            if (Utils.requesTurnOnGps(activity)) {
-                                validaGeocerca(activity, position, pregunta.getListEvidencias(), holder.textViewAddEvidencias);
-                            }
-                        } else {
-                            agregarEvidencias(pregunta.getListEvidencias(), holder.textViewAddEvidencias, position);
-                        }
-                    }
-                }
-                /*if(pregunta.getListEvidencias() != null) {
-                    if (validaNumeroEvidencias(pregunta.getListEvidencias().size())) {
-                        String noEvidencias = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_LIMITE_EVIDENCIAS,"");
-                        Utils.message(activity,"Sólo se permite agregar " + noEvidencias + " evidencias");
-                    }else{
-                        mostrarPopupEvidencias(holder.textViewAddEvidencias, position);
-                    }
-                }else{
-                    mostrarPopupEvidencias(holder.textViewAddEvidencias, position);
-                }//*/
-            }
-        });
+        holder.textViewAddEvidencias.setTag(holder);
+        holder.textViewAddEvidencias.setOnClickListener(mOnClickListener);
 
-        holder.imageViewAgregaEvidencia.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (Utils.checkPermission(activity)) {
-                    if (Utils.validaConfiguracionApp(activity)) {
-                        //String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
-                        //if (flagGPS.equals("true")) {
-                            /*if (Utils.validaGeocerca(activity)) {
-                                agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia, position);
-                            } else {
-                                Utils.message(activity, "No se encuentra dentro de la zona");
-                            }//*/
-                        List<RolUsuario> listRoles = new CatalogosDBMethods(activity).readRolesUsuario(
-                                "SELECT ID_ROL,DESCRIPCION,IS_GEOCERCA FROM " + CatalogosDBMethods.TP_CAT_ROLES_USUARIO + " WHERE ID_ROL = ?",
-                                new String[]{String.valueOf(usuario.getIdrol())});
-                        if (listRoles.get(0).isGeocerca()) {
-                            if (Utils.requesTurnOnGps(activity)) {
-                                validaGeocerca(activity, position, pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia);
-                            }
-                        } else {
-                            agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAgregaEvidencia, position);
-                        }
-                    }
-                }
-                /*if(pregunta.getListEvidencias() != null) {
-                    if (validaNumeroEvidencias(pregunta.getListEvidencias().size())) {
-                        String noEvidencias = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_LIMITE_EVIDENCIAS, "");
-                        Utils.message(activity, "Sólo se permite agregar " + noEvidencias + " evidencias");
-                    } else {
-                        mostrarPopupEvidencias(holder.imageViewAgregaEvidencia, position);
-                    }
-                }else{
-                    mostrarPopupEvidencias(holder.imageViewAgregaEvidencia, position);
-                }//*/
-            }
-        });
+        holder.imageViewAgregaEvidencia.setTag(holder);
+        holder.imageViewAgregaEvidencia.setOnClickListener(mOnClickListener);
 
-        holder.imageViewAddEvidencia.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (Utils.checkPermission(activity)) {
-                    if (Utils.validaConfiguracionApp(activity)) {
-                        //String flagGPS = new Encryption().decryptAES(activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_GPS_FLAG, ""));
-                        //if (flagGPS.equals("true")) {
-                            /*if (Utils.validaGeocerca(activity)) {
-                                agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
-                            } else {
-                                Utils.message(activity, "No se pueden agregar evidencias fuera de la zona de operación");
-                            }//*/
-                        List<RolUsuario> listRoles = new CatalogosDBMethods(activity).readRolesUsuario(
-                                "SELECT ID_ROL,DESCRIPCION,IS_GEOCERCA FROM " + CatalogosDBMethods.TP_CAT_ROLES_USUARIO + " WHERE ID_ROL = ?",
-                                new String[]{String.valueOf(usuario.getIdrol())});
-                        if (listRoles.get(0).isGeocerca()) {
-                            if (Utils.requesTurnOnGps(activity)) {
-                                validaGeocerca(activity, position, pregunta.getListEvidencias(), holder.imageViewAddEvidencia);
-                            }
-                        } else {
-                            agregarEvidencias(pregunta.getListEvidencias(), holder.imageViewAddEvidencia, position);
-                        }
-                    }
-                }
-                /*if(pregunta.getListEvidencias() != null) {
-                    if (validaNumeroEvidencias(pregunta.getListEvidencias().size())) {
-                        String noEvidencias = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE).getString(Constants.SP_LIMITE_EVIDENCIAS, "");
-                        Utils.message(activity, "Sólo se permite agregar " + noEvidencias + " evidencias");
-                    } else {
-                        mostrarPopupEvidencias(holder.imageViewAddEvidencia, position);
-                    }
-                }else{
-                    mostrarPopupEvidencias(holder.imageViewAddEvidencia, position);
-                }//*/
-            }
-        });
+        holder.imageViewAddEvidencia.setTag(holder);
+        holder.imageViewAddEvidencia.setOnClickListener(mOnClickListener);
 
         if (pregunta.getListEvidencias() != null) {
             if (pregunta.getListEvidencias().size() != 0) {
@@ -334,16 +212,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 holder.linearLayout.setVisibility(View.VISIBLE);
                 holder.linearLayoutAddEvidencias.setVisibility(View.GONE);
                 for (Evidencia evidencia : pregunta.getListEvidencias()) {
-                    //if (evidencia.getSmallBitmap() != null) {
-                    /*if(usuario.getIdrol() != 1){
-                        if(evidencia.getIdEstatus() != 3){
-                            holder.linearLayoutEvidencias.addView(insertEvidencia(evidencia.getSmallBitmap(), evidencia.getIdEvidencia(), position), 1);
-                        }
-                    }else{
-                        holder.linearLayoutEvidencias.addView(insertEvidencia(evidencia.getSmallBitmap(), evidencia.getIdEvidencia(), position), 1);
-                    }//*/
-                    holder.linearLayoutEvidencias.addView(insertEvidencia(evidencia.getSmallBitmap(), evidencia.getIdEvidencia(), position), 1);
-                    //}
+                    holder.linearLayoutEvidencias.addView(insertEvidencia(evidencia), 1);
                 }
                 holder.horizontalScrollView.postDelayed(new Runnable() {
                     @Override
@@ -353,15 +222,13 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 }, 100L);
 
                 if (validaEvidencias(pregunta.getListEvidencias())) {
-                    //radioGroupTemp.check(R.id.opcion1);
                     holder.radioGroup.check(R.id.opcion1);
                     pregunta.setCumple(true);
                 } else {
-                    //radioGroupTemp.check(R.id.opcion2);
                     holder.radioGroup.check(R.id.opcion2);
                     pregunta.setCumple(false);
                 }
-                adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
+                adapterExpandableChecklist.contarPreguntasCumplen();
             } else {
                 holder.linearLayout.setVisibility(View.GONE);
                 holder.linearLayoutAddEvidencias.setVisibility(View.VISIBLE);
@@ -371,28 +238,21 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             holder.linearLayoutAddEvidencias.setVisibility(View.VISIBLE);
         }
 
-        if (pregunta.getListEvidencias() != null) {
-            if (pregunta.getListEvidencias().size() != 0) {
-                if (validaEvidencias(pregunta.getListEvidencias())) {
-                    holder.radioGroup.check(R.id.opcion1);
-                } else {
-                    holder.radioGroup.check(R.id.opcion2);
-                }
-            }
-        }
 
-        if (listRespuestas.size() != 0) {
-            for (RespuestaData respuestaData : listRespuestas) {
-                if (respuestaData.getIdRespuesta() != null) {
-                    if (respuestaData.getIdRespuesta() == 2) {
-                        holder.radioGroup.check(R.id.opcion1);
-                    } else if (respuestaData.getIdRespuesta() == 3) {
-                        holder.radioGroup.check(R.id.opcion2);
+        if (mRubro.getListRespuestas().size() != 0) {
+            for (RespuestaData respuestaData : mRubro.getListRespuestas()) {
+                if (respuestaData.getIdPregunta() == pregunta.getIdPregunta()) {
+                    if (respuestaData.getIdRespuesta() != null) {
+                        if (respuestaData.getIdRespuesta() == 2) {
+                            holder.radioGroup.check(R.id.opcion1);
+                        } else if (respuestaData.getIdRespuesta() == 3) {
+                            holder.radioGroup.check(R.id.opcion2);
+                        } else {
+                            holder.radioGroup.clearCheck();
+                        }
                     } else {
                         holder.radioGroup.clearCheck();
                     }
-                } else {
-                    holder.radioGroup.clearCheck();
                 }
 
                 if (respuestaData.getIdEstatus() == 2) {
@@ -403,35 +263,19 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     holder.relativeLayoutDescargaPdf.setVisibility(View.GONE);
                 }
 
-                /*if(respuestaData.getSincronizado() == 1){
-                    holder.imageViewSincronizadoFlag.setVisibility(View.VISIBLE);
-                }else{
-                    holder.imageViewSincronizadoFlag.setVisibility(View.GONE);
-                }//*/
+                if (respuestaData.getIdRevision() == pregunta.getIdRevision() &&
+                        respuestaData.getIdChecklist() == pregunta.getIdChecklist() &&
+                        respuestaData.getIdRubro() == pregunta.getIdRubro() &&
+                        respuestaData.getIdPregunta() == pregunta.getIdPregunta() &&
+                        respuestaData.getIdBarco() == mBarco.getIdBarco() && !pregunta.isSeleccionado()) {
+                    pregunta.setSeleccionado(respuestaData.getSincronizado() == 1);
+                }
             }
         }
 
         holder.imageViewSeleccionado.setEnabled(false);
-
-        holder.imageViewSeleccionado.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (pregunta.isSeleccionado()) {
-                    pregunta.setSeleccionado(false);
-                    rubroData.setSeleccionado(false);
-                    Utils.updatePregunta(activity, String.valueOf(pregunta.getIdRevision()),
-                            String.valueOf(pregunta.getIdChecklist()), String.valueOf(pregunta.getIdPregunta()),
-                            String.valueOf(pregunta.getIdRubro()), 0);//*/
-                    adapterExpandableChecklist.notifyDataSetChanged();
-                } else {
-                    pregunta.setSeleccionado(true);
-                    Utils.updatePregunta(activity, String.valueOf(pregunta.getIdRevision()),
-                            String.valueOf(pregunta.getIdChecklist()), String.valueOf(pregunta.getIdPregunta()),
-                            String.valueOf(pregunta.getIdRubro()), 1);//*/
-                }
-                notifyDataSetChanged();
-            }
-        });
+        holder.imageViewSeleccionado.setTag(holder);
+        holder.imageViewSeleccionado.setOnClickListener(mOnClickListener);
 
         if (pregunta.isSeleccionado()) {
             holder.imageViewSeleccionado.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_check_blue));
@@ -439,8 +283,78 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             holder.imageViewSeleccionado.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_uncheck_blue));
         }
 
-        //reiniciaRadioGroup(holder.radioGroup,pregunta.getListEvidencias());
     }
+
+    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            MyViewHolder mHolder = null;
+            if (v.getTag() instanceof MyViewHolder)
+                mHolder = (MyViewHolder) v.getTag();
+            switch (v.getId()) {
+                case R.id.imageViewDescargaPdf:
+                    if (mUsuario.getIdrol() == 3) {
+                        descargaPDF(listPreguntas.get(mHolder.getAdapterPosition()));
+                    } else {
+                        Utils.message(activity, "No cuenta con el permiso para visualizar el documento");
+                    }
+                    break;
+                case R.id.imageViewAgregaEvidencias:
+                case R.id.textViewAgregarEvidencia:
+                case R.id.imageViewAddEvidencia:
+                    if (Utils.checkPermission(activity)) {
+                        if (Utils.validaConfiguracionApp(activity)) {
+                            if (lstRoles.get(0).isGeocerca()) {
+                                if (Utils.requesTurnOnGps(activity)) {
+                                    validaGeocerca(activity, mHolder.getAdapterPosition(),
+                                            listPreguntas.get(mHolder.getAdapterPosition()).getListEvidencias(),
+                                            v);
+                                }
+                            } else {
+                                agregarEvidencias(listPreguntas.get(mHolder.getAdapterPosition()).getListEvidencias(),
+                                        v, mHolder.getAdapterPosition());
+                            }
+                        }
+                    }
+                    break;
+                case R.id.imageViewSelect:
+                    Pregunta mPregunta = listPreguntas.get(mHolder.getAdapterPosition());
+                    if (mPregunta.isSeleccionado()) {
+                        mPregunta.setSeleccionado(false);
+                        mRubro.setSeleccionado(false);
+                        Utils.updatePregunta(activity, String.valueOf(mPregunta.getIdRevision()),
+                                String.valueOf(mPregunta.getIdChecklist()), String.valueOf(mPregunta.getIdPregunta()),
+                                String.valueOf(mPregunta.getIdRubro()), 0);//*/
+                    } else {
+                        mPregunta.setSeleccionado(true);
+                        Utils.updatePregunta(activity, String.valueOf(mPregunta.getIdRevision()),
+                                String.valueOf(mPregunta.getIdChecklist()), String.valueOf(mPregunta.getIdPregunta()),
+                                String.valueOf(mPregunta.getIdRubro()), 1);//*/
+                    }
+                    notifyItemChanged(mHolder.getAdapterPosition());
+                    break;
+                case R.id.imageViewPreview:
+                    try {
+                        Evidencia mEvidencia = (Evidencia) v.getTag();
+                        if (mEvidencia.getContenido() == null && mEvidencia.getOriginalBitmap() == null) {
+                            EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
+                            evidenciasDBMethods.readJustEvidencia(
+                                    new String[]{String.valueOf(mEvidencia.getIdEvidencia())}, mEvidencia);
+                        }
+                        mostrarDocumento(mEvidencia);
+                        mEvidencia.setOriginalBitmap(null);
+                        mEvidencia.setContenido(null);
+                    } catch (IOException e) {
+                        Utils.message(activity, "Error al cargar imagen");
+                        e.printStackTrace();
+                    } catch (NumberFormatException e) {
+                        Utils.message(activity, "Error al cargar imagen");
+                        e.printStackTrace();
+                    }
+                    break;
+            }
+        }
+    };
 
     private void validaGeocerca(final Activity activity, final int position, final List<Evidencia> listEvidencias, final View view) {
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
@@ -455,35 +369,21 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                             List<CatalogoBarco> barcos = new BarcoDBMethods(activity).readBarcos();
                             CatalogoBarco catalogoBarco = null;
                             for (CatalogoBarco catalogoBarcoTemp : barcos) {
-                                if (catalogoBarcoTemp.getIdBarco() == idBarco) {
+                                if (catalogoBarcoTemp.getIdBarco() == mBarco.getIdBarco()) {
                                     catalogoBarco = catalogoBarcoTemp;
                                     break;
                                 }
                             }
 
                             float[] disResultado = new float[2];
-                            SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, Activity.MODE_PRIVATE);
-                            //if (sharedPreferences.contains(Constants.SP_GPS_GEOCERCA)) {
-                            //String geocerca = new Encryption().decryptAES(sharedPreferences.getString(Constants.SP_GPS_GEOCERCA, ""));
-                            //String[] temp = geocerca.split("\\|");
-                            //double latitudeTyphoon = Double.parseDouble(temp[1].replace("Lat:",""));
-                            //double longitudeTyphoon = Double.parseDouble(temp[0].replace("Lon:",""));
                             double latitudeTyphoon = catalogoBarco.getLatitud();
                             double longitudeTyphoon = catalogoBarco.getLongitud();
-                            //float radioTyphoon = Float.parseFloat(temp[2].replace("Rad:", ""));
                             float radioTyphoon = catalogoBarco.getRadio();
 
                             Location.distanceBetween(latitudeTyphoon, longitudeTyphoon, location.getLatitude(), location.getLongitude(), disResultado);
-                            //Hardcode para probar la ubicacion del dispositivo ficticia
-                            //Location.distanceBetween(latitudeTyphoon, longitudeTyphoon, 19.310916, -99.183039, disResultado);
-                            //Location.distanceBetween(19.3046277,-99.2037863,miPosicion.getLatitude(),miPosicion.getLongitude(),disResultado);
-                            //Location.distanceBetween(19.3046277,-99.2037863,19.304980, -99.204047,disResultado);
-
                             if (disResultado[0] > radioTyphoon) {
-                                //Utils.message(this,"Fuera de la geocerca");
                                 Utils.message(activity, "No se pueden agregar evidencias fuera de la zona de operación");
                             } else {
-                                //Utils.message(this,"Dentro de la geocerca");
                                 agregarEvidencias(listEvidencias, view, position);
                             }
                             //}
@@ -504,54 +404,6 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             mostrarPopupEvidencias(view, position);
         }
     }
-
-    /*private ImageView insertEvidencia(Bitmap bitmap,String id,int numPregunta){
-        ImageView iv = new ImageView(activity.getApplicationContext());
-        if(bitmap != null) {
-            iv.setImageBitmap(bitmap);
-        }else{
-            iv.setImageDrawable(activity.getResources().getDrawable(R.mipmap.ic_pdf_image));
-        }
-        //iv.setId(id);
-        //iv.setContentDescription("" + numPregunta);
-        iv.setContentDescription(id + "," + numPregunta);
-        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(87,
-                87);
-        lp.gravity = Gravity.CENTER_VERTICAL;
-        lp.setMarginStart(5);
-        iv.setLayoutParams(lp);
-        iv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    //int identificador = view.getId();
-                    //int numeroPregunta = Integer.parseInt(view.getContentDescription().toString());
-                    String[] temp = view.getContentDescription().toString().split(",");
-                    String identificador = temp[0];
-                    int numeroPregunta = Integer.parseInt(temp[1]);
-                    //Bitmap bitmap = listPreguntas.get(numeroPregunta).getListEvidencias().get(identificador - 1).getOriginalBitmap();
-                    Bitmap bitmap = null;
-                    Pregunta pregunta = listPreguntas.get(numeroPregunta);
-                    Evidencia evidencia = new EvidenciasDBMethods(activity).readEvidencia("WHERE ID_EVIDENCIA = ? AND ID_REVISION = ? " +
-                            "AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?",
-                            new String[]{String.valueOf(identificador),String.valueOf(pregunta.getIdRevision()),
-                                    String.valueOf(pregunta.getIdChecklist()),String.valueOf(pregunta.getIdRubro()),
-                                    String.valueOf(pregunta.getIdPregunta()),String.valueOf(pregunta.getIdBarco())});
-                    if(evidencia != null) {
-                        bitmap = evidencia.getOriginalBitmap();
-                        mostrarDocumento(view, identificador, numeroPregunta, activity, bitmap,evidencia.getContenido());
-                    }else{
-                        Utils.message(activity,"No se pudo cargar la imagen");
-                    }
-                }catch (Exception e){
-                    Utils.message(activity,"Error al cargar imagen");
-                    e.printStackTrace();
-                }
-            }
-        });
-        return iv;
-    }//*/
 
     private boolean validaNumeroEvidencias(int evidenciasCargadas) {
         try {
@@ -577,138 +429,71 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         }
     }
 
-    private RelativeLayout insertEvidencia(Bitmap bitmap, String id, int numPregunta) {
-
-        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
-
+    private RelativeLayout insertEvidencia(Evidencia mEvidencia) {
         LayoutInflater inflater = LayoutInflater.from(activity);
         RelativeLayout relativeLayout = (RelativeLayout) inflater.inflate(R.layout.image_item_layout, null, false);
+        ImageView iv = relativeLayout.findViewById(R.id.imageViewPreview);
 
-        //ImageView iv = new ImageView(activity.getApplicationContext());
-        ImageView iv = (ImageView) relativeLayout.findViewById(R.id.imageViewPreview);
-
-        Pregunta pregunta = listPreguntas.get(numPregunta);
-        Evidencia evidenciaTemp = null;
-        for (Evidencia evidencia : listPreguntas.get(numPregunta).getListEvidencias()) {
-            if (evidencia.getIdEvidencia().equals(id)) {
-                evidenciaTemp = evidencia;
-                break;
-            }
-        }
-
-        if (evidenciaTemp != null) {
-            if (usuario.getIdrol() == 1) {
-                //if ((evidenciaTemp.getIdEtapa() == 2 || evidenciaTemp.getIdEtapa() == 3) && evidenciaTemp.getIdEstatus() == 1) {
-                if (evidenciaTemp.getIdEtapa() != 1 && evidenciaTemp.getIdEstatus() == 1) {
-                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
-                } else if ((evidenciaTemp.getIdEtapa() == 1 || evidenciaTemp.getIdEtapa() == 2) && evidenciaTemp.getIdEstatus() == 3) {
-                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
-                } else {
-                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.gris));
-                }
-                //}else if(usuario.getIdrol() == 2) {
+        if (mUsuario.getIdrol() == 1) {
+            if (mEvidencia.getIdEtapa() != 1 && mEvidencia.getIdEstatus() == 1) {
+                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
+            } else if ((mEvidencia.getIdEtapa() == 1 || mEvidencia.getIdEtapa() == 2) && mEvidencia.getIdEstatus() == 3) {
+                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
             } else {
-                //if (evidenciaTemp.getIdEtapa() == 3 && evidenciaTemp.getIdEstatus() == 1) {
-                if (evidenciaTemp.getIdEtapa() > usuario.getIdrol() && evidenciaTemp.getIdEstatus() == 1) {
-                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
-                } else if ((evidenciaTemp.getIdEtapa() == 1 || evidenciaTemp.getIdEtapa() == 2) && evidenciaTemp.getIdEstatus() == 3) {
-                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
-                } else {
-                    relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.gris));
-                }
+                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.gris));
+            }
+        } else {
+            if (mEvidencia.getIdEtapa() > mUsuario.getIdrol() && mEvidencia.getIdEstatus() == 1) {
+                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.verde_chk));
+            } else if ((mEvidencia.getIdEtapa() == 1 || mEvidencia.getIdEtapa() == 2) && mEvidencia.getIdEstatus() == 3) {
+                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.rojo_chk));
+            } else {
+                relativeLayout.setBackgroundColor(activity.getResources().getColor(R.color.gris));
             }
         }
 
-        if (bitmap != null) {
-            iv.setImageBitmap(bitmap);
+        if (mEvidencia.getSmallBitmap() != null) {
+            iv.setImageBitmap(mEvidencia.getSmallBitmap());
         } else {
             iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.pdf_icon));
         }
-        //iv.setId(id);
-        //iv.setContentDescription("" + numPregunta);
-        iv.setContentDescription(id + "," + numPregunta);
-        //iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        //iv.setContentDescription(mEvidencia.getIdEvidencia() + "," + mHolder.getAdapterPosition());
+        iv.setTag(mEvidencia);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.gravity = Gravity.CENTER_VERTICAL;
         lp.setMarginStart(5);
         //iv.setLayoutParams(lp);
         relativeLayout.setLayoutParams(lp);
-        iv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    //int identificador = view.getId();
-                    //int numeroPregunta = Integer.parseInt(view.getContentDescription().toString());
-                    String[] temp = view.getContentDescription().toString().split(",");
-                    String identificador = temp[0];
-                    int numeroPregunta = Integer.parseInt(temp[1]);
-                    //Bitmap bitmap = listPreguntas.get(numeroPregunta).getListEvidencias().get(identificador - 1).getOriginalBitmap();
-                    //Bitmap bitmap = null;descomentar si se requiere
-                    Pregunta pregunta = listPreguntas.get(numeroPregunta);
-                    EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
-                    Evidencia evidencia = evidenciasDBMethods.readEvidencia(
-                            "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
-                                    "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR,NUEVO,FECHA_MOD," +
-                                    "LOCATION,ID_ROL,ID_USUARIO,AGREGADO_LIDER FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA + " WHERE ID_EVIDENCIA = ? AND ID_REVISION = ? " +
-                                    "AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?",
-                            new String[]{String.valueOf(identificador), String.valueOf(pregunta.getIdRevision()),
-                                    String.valueOf(pregunta.getIdChecklist()), String.valueOf(pregunta.getIdRubro()),
-                                    String.valueOf(pregunta.getIdPregunta()), String.valueOf(pregunta.getIdBarco())});
-                    /*for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()){
-                        if(evidencia.getIdEvidencia() == identificador){
-                            bitmap = evidencia.getOriginalBitmap();
-                        }
-                    }//*/
-                    if (evidencia != null) {
-                        //bitmap = evidencia.getOriginalBitmap();descomentar si se requiere
-                        //mostrarDocumento(view, identificador, numeroPregunta, activity, bitmap,evidencia.getContenido());descomentar si se requiere
-                        mostrarDocumento(view, identificador, numeroPregunta, activity, evidencia.getOriginalBitmap(), evidencia.getContenido(), evidencia.getLocation());
-                    } else {
-                        Utils.message(activity, "No se pudo cargar la imagen");
-                    }
-                } catch (IOException e) {
-                    Utils.message(activity, "Error al cargar imagen");
-                    e.printStackTrace();
-                } catch (NumberFormatException e) {
-                    Utils.message(activity, "Error al cargar imagen");
-                    e.printStackTrace();
-                }
-            }
-        });
+        iv.setOnClickListener(mOnClickListener);
         return relativeLayout;
     }
 
     @Override
     public int getItemCount() {
-        return listPreguntas.size();
+        if (listPreguntas != null) {
+            return listPreguntas.size();
+        }
+        return 0;
     }
 
-    private void mostrarDocumento(final View viewImagen, final String identificador, final int numeroPregunta, final Activity activity, final Bitmap documento, String documentoPDF, String location) {
+    private void mostrarDocumento(final Evidencia mEvidencia) {
+        //final View viewImagen, final String identificador, final int numeroPregunta, final Activity activity, final Bitmap documento, String documentoPDF, String location
         LayoutInflater inflater = LayoutInflater.from(activity);
-
-        String estatusString = "";
+        final Pregunta pregunta = new Pregunta();
+        pregunta.setIdPregunta(mEvidencia.getIdPregunta());
+        final int positionPregunta = listPreguntas.indexOf(pregunta);
         String etapaString = "";
-        double longitud = 0.0;
-        double latitud = 0.0;
-        int barco = 0;
-        String localizacion = "";
-
         View dialogLayout = null;
-        UsuarioDBMethods usuarioDBMethods = new UsuarioDBMethods(activity);
-        final ResponseLogin.Usuario usuario = usuarioDBMethods.readUsuario();
 
-        if (documento != null) {
+        if (mEvidencia.getOriginalBitmap() != null) {
             dialogLayout = inflater.inflate(R.layout.mostrar_documento_layout, null, false);
-            final ImageView imageViewDocumento = (ImageView) dialogLayout.findViewById(R.id.imageViewDocumento);
-            //imageViewDocumento.setImageBitmap(documento);
-            /*Glide.with(activity).load(Utils.resizeImageBitmap(documento,
-                    documento.getWidth()/2,documento.getHeight()/2)).into(imageViewDocumento);//*/
-            Glide.with(activity).load(documento).into(imageViewDocumento);
+            final ImageView imageViewDocumento = dialogLayout.findViewById(R.id.imageViewDocumento);
+            Glide.with(activity).load(mEvidencia.getOriginalBitmap()).into(imageViewDocumento);
         } else {
             dialogLayout = inflater.inflate(R.layout.mostrar_documento_pdf_layout, null, false);
-            PDFView pdfViewDocumento = (PDFView) dialogLayout.findViewById(R.id.pdfViewDocumento);
-            byte[] pdf = Utils.base64ToFile(documentoPDF);
+            PDFView pdfViewDocumento = dialogLayout.findViewById(R.id.pdfViewDocumento);
+            byte[] pdf = Utils.base64ToFile(mEvidencia.getContenido());
             pdfViewDocumento.fromBytes(pdf).load();
 
             dialogLayout.setMinimumWidth((int) (activity.getResources().getDisplayMetrics().widthPixels * 0.90));
@@ -720,144 +505,77 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         final Drawable drawableCumpleGris = activity.getDrawable(R.mipmap.ic_cumple_gris);
         final Drawable drawableNoCumpleGris = activity.getDrawable(R.mipmap.ic_nocumple_gris);
 
-        final Button buttonCumple = (Button) dialogLayout.findViewById(R.id.buttonCumple);
-        final Button buttonNoCumple = (Button) dialogLayout.findViewById(R.id.buttonNoCumple);
-        final Button buttonBorrar = (Button) dialogLayout.findViewById(R.id.buttonBorrar);
-        Button buttonHistorico = (Button) dialogLayout.findViewById(R.id.buttonHistorico);
-        final TextView textViewNombreDocumento = (TextView) dialogLayout.findViewById(R.id.textViewNombreDocumento);
+        final Button buttonCumple = dialogLayout.findViewById(R.id.buttonCumple);
+        final Button buttonNoCumple = dialogLayout.findViewById(R.id.buttonNoCumple);
+        final Button buttonBorrar = dialogLayout.findViewById(R.id.buttonBorrar);
+        Button buttonHistorico = dialogLayout.findViewById(R.id.buttonHistorico);
+        final TextView textViewNombreDocumento = dialogLayout.findViewById(R.id.textViewNombreDocumento);
         ImageView imageViewCerrarDialog = dialogLayout.findViewById(R.id.imageViewCloseDialog);
 
-        if (usuario != null) {
-            if (usuario.getIdrol() == 1) {
+        if (mUsuario != null) {
+            if (mUsuario.getIdrol() == 1) {
                 buttonNoCumple.setVisibility(View.GONE);
             } else {
-                if (usuario.getIdrol() == 3) {
+                if (mUsuario.getIdrol() == 3) {
                     buttonBorrar.setVisibility(View.VISIBLE);
                 } else {
                     buttonBorrar.setVisibility(View.GONE);
                 }
-                //buttonHistorico.setVisibility(View.GONE);
             }
         }
 
         buttonCumple.setBackground(drawableCumpleVerde);
         buttonNoCumple.setBackground(drawableNoCumpleRojo);
 
-        for (Evidencia evidencia : listPreguntas.get(numeroPregunta).getListEvidencias()) {
-            if (evidencia.getIdEvidencia().equals(identificador)) {
-                //if(evidencia.getIdEstatus() == 1){
+        etapaString = Utils.getEtapa(activity, mEvidencia.getIdEtapa());
 
-                longitud = evidencia.getLongitude();
-                latitud = evidencia.getLatitude();
-                barco = evidencia.getIdBarco();
-                localizacion = location;
+        if (mUsuario.getIdrol() == 1) {
+            if (mEvidencia.getIdEtapa() != 1 && mEvidencia.getIdEstatus() == 1) {
+                buttonCumple.setVisibility(View.GONE);
+                buttonBorrar.setVisibility(View.GONE);
+            } else if (mEvidencia.getIdEtapa() == 1 && mEvidencia.getIdEstatus() == 3) {
+                buttonCumple.setVisibility(View.GONE);
+            } else if (mEvidencia.getIdEtapa() == 2 && mEvidencia.getIdEstatus() == 3) {
+                buttonBorrar.setVisibility(View.GONE);
+                buttonCumple.setVisibility(View.GONE);
+                buttonNoCumple.setVisibility(View.GONE);
+            }
+        } else {
+            if (mEvidencia.getIdEtapa() > mUsuario.getIdrol() && mEvidencia.getIdEstatus() == 1) {
+                buttonBorrar.setVisibility(View.GONE);
+                buttonCumple.setVisibility(View.GONE);
+                buttonNoCumple.setVisibility(View.GONE);
+            } else if (mEvidencia.getIdEtapa() == 1 && mEvidencia.getIdEstatus() == 3) {
+                buttonBorrar.setVisibility(View.GONE);
+                buttonCumple.setVisibility(View.GONE);
+                buttonNoCumple.setVisibility(View.GONE);
+            } else if (mEvidencia.getIdEtapa() == 2 && mEvidencia.getIdEstatus() == 3) {
+                buttonBorrar.setVisibility(View.VISIBLE);
+                buttonCumple.setVisibility(View.GONE);
+                buttonNoCumple.setVisibility(View.GONE);
+            } else if (mEvidencia.getIdEtapa() < mUsuario.getIdrol() && mEvidencia.getIdEstatus() == 1) {
+                buttonCumple.setVisibility(View.GONE);
+                buttonNoCumple.setVisibility(View.GONE);
+            }
 
-                /*List<Address> addresses;
-                Geocoder geocoder = new Geocoder(activity.getBaseContext(), Locale.getDefault());
-
-                try {
-                    addresses = geocoder.getFromLocation(latitud, longitud, 1);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }//*/
-
-                etapaString = Utils.getEtapa(activity, evidencia.getIdEtapa());
-                estatusString = Utils.getEstatusEvidencia(activity, evidencia.getIdEstatus());
-                if (evidencia.getIdEtapa() != 1 && evidencia.getIdEstatus() == 1) {
-                    estatusString = estatusString.replace("Activa", "Validada");
+            if (mUsuario.getIdrol() > 2) {
+                if (mEvidencia.getAgregadoCoordinador() == 1) {
+                    buttonNoCumple.setVisibility(View.GONE);
                 } else {
-
+                    buttonBorrar.setVisibility(View.GONE);
                 }
-
-                if (usuario.getIdrol() == 1) {
-                    if (evidencia.getIdEtapa() != 1 && evidencia.getIdEstatus() == 1) {
-                        //buttonCumple.setBackground(drawableCumpleVerde);
-                        //buttonNoCumple.setBackground(drawableNoCumpleGris);
-                        buttonCumple.setVisibility(View.GONE);
-                        buttonBorrar.setVisibility(View.GONE);
-                    } else if (evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 3) {
-                        //buttonCumple.setBackground(drawableCumpleGris);
-                        //buttonNoCumple.setBackground(drawableNoCumpleRojo);
-                        buttonCumple.setVisibility(View.GONE);
-                    } else if (evidencia.getIdEtapa() == 2 && evidencia.getIdEstatus() == 3) {
-                        //buttonCumple.setBackground(drawableCumpleGris);
-                        //buttonNoCumple.setBackground(drawableNoCumpleRojo);
-                        buttonBorrar.setVisibility(View.GONE);
-                        buttonCumple.setVisibility(View.GONE);
-                        buttonNoCumple.setVisibility(View.GONE);
-                    } else {
-                        //buttonCumple.setBackground(drawableCumpleGris);
-                        //buttonNoCumple.setBackground(drawableNoCumpleGris);
-                    }
-                    //}else if(usuario.getIdrol() == 2) {
-                } else {
-                    if (evidencia.getIdEtapa() > usuario.getIdrol() && evidencia.getIdEstatus() == 1) {
-                        //buttonCumple.setBackground(drawableCumpleVerde);
-                        //buttonNoCumple.setBackground(drawableNoCumpleGris);
-                        buttonBorrar.setVisibility(View.GONE);
-                        buttonCumple.setVisibility(View.GONE);
-                        buttonNoCumple.setVisibility(View.GONE);
-                    } else if (evidencia.getIdEtapa() == 1 && evidencia.getIdEstatus() == 3) {
-                        //buttonCumple.setBackground(drawableCumpleGris);
-                        //buttonNoCumple.setBackground(drawableNoCumpleRojo);
-                        buttonBorrar.setVisibility(View.GONE);
-                        buttonCumple.setVisibility(View.GONE);
-                        buttonNoCumple.setVisibility(View.GONE);
-                    } else if (evidencia.getIdEtapa() == 2 && evidencia.getIdEstatus() == 3) {
-                        //buttonCumple.setBackground(drawableCumpleGris);
-                        //buttonNoCumple.setBackground(drawableNoCumpleRojo);
-                        buttonBorrar.setVisibility(View.VISIBLE);
-                        buttonCumple.setVisibility(View.GONE);
-                        buttonNoCumple.setVisibility(View.GONE);
-                    } else if (evidencia.getIdEtapa() < usuario.getIdrol() && evidencia.getIdEstatus() == 1) {
-                        //buttonCumple.setBackground(drawableCumpleGris);
-                        //buttonNoCumple.setBackground(drawableNoCumpleGris);
-                        buttonCumple.setVisibility(View.GONE);
-                        buttonNoCumple.setVisibility(View.GONE);
-                    }
-
-                    if (usuario.getIdrol() > 2) {
-                        if (evidencia.getAgregadoCoordinador() == 1) {
-                            //buttonBorrar.setVisibility(View.VISIBLE);
-                            buttonNoCumple.setVisibility(View.GONE);
-                        } else {
-                            buttonBorrar.setVisibility(View.GONE);
-                        }
-                    }
-
-                    if (usuario.getIdrol() == 2) {
-                        if (evidencia.getAgregadoLider() == 1) {
-                            //buttonBorrar.setVisibility(View.VISIBLE);
-                            buttonNoCumple.setVisibility(View.GONE);
-                        }
-                    }
+            } else if (mUsuario.getIdrol() == 2) {
+                if (mEvidencia.getAgregadoLider() == 1) {
+                    buttonNoCumple.setVisibility(View.GONE);
                 }
-                textViewNombreDocumento.setText(rubroData.getNombre() + "\n" + evidencia.getNombre());
-                break;
             }
         }
+        textViewNombreDocumento.setText(mRubro.getNombre() + "\n" + mEvidencia.getNombre());
+
 
         final AlertDialog alertDialog = new AlertDialog.Builder(activity)
                 .setView(dialogLayout)
-                //.setPositiveButton("Cerrar", null)
                 .create();
-
-
-        /*alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-
-            @Override
-            public void onShow(DialogInterface dialog) {
-
-                Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
-                button.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View view) {
-                        alertDialog.dismiss();
-                    }
-                });
-            }
-        });//*/
         alertDialog.show();
 
         imageViewCerrarDialog.setOnClickListener(new View.OnClickListener() {
@@ -867,11 +585,8 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             }
         });
 
-        final String finalEstatusString = estatusString;
         final String finalEtapaString = etapaString;
 
-        final int finalBarco = barco;
-        final String finalLocalizacion = localizacion;
         buttonHistorico.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -890,14 +605,14 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                 textViewLocalizacion.setVisibility(View.VISIBLE);
                 textViewtituloBarco.setVisibility(View.VISIBLE);
                 textViewTituloLocalizacion.setVisibility(View.VISIBLE);
-                textViewEstatus.setText(Utils.getNombreBarco(activity, finalBarco));
-                textViewLocalizacion.setText(finalLocalizacion);
+                textViewEstatus.setText(mBarco.getNombre());
+                textViewLocalizacion.setText(mEvidencia.getLocation());
                 textViewEtapa.setText(finalEtapaString);
 
                 HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(activity);
                 List<Historico> listHistorico = historicoDBMethods.readHistorico(
                         "SELECT ID_EVIDENCIA,ID_ETAPA,ID_USUARIO,MOTIVO,CONSEC,ID_REVISION,ID_CHECKLIST,FECHA_MOD FROM " + historicoDBMethods.TP_TRAN_HISTORIAL_EVIDENCIA + " WHERE ID_EVIDENCIA = ? ORDER BY FECHA_MOD DESC",
-                        new String[]{identificador});
+                        new String[]{mEvidencia.getIdEvidencia()});
                 HistoricoAdapter historicoAdapter = new HistoricoAdapter(activity, listHistorico);
                 listViewHistorico.setAdapter(historicoAdapter);
 
@@ -919,67 +634,50 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         buttonCumple.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Evidencia evidenciaTemp = null;
-                for (Evidencia evidencia : listPreguntas.get(numeroPregunta).getListEvidencias()) {
-                    if (evidencia.getIdEvidencia().equals(identificador)) {
-                        evidencia.setIdEstatus(1);
-                        if (usuario.getIdrol() == 1) {
-                            //evidencia.setIdEtapa(getEtapaValidado(evidencia.getIdEtapa()));
-                            evidencia.setIdEtapa(2);
-                            //}else if(usuario.getIdrol() == 2) {
-                        } else {
-                            evidencia.setIdEtapa(usuario.getIdrol() + 1);
-                        }
-                        //try {
-                        ContentValues contentValues = new ContentValues();
-                        //contentValues.put("ID_ETAPA", getEtapaValidado(evidencia.getIdEtapa()));
-                        if (usuario.getIdrol() == 1) {
-                            contentValues.put("ID_ETAPA", 2);
-                            //}else if(usuario.getIdrol() == 2) {
-                        } else {
-                            //contentValues.put("ID_ETAPA", 3);
-                            contentValues.put("ID_ETAPA", usuario.getIdrol() + 1);
-                        }
-                        contentValues.put("ID_ESTATUS", 1);
-                        new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
-                                "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
-                                        "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
-                                new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
-                                        String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
-                                        String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
-                                        String.valueOf(idBarco)});
-
-                        Utils.message(activity, "Validada");
-                        crearHistorico(evidencia, usuario, "VALIDADA POR " + Utils.getRol(activity, usuario.getIdrol()).toUpperCase() + ": " + usuario.getNombre());
-
-                        listPreguntas.get(numeroPregunta).setSeleccionado(true);
-                        Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
-                        Utils.updatePregunta(activity, String.valueOf(preguntaTemp.getIdRevision()),
-                                String.valueOf(preguntaTemp.getIdChecklist()), String.valueOf(preguntaTemp.getIdPregunta()),
-                                String.valueOf(preguntaTemp.getIdRubro()), String.valueOf(evidencia.getIdBarco()), 1);//*/
-
-                        if (validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())) {
-                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
-                            updateRespuesta(evidencia, 2);
-                            listPreguntas.get(numeroPregunta).setCumple(true);
-                        } else {
-                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
-                            updateRespuesta(evidencia, 3);
-                            listPreguntas.get(numeroPregunta).setCumple(false);
-                        }
-                        adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
-                        buttonCumple.setBackground(drawableCumpleVerde);
-                        buttonNoCumple.setBackground(drawableNoCumpleGris);
-                        alertDialog.dismiss();
-                        notifyDataSetChanged();
-                        break;
-
-                        /*}catch (NullPointerException e){
-                            e.printStackTrace();
-                            Utils.message(activity,"Error al validar evidencia: " + e.getMessage());
-                        }//*/
-                    }
+                mEvidencia.setIdEstatus(1);
+                if (mUsuario.getIdrol() == 1) {
+                    mEvidencia.setIdEtapa(2);
+                } else {
+                    mEvidencia.setIdEtapa(mUsuario.getIdrol() + 1);
                 }
+                ContentValues contentValues = new ContentValues();
+                if (mUsuario.getIdrol() == 1) {
+                    contentValues.put("ID_ETAPA", 2);
+                } else {
+                    contentValues.put("ID_ETAPA", mUsuario.getIdrol() + 1);
+                }
+                contentValues.put("ID_ESTATUS", 1);
+                new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
+                        "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                                "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
+                        new String[]{mEvidencia.getIdEvidencia(), String.valueOf(mEvidencia.getIdRevision()),
+                                String.valueOf(mEvidencia.getIdChecklist()), String.valueOf(mEvidencia.getIdRubro()),
+                                String.valueOf(mEvidencia.getIdPregunta()), String.valueOf(mEvidencia.getIdRegistro()),
+                                String.valueOf(mBarco.getIdBarco())});
+
+                Utils.message(activity, "Validada");
+                crearHistorico(mEvidencia, mUsuario, "VALIDADA POR " + Utils.getRol(activity, mUsuario.getIdrol()).toUpperCase() + ": " + mUsuario.getNombre());
+
+                Pregunta preguntaTemp = listPreguntas.get(positionPregunta);
+                preguntaTemp.setSeleccionado(true);
+                Utils.updatePregunta(activity, String.valueOf(preguntaTemp.getIdRevision()),
+                        String.valueOf(preguntaTemp.getIdChecklist()), String.valueOf(preguntaTemp.getIdPregunta()),
+                        String.valueOf(preguntaTemp.getIdRubro()), String.valueOf(mEvidencia.getIdBarco()), 1);//*/
+
+                if (validaEvidencias(preguntaTemp.getListEvidencias())) {
+                    preguntaTemp.getRadioGroup().check(R.id.opcion1);
+                    updateRespuesta(mEvidencia, 2);
+                    preguntaTemp.setCumple(true);
+                } else {
+                    preguntaTemp.getRadioGroup().check(R.id.opcion2);
+                    updateRespuesta(mEvidencia, 3);
+                    preguntaTemp.setCumple(false);
+                }
+                adapterExpandableChecklist.contarPreguntasCumplen();
+                buttonCumple.setBackground(drawableCumpleVerde);
+                buttonNoCumple.setBackground(drawableNoCumpleGris);
+                alertDialog.dismiss();
+                adapterRecycleViewPreguntas.notifyItemChanged(positionPregunta);
             }
         });
 
@@ -992,7 +690,6 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
 
                 final EditText editTextMotivoRechazo = dialogLayout.findViewById(R.id.editTextMotivoRechazo);
                 TextView textViewCancelar = dialogLayout.findViewById(R.id.buttonCancelar);
-                final TextView textViewAceptar = dialogLayout.findViewById(R.id.buttonAceptar);
 
                 final LinearLayout linearLayoutAceptar = dialogLayout.findViewById(R.id.linearLayoutAceptar);
                 LinearLayout linearLayoutCancelar = dialogLayout.findViewById(R.id.linearLayoutCancelar);
@@ -1018,157 +715,31 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     }
                 });
 
-                /*alertDialogMotivo.setOnShowListener(new DialogInterface.OnShowListener() {
-
-                    @Override
-                    public void onShow(DialogInterface dialog) {
-                        textViewAceptar.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if(!editTextMotivoRechazo.getText().toString().equals("")) {
-                                    rechazarEvidencia(numeroPregunta, identificador, buttonCumple, buttonNoCumple, alertDialog, drawableCumpleGris, drawableNoCumpleRojo,usuario,editTextMotivoRechazo.getText().toString(),adapterRecycleViewPreguntas);
-                                    alertDialogMotivo.dismiss();
-                                    notifyDataSetChanged();
-                                }else{
-                                    Utils.message(activity,"Debe especificar el motivo de rechazo");
-                                }
-                            }
-                        });
-
-                        linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if(!editTextMotivoRechazo.getText().toString().equals("")) {
-                                    rechazarEvidencia(numeroPregunta, identificador, buttonCumple, buttonNoCumple, alertDialog, drawableCumpleGris, drawableNoCumpleRojo,usuario,editTextMotivoRechazo.getText().toString(),adapterRecycleViewPreguntas);
-                                    alertDialogMotivo.dismiss();
-                                    notifyDataSetChanged();
-                                }else{
-                                    Utils.message(activity,"Debe especificar el motivo de rechazo");
-                                }
-                            }
-                        });
-                    }
-                });
-                alertDialogMotivo.show();//*/
-
-                /*textViewAceptar.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if(!editTextMotivoRechazo.getText().toString().equals("")) {
-                            rechazarEvidencia(numeroPregunta, identificador, buttonCumple, buttonNoCumple, alertDialog, drawableCumpleGris, drawableNoCumpleRojo,usuario,editTextMotivoRechazo.getText().toString(),adapterRecycleViewPreguntas);
-                            alertDialogMotivo.dismiss();
-                            notifyDataSetChanged();
-                        }else{
-                            Utils.message(activity,"Debe especificar el motivo de rechazo");
-                        }
-                    }
-                });//*/
 
                 linearLayoutAceptar.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if (!editTextMotivoRechazo.getText().toString().equals("")) {
 
-                            rechazarEvidencia(numeroPregunta, identificador, buttonCumple, buttonNoCumple, alertDialog, drawableCumpleGris, drawableNoCumpleRojo, usuario, editTextMotivoRechazo.getText().toString(), adapterRecycleViewPreguntas);
+                            rechazarEvidencia(mEvidencia, positionPregunta,
+                                    editTextMotivoRechazo.getText().toString());
+                            buttonCumple.setBackground(drawableCumpleGris);
+                            buttonNoCumple.setBackground(drawableNoCumpleRojo);
+                            Pregunta mPregunta = listPreguntas.get(positionPregunta);
+                            mPregunta.setSeleccionado(true);
 
-                            //********************************************************************
-                            /*Evidencia evidenciaTemp = null;
-                            for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
-                                if(evidencia.getIdEvidencia().equals(identificador)) {
-                                    evidencia.setIdEstatus(3);
-                                    evidencia.setIdEtapa(1);
-                                    ContentValues contentValues = new ContentValues();
-                                    contentValues.put("ID_ETAPA",1);
-                                    contentValues.put("ID_ESTATUS",3);
-                                    try {
-                                        new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
-                                                "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
-                                                        "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
-                                                new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
-                                                        String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
-                                                        String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
-                                                        String.valueOf(evidencia.getIdBarco())});
-
-                                        Utils.message(activity,"Rechazada");
-                                        crearHistorico(evidencia,usuario,"Rechazado por " + Utils.getRol(activity,usuario.getIdrol()).toLowerCase() + ": " + usuario.getNombre() + "\nMotivo: " +
-                                                editTextMotivoRechazo.getText().toString());
-
-                                        if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
-                                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
-                                            updateRespuesta(evidencia,2);
-                                            listPreguntas.get(numeroPregunta).setCumple(true);
-                                        }else{
-                                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
-                                            updateRespuesta(evidencia,3);
-                                            listPreguntas.get(numeroPregunta).setCumple(false);
-                                        }
-                                        adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
-                                        buttonCumple.setBackground(drawableCumpleGris);
-                                        buttonNoCumple.setBackground(drawableNoCumpleRojo);
-                                        alertDialog.dismiss();
-                                        //notifyDataSetChanged();
-                                        //adapterRecycleViewPreguntas.notifyDataSetChanged();
-                                        //evidenciaTemp = evidencia;
-                                        break;
-                                    }catch (Exception e){
-                                        e.printStackTrace();
-                                        Utils.message(activity,"Error al rechazar evidencia: " + e.getMessage());
-                                    }
-                                }
-                            }//*/
-                            //********************************************************************
-                            listPreguntas.get(numeroPregunta).setSeleccionado(true);
-                            Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
-                            Utils.updatePregunta(activity, String.valueOf(preguntaTemp.getIdRevision()),
-                                    String.valueOf(preguntaTemp.getIdChecklist()), String.valueOf(preguntaTemp.getIdPregunta()),
-                                    String.valueOf(preguntaTemp.getIdRubro()), String.valueOf(idBarco), 1);//*/
-                            adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().notifyDataSetChanged();
+                            Utils.updatePregunta(activity, String.valueOf(mPregunta.getIdRevision()),
+                                    String.valueOf(mPregunta.getIdChecklist()), String.valueOf(mPregunta.getIdPregunta()),
+                                    String.valueOf(mPregunta.getIdRubro()), String.valueOf(mBarco.getIdBarco()), 1);//*/
+                            notifyItemChanged(positionPregunta);
                             alertDialogMotivo.dismiss();
+                            alertDialog.dismiss();
 
                         } else {
                             Utils.message(activity, "Debe especificar el motivo de rechazo");
                         }
                     }
-                });//*/
-
-                /*Evidencia evidenciaTemp = null;
-                for(Evidencia evidencia:listPreguntas.get(numeroPregunta).getListEvidencias()) {
-                    if(evidencia.getIdEvidencia().equals(identificador)) {
-                        evidencia.setIdEstatus(3);
-                        evidencia.setIdEtapa(1);
-                        ContentValues contentValues = new ContentValues();
-                        contentValues.put("ID_ETAPA",1);
-                        contentValues.put("ID_ESTATUS",3);
-                        try {
-                            new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
-                                    "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
-                                            "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
-                                    new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
-                                            String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
-                                            String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
-                                            String.valueOf(evidencia.getIdBarco())});
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
-                        evidenciaTemp = evidencia;
-                        break;
-                    }
-                }
-                Utils.message(activity,"Rechazada");
-                if(validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())){
-                    listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
-                    updateRespuesta(evidenciaTemp,2);
-                    listPreguntas.get(numeroPregunta).setCumple(true);
-                }else{
-                    listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
-                    updateRespuesta(evidenciaTemp,3);
-                    listPreguntas.get(numeroPregunta).setCumple(false);
-                }
-                adapterExpandableChecklist.contarPreguntasCumplen();
-                buttonCumple.setBackground(drawableCumpleGris);
-                buttonNoCumple.setBackground(drawableNoCumpleRojo);
-                alertDialog.dismiss();
-                notifyDataSetChanged();//*/
+                });
             }
         });
 
@@ -1176,105 +747,93 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
             @Override
             public void onClick(View view) {
                 //try {
-                Evidencia evidenciaTemp = null;
-                for (Evidencia evidencia : listPreguntas.get(numeroPregunta).getListEvidencias()) {
-                    if (evidencia.getIdEvidencia().equals(identificador)) {
-                        evidenciaTemp = evidencia;
-                        if (usuario.getIdrol() == 1 || usuario.getIdrol() == 2) {
-                            //si esta rechazada la evidencia
-                            if (evidencia.getIdEstatus() == 3) {
-                                //borrado lógico
-                                evidencia.setIdEstatus(2);
-                                evidencia.setIdEtapa(usuario.getIdrol());
-                                ContentValues contentValues = new ContentValues();
-                                contentValues.put("ID_ETAPA", usuario.getIdrol());
-                                contentValues.put("ID_ESTATUS", 2);
-                                String base64 = null;
-                                contentValues.put("CONTENIDO", base64);
+                if (mUsuario.getIdrol() == 1 || mUsuario.getIdrol() == 2) {
+                    //si esta rechazada la evidencia
+                    if (mEvidencia.getIdEstatus() == 3) {
+                        //borrado lógico
+                        mEvidencia.setIdEstatus(2);
+                        mEvidencia.setIdEtapa(mUsuario.getIdrol());
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put("ID_ETAPA", mUsuario.getIdrol());
+                        contentValues.put("ID_ESTATUS", 2);
+                        String base64 = null;
+                        contentValues.put("CONTENIDO", base64);
 
-                                new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
-                                        "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
-                                                "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
-                                        new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
-                                                String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
-                                                String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
-                                                String.valueOf(evidencia.getIdBarco())});
+                        new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
+                                "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                                        "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
+                                new String[]{mEvidencia.getIdEvidencia(), String.valueOf(mEvidencia.getIdRevision()),
+                                        String.valueOf(mEvidencia.getIdChecklist()), String.valueOf(mEvidencia.getIdRubro()),
+                                        String.valueOf(mEvidencia.getIdPregunta()), String.valueOf(mEvidencia.getIdRegistro()),
+                                        String.valueOf(mEvidencia.getIdBarco())});
 
-                                crearHistorico(evidencia, usuario, "BORRADO POR " + Utils.getRol(activity, usuario.getIdrol()).toUpperCase() + ": " + usuario.getNombre());
-                                listPreguntas.get(numeroPregunta).setSeleccionado(true);
-                                Utils.updatePregunta(activity, String.valueOf(listPreguntas.get(numeroPregunta).getIdRevision()),
-                                        String.valueOf(listPreguntas.get(numeroPregunta).getIdChecklist()), String.valueOf(listPreguntas.get(numeroPregunta).getIdPregunta()),
-                                        String.valueOf(listPreguntas.get(numeroPregunta).getIdRubro()), String.valueOf(idBarco), 1);//*/
-                            } else {
-                                //borrado físico
-                                new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
-                                        "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
-                                        identificador,
-                                        String.valueOf(evidencia.getIdRevision()),
-                                        String.valueOf(evidencia.getIdChecklist()),
-                                        String.valueOf(evidencia.getIdRubro()),
-                                        String.valueOf(evidencia.getIdPregunta()),
-                                        String.valueOf(evidencia.getIdBarco())
-                                });
-                            }
-                            listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
-                        } else if (usuario.getIdrol() == 3) {
-                            //borrado físico
-                            new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
-                                    "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
-                                    identificador,
-                                    String.valueOf(evidencia.getIdRevision()),
-                                    String.valueOf(evidencia.getIdChecklist()),
-                                    String.valueOf(evidencia.getIdRubro()),
-                                    String.valueOf(evidencia.getIdPregunta()),
-                                    String.valueOf(evidencia.getIdBarco())
-                            });
-                            listPreguntas.get(numeroPregunta).setSeleccionado(true);
-                            listPreguntas.get(numeroPregunta).getListEvidencias().remove(evidencia);
-                            Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
-                            Utils.updatePregunta(activity, String.valueOf(preguntaTemp.getIdRevision()),
-                                    String.valueOf(preguntaTemp.getIdChecklist()), String.valueOf(preguntaTemp.getIdPregunta()),
-                                    String.valueOf(preguntaTemp.getIdRubro()), String.valueOf(idBarco), 1);//*/
-                        }
-                        break;
+                        crearHistorico(mEvidencia, mUsuario, "BORRADO POR " + Utils.getRol(activity, mUsuario.getIdrol()).toUpperCase() + ": " + mUsuario.getNombre());
+                        Pregunta mPregunta = listPreguntas.get(positionPregunta);
+                        mPregunta.setSeleccionado(true);
+                        Utils.updatePregunta(activity, String.valueOf(mPregunta.getIdRevision()),
+                                String.valueOf(mPregunta.getIdChecklist()), String.valueOf(mPregunta.getIdPregunta()),
+                                String.valueOf(mPregunta.getIdRubro()), String.valueOf(mBarco.getIdBarco()), 1);
+                    } else {
+                        new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
+                                "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
+                                mEvidencia.getIdEvidencia(),
+                                String.valueOf(mEvidencia.getIdRevision()),
+                                String.valueOf(mEvidencia.getIdChecklist()),
+                                String.valueOf(mEvidencia.getIdRubro()),
+                                String.valueOf(mEvidencia.getIdPregunta()),
+                                String.valueOf(mEvidencia.getIdBarco())
+                        });
                     }
+                    listPreguntas.get(positionPregunta).getListEvidencias().remove(mEvidencia);
+                } else if (mUsuario.getIdrol() == 3) {
+                    //borrado físico
+                    new EvidenciasDBMethods(activity).deleteEvidencia("ID_EVIDENCIA = ? AND ID_REVISION = ? AND " +
+                            "ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_BARCO = ?", new String[]{
+                            mEvidencia.getIdEvidencia(),
+                            String.valueOf(mEvidencia.getIdRevision()),
+                            String.valueOf(mEvidencia.getIdChecklist()),
+                            String.valueOf(mEvidencia.getIdRubro()),
+                            String.valueOf(mEvidencia.getIdPregunta()),
+                            String.valueOf(mEvidencia.getIdBarco())
+                    });
+                    Pregunta mPregunta = listPreguntas.get(positionPregunta);
+                    mPregunta.setSeleccionado(true);
+                    mPregunta.getListEvidencias().remove(mEvidencia);
+                    Utils.updatePregunta(activity, String.valueOf(mPregunta.getIdRevision()),
+                            String.valueOf(mPregunta.getIdChecklist()), String.valueOf(mPregunta.getIdPregunta()),
+                            String.valueOf(mPregunta.getIdRubro()), String.valueOf(mBarco.getIdBarco()), 1);
                 }
-                LinearLayout linearLayoutParent = (LinearLayout) viewImagen.getParent().getParent();
-                //linearLayoutParent.removeView(viewImagen.getParent());
+
                 Utils.message(activity, "Evidencia borrada");
 
-                /*Pregunta preguntaTemp = listPreguntas.get(numeroPregunta);
-                Utils.updatePregunta(activity,String.valueOf(preguntaTemp.getIdRevision()),
-                        String.valueOf(preguntaTemp.getIdChecklist()),String.valueOf(preguntaTemp.getIdPregunta()),
-                        String.valueOf(preguntaTemp.getIdRubro()),String.valueOf(idBarco),1);//*/
-
-                if (listPreguntas.get(numeroPregunta).getListEvidencias() != null) {
-                    if (listPreguntas.get(numeroPregunta).getListEvidencias().size() != 0) {
-                        if (validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())) {
-                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
-                            updateRespuesta(evidenciaTemp, 2);
-                            listPreguntas.get(numeroPregunta).setCumple(true);
+                Pregunta mPregunta = listPreguntas.get(positionPregunta);
+                if (mPregunta.getListEvidencias() != null) {
+                    if (mPregunta.getListEvidencias().size() != 0) {
+                        if (validaEvidencias(mPregunta.getListEvidencias())) {
+                            mPregunta.getRadioGroup().check(R.id.opcion1);
+                            updateRespuesta(mEvidencia, 2);
+                            mPregunta.setCumple(true);
                         } else {
-                            listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
-                            updateRespuesta(evidenciaTemp, 3);
-                            listPreguntas.get(numeroPregunta).setCumple(false);
+                            mPregunta.getRadioGroup().check(R.id.opcion2);
+                            updateRespuesta(mEvidencia, 3);
+                            mPregunta.setCumple(false);
                         }
-                        adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
+                        adapterExpandableChecklist.contarPreguntasCumplen();
                     } else {
-                        listPreguntas.get(numeroPregunta).getRadioGroup().clearCheck();
+                        mPregunta.getRadioGroup().clearCheck();
                         //updateRespuesta(evidenciaTemp,3);
-                        updateRespuesta(evidenciaTemp, null);
-                        listPreguntas.get(numeroPregunta).setCumple(false);
-                        adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
+                        updateRespuesta(mEvidencia, null);
+                        mPregunta.setCumple(false);
+                        adapterExpandableChecklist.contarPreguntasCumplen();
                     }
                 } else {
-                    listPreguntas.get(numeroPregunta).getRadioGroup().clearCheck();
+                    mPregunta.getRadioGroup().clearCheck();
                     //updateRespuesta(evidenciaTemp,3);
-                    updateRespuesta(evidenciaTemp, null);
-                    listPreguntas.get(numeroPregunta).setCumple(false);
-                    adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
+                    updateRespuesta(mEvidencia, null);
+                    mPregunta.setCumple(false);
+                    adapterExpandableChecklist.contarPreguntasCumplen();
                 }
-                notifyDataSetChanged();
+                adapterRecycleViewPreguntas.notifyItemChanged(positionPregunta);
                 alertDialog.dismiss();
                 /*}catch (NullPointerException e){
                     e.printStackTrace();
@@ -1284,32 +843,12 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         });
     }
 
-    private void refresh() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //movies.add(0,movies.get(new Random().nextInt(movies.size())));
-
-                AdapterRecycleViewPreguntas.this.notifyDataSetChanged();
-
-                //swiper.setRefreshing(false);
-            }
-        }, 3000);
-    }
-
     private void crearHistorico(Evidencia evidencia, ResponseLogin.Usuario usuario, String motivo) {
         HistoricoDBMethods historicoDBMethods = new HistoricoDBMethods(activity);
         List<Historico> listHistorico = historicoDBMethods.readHistorico(
                 "SELECT ID_EVIDENCIA,ID_ETAPA,ID_USUARIO,MOTIVO,CONSEC,ID_REVISION,ID_CHECKLIST,FECHA_MOD FROM " + historicoDBMethods.TP_TRAN_HISTORIAL_EVIDENCIA + " WHERE ID_EVIDENCIA = ?",
                 new String[]{evidencia.getIdEvidencia()});
         int consecutivo = 1;
-        /*if(listHistorico.size() != 0){
-            for(Historico historico:listHistorico){
-                if(historico.getConsec() > consecutivo){
-                    consecutivo = historico.getConsec();
-                }
-            }
-        }//*/
         Historico historico = new Historico();
         historico.setIdEvidencia(evidencia.getIdEvidencia());
         historico.setIdEtapa(evidencia.getIdEtapa());
@@ -1322,53 +861,39 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         historicoDBMethods.createHistorico(historico);
     }
 
-    private void rechazarEvidencia(int numeroPregunta, String identificador, Button buttonCumple, Button buttonNoCumple, AlertDialog alertDialog,
+    private void rechazarEvidencia(Evidencia mEvidencia, int positionPregunta, String motivoRechazo) {
+        /*int numeroPregunta, String identificador, Button buttonCumple, Button buttonNoCumple, AlertDialog alertDialog,
                                    Drawable drawableCumpleGris, Drawable drawableNoCumpleRojo, ResponseLogin.Usuario usuario, String motivoRechazo,
-                                   AdapterRecycleViewPreguntas adapterRecycleViewPreguntas) {
-        Evidencia evidenciaTemp = null;
-        for (Evidencia evidencia : listPreguntas.get(numeroPregunta).getListEvidencias()) {
-            if (evidencia.getIdEvidencia().equals(identificador)) {
-                evidencia.setIdEstatus(3);
-                evidencia.setIdEtapa(evidencia.getIdRol());
-                ContentValues contentValues = new ContentValues();
-                contentValues.put("ID_ETAPA", evidencia.getIdRol());
-                contentValues.put("ID_ESTATUS", 3);
-                //try {
-                new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
-                        "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
-                                "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
-                        new String[]{evidencia.getIdEvidencia(), String.valueOf(evidencia.getIdRevision()),
-                                String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdRubro()),
-                                String.valueOf(evidencia.getIdPregunta()), String.valueOf(evidencia.getIdRegistro()),
-                                String.valueOf(evidencia.getIdBarco())});
+                                   AdapterRecycleViewPreguntas adapterRecycleViewPreguntas*/
+        mEvidencia.setIdEstatus(3);
+        mEvidencia.setIdEtapa(mEvidencia.getIdRol());
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("ID_ETAPA", mEvidencia.getIdRol());
+        contentValues.put("ID_ESTATUS", 3);
+        //try {
+        new EvidenciasDBMethods(activity).updateEvidencia(contentValues,
+                "ID_EVIDENCIA = ? AND ID_REVISION = ? AND ID_CHECKLIST = ? " +
+                        "AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_REGISTRO = ? AND ID_BARCO = ?",
+                new String[]{mEvidencia.getIdEvidencia(), String.valueOf(mEvidencia.getIdRevision()),
+                        String.valueOf(mEvidencia.getIdChecklist()), String.valueOf(mEvidencia.getIdRubro()),
+                        String.valueOf(mEvidencia.getIdPregunta()), String.valueOf(mEvidencia.getIdRegistro()),
+                        String.valueOf(mEvidencia.getIdBarco())});
 
-                Utils.message(activity, "Rechazada");
-                crearHistorico(evidencia, usuario, "RECHAZADO POR " + Utils.getRol(activity, usuario.getIdrol()).toUpperCase() + ": " + usuario.getNombre() + "\nMotivo: " +
-                        motivoRechazo);
+        Utils.message(activity, "Rechazada");
+        crearHistorico(mEvidencia, mUsuario, "RECHAZADO POR " + Utils.getRol(activity, mUsuario.getIdrol()).toUpperCase() + ": " + mUsuario.getNombre() + "\nMotivo: " +
+                motivoRechazo);
 
-                if (validaEvidencias(listPreguntas.get(numeroPregunta).getListEvidencias())) {
-                    listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion1);
-                    updateRespuesta(evidencia, 2);
-                    listPreguntas.get(numeroPregunta).setCumple(true);
-                } else {
-                    listPreguntas.get(numeroPregunta).getRadioGroup().check(R.id.opcion2);
-                    updateRespuesta(evidencia, 3);
-                    listPreguntas.get(numeroPregunta).setCumple(false);
-                }
-                adapterExpandableChecklist.contarPreguntasCumplen(idBarco);
-                buttonCumple.setBackground(drawableCumpleGris);
-                buttonNoCumple.setBackground(drawableNoCumpleRojo);
-                alertDialog.dismiss();
-                //notifyDataSetChanged();
-                //adapterRecycleViewPreguntas.notifyDataSetChanged();
-                //evidenciaTemp = evidencia;
-                break;
-                /*}catch (NullPointerException e){
-                    e.printStackTrace();
-                    Utils.message(activity,"Error al rechazar evidencia: " + e.getMessage());
-                }//*/
-            }
+        Pregunta mPregunta = listPreguntas.get(positionPregunta);
+        if (validaEvidencias(mPregunta.getListEvidencias())) {
+            mPregunta.getRadioGroup().check(R.id.opcion1);
+            updateRespuesta(mEvidencia, 2);
+            mPregunta.setCumple(true);
+        } else {
+            mPregunta.getRadioGroup().check(R.id.opcion2);
+            updateRespuesta(mEvidencia, 3);
+            mPregunta.setCumple(false);
         }
+        adapterExpandableChecklist.contarPreguntasCumplen();
     }
 
     private void updateRespuesta(Evidencia evidencia, Integer idRespuesta) {
@@ -1379,27 +904,16 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                             "ID_CHECKLIST = ? AND ID_PREGUNTA = ? AND ID_RUBRO = ? AND ID_BARCO = ? AND ID_REGISTRO = ?",
                     new String[]{String.valueOf(evidencia.getIdRevision()), String.valueOf(evidencia.getIdChecklist()), String.valueOf(evidencia.getIdPregunta()),
                             String.valueOf(evidencia.getIdRubro()), String.valueOf(evidencia.getIdBarco()), String.valueOf(evidencia.getIdRegistro())});
+            RespuestaData mRespuestaData = new RespuestaData();
+            mRespuestaData.setIdPregunta(evidencia.getIdPregunta());
+            mRubro.getListRespuestas().get(mRubro.getListRespuestas().indexOf(mRespuestaData)).setIdRespuesta(idRespuesta);
         }
     }
 
     public boolean validaEvidencias(List<Evidencia> listEvidencias) {
-        ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
         for (Evidencia ev : listEvidencias) {
-            //if(ev.getIdEstatus() == 2){
-            if (usuario.getIdrol() == 1) {
-                if (ev.getIdEtapa() != 1 && ev.getIdEstatus() == 1) {
-
-                } else {
-                    return false;
-                }
-                //}else if(usuario.getIdrol() == 2) {
-            } else {
-                if (ev.getIdEtapa() != 1 && ev.getIdEstatus() == 1) {
-                    //if (ev.getIdEtapa() > usuario.getIdrol() && ev.getIdEstatus() == 1) {
-
-                } else {
-                    return false;
-                }
+            if (ev.getIdEtapa() == 1 || ev.getIdEstatus() != 1) {
+                return false;
             }
         }
         return true;
@@ -1445,44 +959,12 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         final SharedPreferences sharedPreferences = activity.getSharedPreferences(Constants.SP_NAME, Activity.MODE_PRIVATE);
         final Encryption encryption = new Encryption();
 
-        Button buttonCamera = (Button) layout.findViewById(R.id.buttonCamera);
-        Button buttonFiles = (Button) layout.findViewById(R.id.buttonFiles);
+        Button buttonCamera = layout.findViewById(R.id.buttonCamera);
+        Button buttonFiles = layout.findViewById(R.id.buttonFiles);
 
         buttonCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                activity.startActivityForResult(captureIntent, position);//*/
-
-                /*if(Utils.checkPermission(activity, Manifest.permission.CAMERA,102)){
-                    if(Utils.checkPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE,101)) {
-                        if(Utils.checkPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION,103)) {
-                            Utils.openCamera(activity, position);
-                        }else{
-                            Utils.message(activity,"Se requiere permiso para acceso a la ubicación");
-                        }
-                    }else{
-                        Utils.message(activity,"Se requiere permiso para lectura de archivos");
-                    }
-                }else{
-                    Utils.message(activity,"Se requiere permiso para utilizar la cámara");
-                }//*/
-
-                /*Calendar calendarActual = Utils.getCalendarDate(Utils.getDate(Constants.DATE_FORMAT_FULL));
-                Calendar calendarFolio = Utils.getCalendarDate(fechaFolio);
-                if(calendarActual != null && calendarFolio != null){
-                    int mesActual = calendarActual.get(Calendar.MONTH) + 1;
-                    int anioActual = calendarActual.get(Calendar.YEAR);
-                    int mesFolio = calendarFolio.get(Calendar.MONTH) + 1;
-                    int anioFolio = calendarFolio.get(Calendar.YEAR);
-                    if((mesActual == mesFolio) && (anioActual == anioFolio)){
-                        if(Utils.checkPermission(activity)){
-                            Utils.openCamera(activity, position);
-                        }
-                    }else{
-                        Utils.message(activity,"No se pueden agregar evidencias ya que la fecha de revisión no corresponde al mes actual");
-                    }
-                }//*/
                 String flagValida = "false";
                 if (sharedPreferences.contains(Constants.SP_VALIDA_FECHA)) {
                     flagValida = encryption.decryptAES(sharedPreferences.getString(Constants.SP_VALIDA_FECHA, "false"));
@@ -1508,19 +990,6 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         buttonFiles.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*if(Utils.checkPermission(activity, Manifest.permission.CAMERA,102)){
-                    if(Utils.checkPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE,101)) {
-                        if(Utils.checkPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION,103)) {
-                            seleccionarArchivo(position);
-                        }else{
-                            Utils.message(activity,"Se requiere permiso para acceso a la ubicación");
-                        }
-                    }else{
-                        Utils.message(activity,"Se requiere permiso para lectura de archivos");
-                    }
-                }else{
-                    Utils.message(activity,"Se requiere permiso para utilizar la cámara");
-                }//*/
 
                 String flagValida = "false";
                 if (sharedPreferences.contains(Constants.SP_VALIDA_FECHA)) {
@@ -1539,11 +1008,6 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                         seleccionarArchivo(position);
                     }
                 }
-
-                /*if(Utils.checkPermission(activity)){
-                    seleccionarArchivo(position);
-                }//*/
-
                 popup.dismiss();
             }
         });
@@ -1574,11 +1038,11 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         intent.setType("*/*");
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        activity.startActivityForResult(intent.createChooser(intent, "Selecciona el archivo"), position);
+        activity.startActivityForResult(Intent.createChooser(intent, "Selecciona el archivo"), position);
         //activity.startActivity(intent.createChooser(intent, "Selecciona el archivo"));
     }
 
-    private void descargaPDF(int idRevision, int idPregunta) {
+    private void descargaPDF(Pregunta mPregunta) {
 
         final ProgressDialog progressDialog = Utils.typhoonLoader(activity, "Descargando informe...");
 
@@ -1587,7 +1051,9 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
         final SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
 
         ApiInterface mApiService = Utils.getInterfaceService();
-        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(Utils.getIPAddress(), encryption.decryptAES(sharedPrefs.getString(Constants.SP_JWT_TAG, "")), idRevision, idPregunta);
+        Call<ResponseDescargaPdf> mService = mApiService.descargaPDF(Utils.getIPAddress(),
+                encryption.decryptAES(sharedPrefs.getString(Constants.SP_JWT_TAG, "")),
+                mPregunta.getIdRevision(), mPregunta.getIdPregunta());
         mService.enqueue(new Callback<ResponseDescargaPdf>() {
             @Override
             public void onResponse(Call<ResponseDescargaPdf> call, Response<ResponseDescargaPdf> response) {

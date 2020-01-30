@@ -282,7 +282,7 @@ public class Utils {
 
         final ImageView imageViewLoader = layoutDialog.findViewById(R.id.imageViewLoader);
         Glide.with(context).load(R.raw.loader3).into(imageViewLoader);
-        TextView textView = (TextView) layoutDialog.findViewById(R.id.textViewLoader);
+        TextView textView = layoutDialog.findViewById(R.id.textViewLoader);
         textView.setText(texto);
 
         final ProgressDialog progressDialog = new ProgressDialog(context, R.style.ThemeTranslucent);
@@ -1181,6 +1181,7 @@ public class Utils {
         contentValues.put("SINCRONIZADO", seleccionado);
         new ChecklistDBMethods(activity).updateRespuesta(contentValues, "ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_PREGUNTA = ? AND ID_RUBRO = ? AND ID_BARCO = ?",
                 new String[]{idRevision, idChecklist, idPregunta, idRubro, idBarco});
+        //updatePregunta(activity, idRevision, idChecklist, idPregunta, idRubro, seleccionado);
     }
 
     public static void updateAnexo(Activity activity, String idRevision, String idSubanexo, int seleccionado) {

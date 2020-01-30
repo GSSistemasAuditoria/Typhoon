@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/textViewSpinnerItem"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_gravity="center_vertical"
-        android:textColor="@color/azul"
-        android:textStyle="bold"
-        android:padding="4dp"
-        android:textSize="@dimen/spinner_text_size"
-        android:layout_margin="0dp" />
-
-</LinearLayout>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/textViewSpinnerItem"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:layout_margin="0dp"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="4dp"
+    android:textColor="@color/azul"
+    android:textSize="@dimen/spinner_text_size"
+    android:textStyle="bold" />

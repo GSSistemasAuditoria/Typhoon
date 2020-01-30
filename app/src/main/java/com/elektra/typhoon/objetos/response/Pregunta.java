@@ -144,4 +144,13 @@ public class Pregunta {
     public void setSeleccionado(boolean seleccionado) {
         this.seleccionado = seleccionado;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Pregunta)
+            return this.idPregunta == ((Pregunta) obj).idPregunta;
+        else if (obj instanceof Integer)
+            return this.idPregunta == ((Integer) obj).intValue();
+        return false;
+    }
 }

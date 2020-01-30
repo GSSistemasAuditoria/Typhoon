@@ -186,7 +186,7 @@ public class ChecklistDBMethods {
 
     public void updateRubros(String condition, String[] args, List<RubroData> lstRubros){
         lstRubros.clear();
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE,null);
         /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_REVISION,ID_CHECKLIST,ID_RUBRO,ESTATUS,NOMBRE FROM ").append(TP_CAT_CL_RUBRO);
         if(condition != null){
@@ -322,7 +322,7 @@ public class ChecklistDBMethods {
     }
 
     public List<RespuestaData> readRespuesta(String condition, String[] args){
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE,null);
         List<RespuestaData> listRespuestas = new ArrayList<>();
         /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA FROM ").append(TP_TRAN_CL_RESPUESTA);
@@ -358,8 +358,16 @@ public class ChecklistDBMethods {
     }
 
     public void updateRespuesta(ContentValues values,String condition,String[] args){
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
-        db.update(TP_TRAN_CL_RESPUESTA,values,condition,args);
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE,null);
+        int response = db.update(TP_TRAN_CL_RESPUESTA, values, condition, args);
+        db.close();
+    }
+
+    public void updateResponseSelect(int idRespuesta, int seleccionado){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE,null);
+        ContentValues values = new ContentValues();
+        values.put("SELECCIONADO", seleccionado);
+        db.update(TP_TRAN_CL_RESPUESTA, values, "ID_RESPUESTA = ?", new String[]{String.valueOf(idRespuesta)});
         db.close();
     }
 }
