@@ -46,7 +46,7 @@ public interface ApiInterface {
     Call<SincronizacionResponse> sincronizacion(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt,@Body SincronizacionPost sincronizacionPost);
 
     @GET("GetCatalogosThyphoon")
-    Call<CatalogosTyphoonResponse> catalogosTyphoon(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt);
+    Call<CatalogosTyphoonResponse> catalogosTyphoon(@Header("X-IP_CLIENT") String ip, @Header("Authorization") String jwt,@Query("idUsuario") String idUsuario);
     //@POST("GetCatalogosThyphoon")
     //Call<CatalogosTyphoonResponse> catalogosTyphoon(@Header("Authorization") String jwt, RequestCatalogos requestCatalogos);
 

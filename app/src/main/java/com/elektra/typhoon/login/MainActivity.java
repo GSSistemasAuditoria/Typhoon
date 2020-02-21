@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_main);
         setContentView(R.layout.login_layout);
+        Log.e(TAG, new Encryption().encryptAES(Constants.URL_PUBLIC));
         sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
         Uri data = null;
         if (getIntent() != null && getIntent().getData() != null) {
@@ -414,7 +415,7 @@ public class MainActivity extends AppCompatActivity {
                             BarcoDBMethods barcoDBMethods = new BarcoDBMethods(getApplicationContext());
                             if (barcoDBMethods.readBarcos().size() == 0) {
                                 //Utils.descargaCatalogos(MainActivity.this, 1);
-                                descargaCatalogos(1);
+                                descargaCatalogos(1, response.body().getValidarEmpleado().getUsuario());
                             } else {
                                 Intent intent = new Intent(MainActivity.this, CarteraFolios.class);
                                 startActivity(intent);
@@ -704,7 +705,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void descargaCatalogos(final int opcion) {
+    private void descargaCatalogos(final int opcion, ResponseLogin.Usuario mUsuario) {
 
         String titulo = "";
         if (opcion == 1) {
@@ -720,7 +721,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             ApiInterface mApiService = Utils.getInterfaceService();
             final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
-            Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(Utils.getIPAddress(), encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG, "")));
+            Call<CatalogosTyphoonResponse> mService = mApiService.catalogosTyphoon(Utils.getIPAddress(), encryption.decryptAES(sharedPreferences.getString(Constants.SP_JWT_TAG, "")), mUsuario.getIdUsuario());
             mService.enqueue(new Callback<CatalogosTyphoonResponse>() {
                 @Override
                 public void onResponse(Call<CatalogosTyphoonResponse> call, Response<CatalogosTyphoonResponse> response) {
