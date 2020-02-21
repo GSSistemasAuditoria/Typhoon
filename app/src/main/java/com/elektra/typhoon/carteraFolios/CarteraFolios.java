@@ -273,27 +273,27 @@ public class CarteraFolios extends AppCompatActivity {
                     @Override
                     public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
                         if (item.getItemId() == R.id.cerrarSesion) {
-                            Utils.cerrarSesionService((usuario.getInterno()) ? usuario.getIdUsuario() : usuario.getCorreo(),
-                                    false, CarteraFolios.this);
-                            /*SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
+                            //Utils.cerrarSesionService((usuario.getInterno()) ? usuario.getIdUsuario() : usuario.getCorreo(),
+                            //        false, CarteraFolios.this);
+                            SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
                             sharedPrefs.edit().putBoolean(Constants.SP_LOGIN_TAG, false).apply();
                             Call<CerrarSesionResponse> mServiceCloseSession = Utils.getInterfaceService().cerrarSesion(usuario.getIdUsuario());
                             mServiceCloseSession.enqueue(new Callback<CerrarSesionResponse>() {
                                 @Override
                                 public void onResponse(Call<CerrarSesionResponse> call, Response<CerrarSesionResponse> response) {
                                     if (response.body().getCerrarSesion().getExito()) {
-                                        /*if (usuario.getInterno()) {
+                                        if (usuario.getInterno()) {
                                             HttpUrl authorizeUrl2 = HttpUrl.parse(Constants.URL_DSI + "jsp/logoutSuccess_latest.jsp?rp=" + getString(R.string.redirect_uri))
                                                     .newBuilder()
                                                     .build();
                                             Intent mIntent2 = new Intent(Intent.ACTION_VIEW);
                                             mIntent2.setData(Uri.parse(String.valueOf(authorizeUrl2.url())));
                                             startActivity(mIntent2);
-                                        //} else {
+                                        } else {
                                             Intent intent = new Intent(CarteraFolios.this, MainActivity.class);
                                             startActivity(intent);
                                             finish();
-                                        //}
+                                        }
                                     }else
                                         Utils.message(CarteraFolios.this, response.body().getCerrarSesion().getError());
 
@@ -303,7 +303,7 @@ public class CarteraFolios extends AppCompatActivity {
                                 public void onFailure(Call<CerrarSesionResponse> call, Throwable t) {
                                     Utils.message(CarteraFolios.this, "Error al cerrar sesión");
                                 }
-                            });*/
+                            });
                         } else if (item.getItemId() == R.id.actualizarCatalogos) {
                             //Utils.descargaCatalogos(CarteraFolios.this,2);
                             descargaCatalogos(2);

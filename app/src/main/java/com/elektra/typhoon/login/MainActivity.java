@@ -148,18 +148,24 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.btnInterno:
                         HttpUrl authorizeUrl = HttpUrl.parse(Constants.URL_DSI + "oauth/nam/authz")
                                 .newBuilder()
-                                .addQueryParameter("client_id", getString(R.string.client_id))
-                                .addQueryParameter("scope", getString(R.string.scope))
-                                .addQueryParameter("redirect_uri", getString(R.string.redirect_uri))
                                 .addQueryParameter("response_type", getString(R.string.response_type))
                                 .addQueryParameter(new Encryption().decryptAES(getString(R.string.client_text)), getString(R.string.client))
+                                .addQueryParameter("redirect_uri", getString(R.string.redirect_uri))
+                                .addQueryParameter("scope", getString(R.string.scope))
                                 .addQueryParameter("acr_values", getString(R.string.acr_values))
+                                .addQueryParameter("client_id", getString(R.string.client_id))
                                 .build();
                         Intent mIntent = new Intent(Intent.ACTION_VIEW);
                         mIntent.setData(Uri.parse(String.valueOf(authorizeUrl.url())));
                         startActivity(mIntent);
                         break;
                     case R.id.btnExterno:
+                        /*HttpUrl authorizeUrl1 = HttpUrl.parse(Constants.URL_DSI + "jsp/logoutSuccess_latest.jsp")
+                                .newBuilder()
+                                .build();
+                        Intent mIntent1 = new Intent(Intent.ACTION_VIEW);
+                        mIntent1.setData(Uri.parse(String.valueOf(authorizeUrl1.url())));
+                        startActivity(mIntent1);*/
                         findViewById(R.id.clIngresar).setVisibility(View.GONE);
                         findViewById(R.id.clExterno).setVisibility(View.VISIBLE);
                         break;
@@ -949,5 +955,15 @@ public class MainActivity extends AppCompatActivity {
                 Utils.message(MainActivity.this, Constants.MSG_ERR_CONN);
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(findViewById(R.id.clExterno).getVisibility() == View.VISIBLE){
+            findViewById(R.id.clIngresar).setVisibility(View.VISIBLE);
+            findViewById(R.id.clExterno).setVisibility(View.GONE);
+        }else{
+            super.onBackPressed();
+        }
     }
 }

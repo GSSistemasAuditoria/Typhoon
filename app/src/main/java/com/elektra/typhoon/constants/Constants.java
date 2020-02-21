@@ -11,6 +11,8 @@ import android.os.Environment;
  */
 public class Constants {
 
+    //DANIEL
+    //public static String URL_PUBLIC = "ofjcUcZ+Cnrw2m6EQ/yxhh9QANm3dmavmcMPkPRMY/RQ+WssvtEbr7CfeY2FvfPacZOi7lcfcis7c36WTrWhGw==";
     //108
     //public static String URL_PUBLIC = "PvNI3N9gGpvQqKsqGRbt8Nhx+46FExYXFBcSyaRedhgB7ahOqJicHA1dLGudNZ81CIoMlPNYfBZea8rM5p41NQ==";
     //CARLOS
@@ -24,7 +26,8 @@ public class Constants {
 
 
     //DSI
-    public static final String URL_DSI = "https://authns.desadsi.gs/nidp/";
+    public static final String URL_DSI = "https://auth.socio.gs/nidp/";
+
 
     //**********************************************************************************************
     public static String DB_NAME = "TyphoonDB";

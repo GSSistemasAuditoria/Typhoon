@@ -59,8 +59,8 @@
     <string name="ingresar">Ingresar</string>
 
     <string name="client_text">Ldl7EdonE1tcDdZTMbPF/w==</string>
-    <string name="client_id">550f7973-3be1-401e-bc15-bfa941a20979</string>
-    <string name="client">SqGCZ8oiD10Y6LBnBND-iTHrKsmiZ3Pg7MoKqB_sRSoS6jJy23hmTDzOLdfmtBAIi3DSgnrP_Tz63Erd0kCCnQ</string>
+    <string name="client_id">70bf3ebc-14db-4a16-8fa2-47e84e187b4f</string>
+    <string name="client">uLQT0IMs0u650uUpSTMhPVN8rmchYmSo7vAqvWWGqHE8UJHApagGIUR2WdERQ4l3y9B0I7Y-VeM-ZY51oxqfnA</string>
     <string name="scope">Typhoon</string>
     <string name="redirect_uri">typhoon://login</string>
     <string name="response_type">token</string>

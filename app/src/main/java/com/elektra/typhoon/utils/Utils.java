@@ -92,6 +92,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -874,8 +875,38 @@ public class Utils {
         textViewAceptar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                cerrarSesionService((usuario.getInterno()) ? usuario.getIdUsuario() : usuario.getCorreo(),
-                        true, activity);
+                //cerrarSesionService((usuario.getInterno()) ? usuario.getIdUsuario() : usuario.getCorreo(),
+                  //      true, activity);
+                final SharedPreferences sharedPrefs = activity.getSharedPreferences(Constants.SP_NAME, activity.MODE_PRIVATE);
+                Call<CerrarSesionResponse> mServiceCloseSession = Utils.getInterfaceService().cerrarSesion(usuario.getIdUsuario());
+                mServiceCloseSession.enqueue(new Callback<CerrarSesionResponse>() {
+                    @Override
+                    public void onResponse(Call<CerrarSesionResponse> call, Response<CerrarSesionResponse> response) {
+                        if (response.body().getCerrarSesion().getExito()) {
+                            sharedPrefs.edit().clear().apply();
+                            new TyphoonDataBase(activity).deleteAll();
+                            if (usuario.getInterno()) {
+                                HttpUrl authorizeUrl2 = HttpUrl.parse(Constants.URL_DSI + "jsp/logoutSuccess_latest.jsp?rp=" + activity.getString(R.string.redirect_uri))
+                                        .newBuilder()
+                                        .build();
+                                Intent mIntent2 = new Intent(Intent.ACTION_VIEW);
+                                mIntent2.setData(Uri.parse(String.valueOf(authorizeUrl2.url())));
+                                activity.startActivity(mIntent2);
+                            } else {
+                                Intent intent = new Intent(activity, MainActivity.class);
+                                activity.startActivity(intent);
+                                activity.finish();
+                            }
+                        }else
+                            Utils.message(activity, response.body().getCerrarSesion().getError());
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<CerrarSesionResponse> call, Throwable t) {
+                        Utils.message(activity, "Error al cerrar sesión");
+                    }
+                });
                 dialog.dismiss();
             }
         });
@@ -884,9 +915,10 @@ public class Utils {
             @Override
             public void onClick(View view) {
                 //new NuevaInstalacion(activity).execute();
-                cerrarSesionService((usuario.getInterno()) ? usuario.getIdUsuario() : usuario.getCorreo(),
-                        true, activity);
-                dialog.dismiss();
+                //cerrarSesionService((usuario.getInterno()) ? usuario.getIdUsuario() : usuario.getCorreo(),
+                  //      true, activity);
+
+               // dialog.dismiss();
             }
         });
     }
