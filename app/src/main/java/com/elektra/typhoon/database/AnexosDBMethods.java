@@ -156,7 +156,7 @@ public class AnexosDBMethods {
 
     public List<Anexo> readAnexos(String query,String[] args){
         CursorWindowFixer.fix();
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,Context.MODE_PRIVATE,null);
         List<Anexo> listAnexos = new ArrayList<>();
         Cursor cursor = db.rawQuery(query,args);
         if(cursor != null){
@@ -179,6 +179,41 @@ public class AnexosDBMethods {
                     }
                     anexo.setIdRol(cursor.getInt(10));
                     anexo.setIdUsuario(cursor.getString(11));
+                    listAnexos.add(anexo);
+                }while(cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return listAnexos;
+    }
+
+    public List<Anexo> readAnexosWithOutDocumento(String where, String[] args){
+        CursorWindowFixer.fix();
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,Context.MODE_PRIVATE,null);
+        List<Anexo> listAnexos = new ArrayList<>();
+        Cursor cursor = db.rawQuery("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD,ID_ROL,ID_USUARIO FROM " +
+                TP_TRAN_ANEXOS + where, args);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    Anexo anexo = new Anexo();
+                    anexo.setIdRevision(cursor.getInt(0));
+                    //anexo.setIdAnexo(cursor.getInt(1));
+                    anexo.setIdSubAnexo(cursor.getInt(2));
+                    anexo.setIdDocumento(cursor.getString(3));
+                    anexo.setIdEtapa(cursor.getInt(4));
+                    //anexo.setBase64(cursor.getString(5));
+                    anexo.setNombreArchivo(cursor.getString(5));
+                    anexo.setFechaSinc(cursor.getString(6));
+                    anexo.setFechaMod(cursor.getString(8));
+                    if(cursor.getInt(7) == 0){
+                        anexo.setSeleccionado(false);
+                    }else{
+                        anexo.setSeleccionado(true);
+                    }
+                    anexo.setIdRol(cursor.getInt(9));
+                    anexo.setIdUsuario(cursor.getString(10));
                     listAnexos.add(anexo);
                 }while(cursor.moveToNext());
             }
@@ -232,5 +267,20 @@ public class AnexosDBMethods {
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
         db.delete(TP_TRAN_ANEXOS, condition,args);
         db.close();
+    }
+
+    public String readAnexosDocumento(int idAnexo){
+        CursorWindowFixer.fix();
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,Context.MODE_PRIVATE,null);
+        Cursor cursor = db.rawQuery("Select DOCUMENTO from " + TP_TRAN_ANEXOS + " where ID_ANEXO = " + idAnexo, null);
+        String result = null;
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                result = cursor.getString(cursor.getColumnIndexOrThrow("DOCUMENTO"));
+            }
+            cursor.close();
+        }
+        db.close();
+        return result;
     }
 }

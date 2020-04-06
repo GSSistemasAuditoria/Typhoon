@@ -1,5 +1,6 @@
 package com.elektra.typhoon.service;
 
+import com.elektra.typhoon.objetos.request.Log;
 import com.elektra.typhoon.objetos.request.RequestCartera;
 import com.elektra.typhoon.objetos.request.RequestLogin;
 import com.elektra.typhoon.objetos.request.SincronizacionPost;
@@ -68,4 +69,7 @@ public interface ApiInterface {
 
     @POST("LoginoAuth")
     Call<ResponseLogin> loginLlaveMaestra(@Header("X-IP_CLIENT") String ip, @Body LoginLlaveMaestraVO loginLlaveMaestraVO);
+
+    @POST("SetLogMovil")
+    Call<Object> setLogMovil(@Body Log logError);
 }

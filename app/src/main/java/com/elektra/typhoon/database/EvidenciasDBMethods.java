@@ -25,7 +25,7 @@ public class EvidenciasDBMethods {
 
     private Context context;
 
-    public EvidenciasDBMethods(Context context){
+    public EvidenciasDBMethods(Context context) {
         this.context = context;
     }
 
@@ -37,13 +37,13 @@ public class EvidenciasDBMethods {
             "ID_RUBRO INTEGER, " +
             "ID_PREGUNTA INTEGER, " +
             "ID_EVIDENCIA TEXT, " +
-	        "ID_REGISTRO INTEGER, " +
+            "ID_REGISTRO INTEGER, " +
             "ID_BARCO INTEGER, " +
             "NOMBRE TEXT, " +
-	        "CONTENIDO TEXT, " +
+            "CONTENIDO TEXT, " +
             "CONTENIDO_PREVIEW TEXT, " +
-	        "ID_ESTATUS INTEGER, " +
-	        "ID_ETAPA INTEGER, " +
+            "ID_ESTATUS INTEGER, " +
+            "ID_ETAPA INTEGER, " +
             "LATITUDE REAL, " +
             "LONGITUDE REAL, " +
             "AGREGADO_COORDINADOR INTEGER, " +
@@ -55,17 +55,17 @@ public class EvidenciasDBMethods {
             "AGREGADO_LIDER INTEGER, " +
             "PRIMARY KEY (ID_REVISION,ID_CHECKLIST,ID_RUBRO,ID_PREGUNTA,ID_EVIDENCIA))";
 
-    public void createEvidencia(Evidencia evidencia){
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+    public void createEvidencia(Evidencia evidencia) {
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, context.MODE_PRIVATE, null);
         ContentValues values = new ContentValues();
-        values.put("ID_EVIDENCIA",evidencia.getIdEvidencia());
+        values.put("ID_EVIDENCIA", evidencia.getIdEvidencia());
         values.put("NOMBRE", Utils.removeSpecialCharacters(evidencia.getNombre()));
-        values.put("CONTENIDO",evidencia.getContenido()); // Contenido pdf en base 64
-        if(evidencia.getContenidoPreview() == null){
+        values.put("CONTENIDO", evidencia.getContenido()); // Contenido pdf en base 64
+        if (evidencia.getContenidoPreview() == null) {
             try {
-                if(!evidencia.getNombre().contains(".pdf") && !evidencia.getNombre().contains(".PDF")) {
-                    if(evidencia.getContenido() != null) {
-                        if(!evidencia.getContenido().equals("")) {
+                if (!evidencia.getNombre().contains(".pdf") && !evidencia.getNombre().contains(".PDF")) {
+                    if (evidencia.getContenido() != null) {
+                        if (!evidencia.getContenido().equals("")) {
                             Bitmap bitmap = Utils.base64ToBitmap(evidencia.getContenido());
                             Bitmap bitmapResize = Utils.resizeImageBitmap(bitmap);
                             String base64 = Utils.bitmapToBase64(bitmapResize);
@@ -78,33 +78,33 @@ public class EvidenciasDBMethods {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }else {
+        } else {
             values.put("CONTENIDO_PREVIEW", evidencia.getContenidoPreview());
         }
-        values.put("ID_ESTATUS",evidencia.getIdEstatus());
-        values.put("ID_ETAPA",evidencia.getIdEtapa());
-        values.put("ID_REVISION",evidencia.getIdRevision());
-        values.put("ID_CHECKLIST",evidencia.getIdChecklist());
-        values.put("ID_RUBRO",evidencia.getIdRubro());
-        values.put("ID_PREGUNTA",evidencia.getIdPregunta());
-        values.put("ID_REGISTRO",evidencia.getIdRegistro());
-        values.put("ID_BARCO",evidencia.getIdBarco());
-        values.put("LATITUDE",evidencia.getLatitude());
-        values.put("LONGITUDE",evidencia.getLongitude());
-        values.put("AGREGADO_COORDINADOR",evidencia.getAgregadoCoordinador());
-        values.put("NUEVO",evidencia.getNuevo());
-        values.put("FECHA_MOD",evidencia.getFechaMod());
-        values.put("LOCATION",evidencia.getLocation());
-        values.put("ID_ROL",evidencia.getIdRol());
-        values.put("ID_USUARIO",evidencia.getIdUsuario());
-        values.put("AGREGADO_LIDER",evidencia.getAgregadoLider());
+        values.put("ID_ESTATUS", evidencia.getIdEstatus());
+        values.put("ID_ETAPA", evidencia.getIdEtapa());
+        values.put("ID_REVISION", evidencia.getIdRevision());
+        values.put("ID_CHECKLIST", evidencia.getIdChecklist());
+        values.put("ID_RUBRO", evidencia.getIdRubro());
+        values.put("ID_PREGUNTA", evidencia.getIdPregunta());
+        values.put("ID_REGISTRO", evidencia.getIdRegistro());
+        values.put("ID_BARCO", evidencia.getIdBarco());
+        values.put("LATITUDE", evidencia.getLatitude());
+        values.put("LONGITUDE", evidencia.getLongitude());
+        values.put("AGREGADO_COORDINADOR", evidencia.getAgregadoCoordinador());
+        values.put("NUEVO", evidencia.getNuevo());
+        values.put("FECHA_MOD", evidencia.getFechaMod());
+        values.put("LOCATION", evidencia.getLocation());
+        values.put("ID_ROL", evidencia.getIdRol());
+        values.put("ID_USUARIO", evidencia.getIdUsuario());
+        values.put("AGREGADO_LIDER", evidencia.getAgregadoLider());
         db.insertWithOnConflict(TP_TRAN_CL_EVIDENCIA, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
 
-    public List<Evidencia> readEvidencias(String condition, String[] args,boolean flagJson) throws IOException {
+    public List<Evidencia> readEvidencias(String condition, String[] args, boolean flagJson) throws IOException {
         CursorWindowFixer.fix();
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, context.MODE_PRIVATE, null);
         List<Evidencia> listEvidencia = new ArrayList<>();
         /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
@@ -113,19 +113,19 @@ public class EvidenciasDBMethods {
             query.append(" ").append(condition);
         }
         Cursor cursor = db.rawQuery(query.toString(),args);//*/
-        Cursor cursor = db.rawQuery(condition,args);
-        if(cursor != null){
-            if(cursor.moveToFirst()){
-                do{
+        Cursor cursor = db.rawQuery(condition, args);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
                     Evidencia evidencia = new Evidencia();
                     evidencia.setIdEvidencia(cursor.getString(0));
                     evidencia.setNombre(cursor.getString(1));
                     //evidencia.setContenido(cursor.getString(2));
-                    if(!flagJson) {
+                    if (!flagJson) {
                         if (!evidencia.getNombre().contains(".pdf") && !evidencia.getNombre().contains(".PDF")) {
                             evidencia.setSmallBitmap(Utils.base64ToBitmap(cursor.getString(2)));
                         }
-                    }else{
+                    } else {
                         evidencia.setContenido(cursor.getString(11));
                     }
                     evidencia.setIdEstatus(cursor.getInt(3));
@@ -146,7 +146,7 @@ public class EvidenciasDBMethods {
                     evidencia.setIdUsuario(cursor.getString(19));
                     evidencia.setAgregadoLider(cursor.getInt(20));
                     listEvidencia.add(evidencia);
-                }while(cursor.moveToNext());
+                } while (cursor.moveToNext());
             }
         }
         cursor.close();
@@ -154,9 +154,9 @@ public class EvidenciasDBMethods {
         return listEvidencia;
     }
 
-    public List<Evidencia> readEvidencias(String condition, String[] args){
+    public List<Evidencia> readEvidenciasWithOutContenidoAndPreview(String where, String[] args) {
         CursorWindowFixer.fix();
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE, null);
         List<Evidencia> listEvidencia = new ArrayList<>();
         /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
@@ -165,15 +165,110 @@ public class EvidenciasDBMethods {
             query.append(" ").append(condition);
         }
         Cursor cursor = db.rawQuery(query.toString(),args);//*/
-        Cursor cursor = db.rawQuery(condition,args);
-        if(cursor != null){
-            if(cursor.moveToFirst()){
-                do{
+        Cursor cursor = db.rawQuery("SELECT ID_EVIDENCIA,NOMBRE,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
+                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR,NUEVO,FECHA_MOD," +
+                "LOCATION,ID_ROL,ID_USUARIO,AGREGADO_LIDER FROM " + EvidenciasDBMethods.TP_TRAN_CL_EVIDENCIA + where, args);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    Evidencia evidencia = new Evidencia();
+                    evidencia.setIdEvidencia(cursor.getString(cursor.getColumnIndexOrThrow("ID_EVIDENCIA")));
+                    evidencia.setNombre(cursor.getString(cursor.getColumnIndexOrThrow("NOMBRE")));
+                    evidencia.setContenido(null);
+                    evidencia.setIdEstatus(cursor.getInt(cursor.getColumnIndexOrThrow("ID_ESTATUS")));
+                    evidencia.setIdEtapa(cursor.getInt(cursor.getColumnIndexOrThrow("ID_ETAPA")));
+                    evidencia.setIdRevision(cursor.getInt(cursor.getColumnIndexOrThrow("ID_REVISION")));
+                    evidencia.setIdChecklist(cursor.getInt(cursor.getColumnIndexOrThrow("ID_CHECKLIST")));
+                    evidencia.setIdRubro(cursor.getInt(cursor.getColumnIndexOrThrow("ID_RUBRO")));
+                    evidencia.setIdPregunta(cursor.getInt(cursor.getColumnIndexOrThrow("ID_PREGUNTA")));
+                    evidencia.setIdRegistro(cursor.getInt(cursor.getColumnIndexOrThrow("ID_REGISTRO")));
+                    evidencia.setIdBarco(cursor.getInt(cursor.getColumnIndexOrThrow("ID_BARCO")));
+                    evidencia.setLatitude(cursor.getDouble(cursor.getColumnIndexOrThrow("LATITUDE")));
+                    evidencia.setLongitude(cursor.getDouble(cursor.getColumnIndexOrThrow("LONGITUDE")));
+                    evidencia.setAgregadoCoordinador(cursor.getInt(cursor.getColumnIndexOrThrow("AGREGADO_COORDINADOR")));
+                    evidencia.setNuevo(cursor.getInt(cursor.getColumnIndexOrThrow("NUEVO")));
+                    evidencia.setFechaMod(cursor.getString(cursor.getColumnIndexOrThrow("FECHA_MOD")));
+                    evidencia.setLocation(cursor.getString(cursor.getColumnIndexOrThrow("LOCATION")));
+                    evidencia.setIdRol(cursor.getInt(cursor.getColumnIndexOrThrow("ID_ROL")));
+                    evidencia.setIdUsuario(cursor.getString(cursor.getColumnIndexOrThrow("ID_USUARIO")));
+                    evidencia.setAgregadoLider(cursor.getInt(cursor.getColumnIndexOrThrow("AGREGADO_LIDER")));
+                    listEvidencia.add(evidencia);
+                } while (cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return listEvidencia;
+    }
+
+    public List<Evidencia> readEvidenciasWithOutContenido(String condition, String[] args) throws IOException {
+        CursorWindowFixer.fix();
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE, null);
+        List<Evidencia> listEvidencia = new ArrayList<>();
+        /*StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
+                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM ").append(TP_TRAN_CL_EVIDENCIA);
+        if(condition != null){
+            query.append(" ").append(condition);
+        }
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition, args);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    Evidencia evidencia = new Evidencia();
+                    evidencia.setIdEvidencia(cursor.getString(0));
+                    evidencia.setNombre(cursor.getString(1));
+                    //evidencia.setContenido(cursor.getString(2));
+                    if (!evidencia.getNombre().contains(".pdf") && !evidencia.getNombre().contains(".PDF")) {
+                        evidencia.setSmallBitmap(Utils.base64ToBitmap(cursor.getString(2)));
+                    }
+                    evidencia.setIdEstatus(cursor.getInt(3));
+                    evidencia.setIdEtapa(cursor.getInt(4));
+                    evidencia.setIdRevision(cursor.getInt(5));
+                    evidencia.setIdChecklist(cursor.getInt(6));
+                    evidencia.setIdRubro(cursor.getInt(7));
+                    evidencia.setIdPregunta(cursor.getInt(8));
+                    evidencia.setIdRegistro(cursor.getInt(9));
+                    evidencia.setIdBarco(cursor.getInt(10));
+                    evidencia.setLatitude(cursor.getDouble(11));
+                    evidencia.setLongitude(cursor.getDouble(12));
+                    evidencia.setAgregadoCoordinador(cursor.getInt(13));
+                    evidencia.setNuevo(cursor.getInt(14));
+                    evidencia.setFechaMod(cursor.getString(15));
+                    evidencia.setLocation(cursor.getString(16));
+                    evidencia.setIdRol(cursor.getInt(17));
+                    evidencia.setIdUsuario(cursor.getString(18));
+                    evidencia.setAgregadoLider(cursor.getInt(19));
+                    listEvidencia.add(evidencia);
+                } while (cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        db.close();
+        return listEvidencia;
+    }
+
+    public List<Evidencia> readEvidencias(String condition, String[] args) {
+        CursorWindowFixer.fix();
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE, null);
+        List<Evidencia> listEvidencia = new ArrayList<>();
+        /*StringBuilder query = new StringBuilder();
+        query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
+                "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR FROM ").append(TP_TRAN_CL_EVIDENCIA);
+        if(condition != null){
+            query.append(" ").append(condition);
+        }
+        Cursor cursor = db.rawQuery(query.toString(),args);//*/
+        Cursor cursor = db.rawQuery(condition, args);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
                     Evidencia evidencia = new Evidencia();
                     evidencia.setIdEstatus(cursor.getInt(cursor.getColumnIndexOrThrow("ID_ESTATUS")));
                     evidencia.setIdEtapa(cursor.getInt(cursor.getColumnIndexOrThrow("ID_ETAPA")));
                     listEvidencia.add(evidencia);
-                }while(cursor.moveToNext());
+                } while (cursor.moveToNext());
             }
         }
         cursor.close();
@@ -183,7 +278,7 @@ public class EvidenciasDBMethods {
 
     public List<Evidencia> readEvidenciasSinDocumento(String condition, String[] args) throws IOException {
         CursorWindowFixer.fix();
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, context.MODE_PRIVATE, null);
         List<Evidencia> listEvidencia = new ArrayList<>();
         /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
@@ -192,15 +287,15 @@ public class EvidenciasDBMethods {
             query.append(" ").append(condition);
         }
         Cursor cursor = db.rawQuery(query.toString(),args);//*/
-        Cursor cursor = db.rawQuery(condition,args);
-        if(cursor != null){
-            if(cursor.moveToFirst()){
-                do{
+        Cursor cursor = db.rawQuery(condition, args);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
                     Evidencia evidencia = new Evidencia();
                     evidencia.setIdEvidencia(cursor.getString(0));
                     evidencia.setFechaMod(cursor.getString(1));
                     listEvidencia.add(evidencia);
-                }while(cursor.moveToNext());
+                } while (cursor.moveToNext());
             }
         }
         cursor.close();
@@ -210,7 +305,7 @@ public class EvidenciasDBMethods {
 
     public Evidencia readEvidencia(String condition, String[] args) throws IOException {
         CursorWindowFixer.fix();
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, context.MODE_PRIVATE, null);
         Evidencia evidencia = null;
         /*StringBuilder query = new StringBuilder();
         query.append("SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
@@ -219,14 +314,14 @@ public class EvidenciasDBMethods {
             query.append(" ").append(condition);
         }
         Cursor cursor = db.rawQuery(query.toString(),args);//*/
-        Cursor cursor = db.rawQuery(condition,args);
-        if(cursor != null){
-            if(cursor.moveToFirst()){
-                do{
+        Cursor cursor = db.rawQuery(condition, args);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
                     evidencia = new Evidencia();
                     evidencia.setIdEvidencia(cursor.getString(0));
                     evidencia.setNombre(cursor.getString(1));
-                    if(!evidencia.getNombre().contains(".pdf") && !evidencia.getNombre().contains(".PDF")) {
+                    if (!evidencia.getNombre().contains(".pdf") && !evidencia.getNombre().contains(".PDF")) {
                         evidencia.setOriginalBitmap(Utils.base64ToBitmap(cursor.getString(2)));
                     }
                     evidencia.setContenido(cursor.getString(2));
@@ -249,7 +344,7 @@ public class EvidenciasDBMethods {
                     evidencia.setIdRol(cursor.getInt(17));
                     evidencia.setIdUsuario(cursor.getString(18));
                     evidencia.setAgregadoLider(cursor.getInt(19));
-                }while(cursor.moveToNext());
+                } while (cursor.moveToNext());
             }
         }
         cursor.close();
@@ -257,15 +352,42 @@ public class EvidenciasDBMethods {
         return evidencia;
     }
 
-    public void updateEvidencia(ContentValues values,String condition,String[] args){
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
-        db.update(TP_TRAN_CL_EVIDENCIA,values,condition,args);
+    public void updateEvidencia(ContentValues values, String condition, String[] args) {
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, context.MODE_PRIVATE, null);
+        db.update(TP_TRAN_CL_EVIDENCIA, values, condition, args);
         db.close();
     }
 
-    public void deleteEvidencia(String condition,String[] args){
-        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,context.MODE_PRIVATE,null);
-        db.delete(TP_TRAN_CL_EVIDENCIA, condition,args);
+    public void deleteEvidencia(String condition, String[] args) {
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, context.MODE_PRIVATE, null);
+        db.delete(TP_TRAN_CL_EVIDENCIA, condition, args);
         db.close();
     }
+
+    public Evidencia readContenidoEvidencia(String idEvidencia, boolean likeBitmap) throws IOException {
+        CursorWindowFixer.fix();
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME, Context.MODE_PRIVATE, null);
+        Evidencia evidencia = null;
+        Cursor cursor = db.rawQuery("SELECT NOMBRE, CONTENIDO, LOCATION FROM " + TP_TRAN_CL_EVIDENCIA + " where ID_EVIDENCIA = '" + idEvidencia + "'", null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                evidencia = new Evidencia();
+                evidencia.setNombre(cursor.getString(cursor.getColumnIndexOrThrow("NOMBRE")));
+                if (!evidencia.getNombre().contains(".pdf") && !evidencia.getNombre().contains(".PDF")) {
+                    if (likeBitmap) {
+                        evidencia.setOriginalBitmap(Utils.base64ToBitmap(cursor.getString(cursor.getColumnIndexOrThrow("CONTENIDO"))));
+                    }else{
+                        evidencia.setContenido(cursor.getString(cursor.getColumnIndexOrThrow("CONTENIDO")));
+                    }
+                } else {
+                    evidencia.setContenido(cursor.getString(cursor.getColumnIndexOrThrow("CONTENIDO")));
+                }
+                evidencia.setLocation(cursor.getString(cursor.getColumnIndexOrThrow("LOCATION")));
+            }
+            cursor.close();
+        }
+        db.close();
+        return evidencia;
+    }
 }
+

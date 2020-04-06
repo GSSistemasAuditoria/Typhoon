@@ -90,6 +90,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import okhttp3.OkHttpClient;
@@ -122,6 +123,9 @@ public class Utils {
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(interceptor)
+                .connectTimeout(300, TimeUnit.SECONDS)
+                .readTimeout(300, TimeUnit.SECONDS)
+                .writeTimeout(300, TimeUnit.SECONDS)
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -133,6 +137,25 @@ public class Utils {
         final ApiInterface mInterfaceService = retrofit.create(ApiInterface.class);
         return mInterfaceService;
     }
+
+    public static ApiInterface getInterfaceServiceLog() {
+
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                //.baseUrl(Constants.URL_PUBLIC)
+                .baseUrl(new Encryption().decryptAES("fcqVM4Fhe5obVMeXHmZlJwCCAHM9zmKsdlxNctt/RcQ5GO+ZgIzAvoEriu/dgztoOEtWBGgIUbS3B0q+19fDOg=="))
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
+        final ApiInterface mInterfaceService = retrofit.create(ApiInterface.class);
+        return mInterfaceService;
+    }
+
 
     /**
      * Método para mostrar texto en pantalla
@@ -287,8 +310,12 @@ public class Utils {
 
         final ProgressDialog progressDialog = new ProgressDialog(context, R.style.ThemeTranslucent);
         progressDialog.setCancelable(false);
-        progressDialog.show();
-        progressDialog.setContentView(layoutDialog);
+        try {
+            progressDialog.show();
+            progressDialog.setContentView(layoutDialog);
+        }catch (Exception e){
+            Log.e(Utils.class.getName(), String.valueOf(e.getCause().getCause()));
+        }
         return progressDialog;
     }
 

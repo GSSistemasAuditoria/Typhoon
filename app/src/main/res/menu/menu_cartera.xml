@@ -25,5 +25,9 @@
         android:title="@string/cerrar_sesion_menu"
         android:icon="@mipmap/ic_cerrar_sesion"
         />
-
+    <item
+        android:id="@+id/enviar_log"
+        android:title="Enviar Log"
+        android:visible="false"
+        />
 </menu>

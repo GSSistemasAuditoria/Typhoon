@@ -391,8 +391,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 e.printStackTrace();
                 return "Error al sincronizar: " + e.getMessage();
             }
-        }else{
-            ResponseLogin.Usuario usuario = new UsuarioDBMethods(activity).readUsuario();
+        }else{//Sincronizar data
 
             try {
 
@@ -1178,7 +1177,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                 }
                 catalogoBarco.setListRubros(listRubros);
             }
-            System.out.println();
+
         }
 
         //******************************************************************************************
@@ -1206,8 +1205,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                                 "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_ANEXO = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(folio), String.valueOf(subanexo.getIdAnexo()), String.valueOf(subanexo.getIdSubAnexo())});//*/
 
-                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD,ID_ROL,ID_USUARIO " +
-                                "FROM " + anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
+                List<Anexo> listDatosAnexos = anexosDBMethods.readAnexosWithOutDocumento(" WHERE ID_REVISION = ? AND ID_SUBANEXO = ?"
                         , new String[]{String.valueOf(idRevision), String.valueOf(subanexo.getIdSubAnexo())});
 
                 if(listDatosAnexos.size() != 0){
