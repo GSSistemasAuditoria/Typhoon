@@ -756,7 +756,6 @@ public class MainActivity extends AppCompatActivity {
                                 //try {
                                 //Log.e(MainActivity.class.getName(), response.raw().toString());
                                 String jwt = encryption.encryptAES(response.headers().get("Authorization"));
-                                sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                                 BarcoDBMethods barcoDBMethods = new BarcoDBMethods(MainActivity.this);
                                 CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(MainActivity.this);
@@ -816,6 +815,18 @@ public class MainActivity extends AppCompatActivity {
                                         }
                                         if (configuracion.getConfiguracion().equals("ValidaFechaEvidencias")) {
                                             ed.putString(Constants.SP_VALIDA_FECHA, encryption.encryptAES(configuracion.getArgumento()));
+                                            ed.apply();
+                                        }
+                                        if (configuracion.getConfiguracion().equals(Constants.SP_SIZE_EVIDENCIAS)){
+                                            ed.putInt(Constants.SP_SIZE_EVIDENCIAS, Integer.parseInt(configuracion.getArgumento()));
+                                            ed.apply();
+                                        }
+                                        if (configuracion.getConfiguracion().equals(Constants.WIDTH_EVIDENCIA)){
+                                            ed.putInt(Constants.WIDTH_EVIDENCIA, Integer.parseInt(configuracion.getArgumento()));
+                                            ed.apply();
+                                        }
+                                        if (configuracion.getConfiguracion().equals(Constants.HEIGTH_EVIDENCIA)){
+                                            ed.putInt(Constants.HEIGTH_EVIDENCIA, Integer.parseInt(configuracion.getArgumento()));
                                             ed.apply();
                                         }
                                     }

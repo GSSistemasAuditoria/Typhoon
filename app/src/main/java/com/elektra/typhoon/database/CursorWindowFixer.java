@@ -9,7 +9,7 @@ public class CursorWindowFixer {
         try {
             Field field = CursorWindow.class.getDeclaredField("sCursorWindowSize");
             field.setAccessible(true);
-            field.set(null, 40485760);
+            field.set(null, 52428800);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

@@ -92,24 +92,16 @@ public class SincronizacionJSON {
                     //String idRol = "2";
                     List<Evidencia> listEvidencias = null;
                     if(usuario.getIdrol() == 1){
-                        //idRol = "2";
-                        listEvidencias = evidenciasDBMethods.readEvidencias("" +
-                                        "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
-                                        "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR,NUEVO,FECHA_MOD," +
-                                        "LOCATION,ID_ROL,ID_USUARIO,AGREGADO_LIDER FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
-                                        " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND (ID_ETAPA = 2) OR (ID_ETAPA = 1 AND ID_ESTATUS = 2)",
+                        listEvidencias = evidenciasDBMethods.readEvidenciasWithOutContenidoAndPreview(
+                                        "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND (ID_ETAPA = 2) OR (ID_ETAPA = 1 AND ID_ESTATUS = 2)",
                                 new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
-                                        String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta())},true);
-                    //}if(usuario.getIdrol() == 2){
+                                        String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta())});
                     }else {
                         String idRol = String.valueOf(usuario.getIdrol() + 1);
-                        listEvidencias = evidenciasDBMethods.readEvidencias("" +
-                                        "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
-                                        "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR,NUEVO,FECHA_MOD," +
-                                        "LOCATION,ID_ROL,ID_USUARIO,AGREGADO_LIDER FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
+                        listEvidencias = evidenciasDBMethods.readEvidenciasWithOutContenidoAndPreview(
                                         " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND (ID_ETAPA = 1 OR ID_ETAPA = ?)",
                                 new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
-                                        String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),idRol},true);
+                                        String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),idRol});
                     }
                     /*listEvidencias = evidenciasDBMethods.readEvidencias("" +
                                     "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_ETAPA = ?" +
@@ -121,6 +113,8 @@ public class SincronizacionJSON {
                         evidencia.setListHistorico(historicoDBMethods.readHistorico(
                                 "SELECT ID_EVIDENCIA,ID_ETAPA,ID_USUARIO,MOTIVO,CONSEC,ID_REVISION,ID_CHECKLIST,FECHA_MOD FROM " + historicoDBMethods.TP_TRAN_HISTORIAL_EVIDENCIA + " WHERE ID_EVIDENCIA = ?",
                                 new String[]{evidencia.getIdEvidencia()}));
+                        Evidencia mEvidencia = evidenciasDBMethods.readContenidoEvidencia(evidencia.getIdEvidencia(), false);
+                        evidencia.setContenido(mEvidencia.getContenido());
                     }
 
                     preguntaData.setListEvidencias(listEvidencias);
@@ -134,12 +128,11 @@ public class SincronizacionJSON {
                     "SELECT ID_REVISION,ID_CHECKLIST,ID_PREGUNTA,ID_RUBRO,ID_ESTATUS,ID_BARCO,ID_REGISTRO,ID_RESPUESTA,SINCRONIZADO FROM " + checklistDBMethods.TP_TRAN_CL_RESPUESTA + " WHERE ID_REVISION = ? AND ID_CHECKLIST = ?"
                 , new String[]{String.valueOf(checklistData.getIdRevision()), String.valueOf(checklistData.getIdChecklist())});
 
-            List<Anexo> listAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD,ID_ROL,ID_USUARIO FROM " +
-             anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND (ID_ETAPA = ? OR ID_ETAPA = -1) ",new String[]{String.valueOf(folio),String.valueOf(usuario.getIdrol())});
+            List<Anexo> listAnexos = anexosDBMethods.readAnexosWithOutDocumento(" WHERE ID_REVISION = ? AND (ID_ETAPA = ? OR ID_ETAPA = -1) ",new String[]{String.valueOf(folio),String.valueOf(usuario.getIdrol())});
 
             List<SubAnexo> listSubAnexo = new ArrayList<>();
             for(Anexo anexo:listAnexos){
-                SubAnexo subAnexo = new SubAnexo(anexo.getIdSubAnexo(),anexo.getIdRevision(),anexo.getNombreArchivo(),anexo.getBase64(),anexo.getIdEtapa());
+                SubAnexo subAnexo = new SubAnexo(anexo.getIdSubAnexo(),anexo.getIdRevision(),anexo.getNombreArchivo(), anexosDBMethods.readAnexosDocumento(anexo.getIdAnexo()),anexo.getIdEtapa());
                 subAnexo.setFechaSincronizacion(anexo.getFechaSinc());
                 listSubAnexo.add(subAnexo);
                 List<HistoricoAnexo> listHistoricoanexo = historicoDBMethods.readHistoricoAnexo("SELECT ID_SUBANEXO,ID_REVISION,ID_ETAPA,ID_USUARIO,NOMBRE,MOTIVO_RECHAZO,FECHA_MOD,GUID,SUBANEXO_FCH_SINC,ID_ROL FROM " +
@@ -215,33 +208,22 @@ public class SincronizacionJSON {
                         List<Evidencia> listEvidencias = null;
                         if (usuario.getIdrol() == 1) {
                             //idRol = "2";
-                            listEvidencias = evidenciasDBMethods.readEvidencias("" +
-                                            "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
-                                            "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR,NUEVO,FECHA_MOD," +
-                                            "LOCATION,ID_ROL,ID_USUARIO,AGREGADO_LIDER FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
+                            listEvidencias = evidenciasDBMethods.readEvidenciasWithOutContenidoAndPreview(
                                             " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ((ID_ETAPA = 2) OR (ID_ETAPA = 1 AND ID_ESTATUS = 2)) AND ID_BARCO = ?",
                                     new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
-                                            String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),String.valueOf(idBarco)}, true);
+                                            String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),String.valueOf(idBarco)});
                             //}if(usuario.getIdrol() == 2){
                         } else {
                             String idRol = String.valueOf(usuario.getIdrol() + 1);
-                            listEvidencias = evidenciasDBMethods.readEvidencias("" +
-                                            "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO_PREVIEW,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
-                                            "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,CONTENIDO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR,NUEVO,FECHA_MOD," +
-                                            "LOCATION,ID_ROL,ID_USUARIO,AGREGADO_LIDER FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA +
+                            listEvidencias = evidenciasDBMethods.readEvidenciasWithOutContenidoAndPreview(
                                             " WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND (ID_ETAPA = 1 OR ID_ETAPA = ? OR (ID_ETAPA = 2 AND (ID_ESTATUS = 3 OR ID_ESTATUS = 2))) AND ID_BARCO = ?",
                                     new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
-                                            String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()), idRol,String.valueOf(idBarco)}, true);
+                                            String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()), idRol,String.valueOf(idBarco)});
                         }
-                    /*listEvidencias = evidenciasDBMethods.readEvidencias("" +
-                                    "WHERE ID_REVISION = ? AND ID_CHECKLIST = ? AND ID_RUBRO = ? AND ID_PREGUNTA = ? AND ID_ETAPA = ?" +
-                                    " AND ID_ESTATUS != 2",
-                            new String[]{String.valueOf(pregunta.getIdRevision()), String.valueOf(pregunta.getIdChecklist()),
-                                    String.valueOf(pregunta.getIdRubro()), String.valueOf(pregunta.getIdPregunta()),idRol},true);//*/
 
                         for (Evidencia evidencia : listEvidencias) {
-                            if(evidencia.getFechaMod() != null){
-                                evidencia.setContenido(null);
+                            if(evidencia.getFechaMod() == null){
+                                evidencia.setContenido(evidenciasDBMethods.readContenidoEvidencia(evidencia.getIdEvidencia(), false).getContenido());
                             }
                             evidencia.setListHistorico(historicoDBMethods.readHistorico(
                                     "SELECT ID_EVIDENCIA,ID_ETAPA,ID_USUARIO,MOTIVO,CONSEC,ID_REVISION,ID_CHECKLIST,FECHA_MOD FROM " + historicoDBMethods.TP_TRAN_HISTORIAL_EVIDENCIA + " WHERE ID_EVIDENCIA = ?",
@@ -300,13 +282,12 @@ public class SincronizacionJSON {
                     rubro.setListPreguntas(listPreguntasPost);
                 }
 
-                List<Anexo> listAnexos = anexosDBMethods.readAnexos("SELECT ID_REVISION,ID_ANEXO,ID_SUBANEXO,ID_DOCUMENTO,ID_ETAPA,DOCUMENTO,NOMBRE,SUBANEXO_FCH_SINC,SELECCIONADO,SUBANEXO_FCH_MOD,ID_ROL,ID_USUARIO FROM " +
-                        anexosDBMethods.TP_TRAN_ANEXOS + " WHERE ID_REVISION = ? AND (ID_ETAPA = ? OR ID_ETAPA = -1) AND ID_SUBANEXO = ?",
+                List<Anexo> listAnexos = anexosDBMethods.readAnexosWithOutDocumento(" WHERE ID_REVISION = ? AND (ID_ETAPA = ? OR ID_ETAPA = -1) AND ID_SUBANEXO = ?",
                         new String[]{String.valueOf(folio), String.valueOf(usuario.getIdrol()),String.valueOf(idSubanexo)});
 
                 List<SubAnexo> listSubAnexo = new ArrayList<>();
                 for (Anexo anexo : listAnexos) {
-                    SubAnexo subAnexo = new SubAnexo(anexo.getIdSubAnexo(), anexo.getIdRevision(), anexo.getNombreArchivo(), anexo.getBase64(), anexo.getIdEtapa());
+                    SubAnexo subAnexo = new SubAnexo(anexo.getIdSubAnexo(), anexo.getIdRevision(), anexo.getNombreArchivo(), anexosDBMethods.readAnexosDocumento(anexo.getIdAnexo()), anexo.getIdEtapa());
                     subAnexo.setFechaSincronizacion(anexo.getFechaSinc());
                     subAnexo.setIdRol(anexo.getIdRol());
                     subAnexo.setIdUsuario(anexo.getIdUsuario());

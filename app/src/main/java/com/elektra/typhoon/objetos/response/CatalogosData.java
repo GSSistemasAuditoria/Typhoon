@@ -3,6 +3,7 @@ package com.elektra.typhoon.objetos.response;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,7 +39,7 @@ public class CatalogosData {
     @Expose
     private List<RolUsuario> listRolesUsuario;
 
-        @SerializedName("CatalogoAppSettings")
+    @SerializedName("CatalogoAppSettings")
     @Expose
     private List<Configuracion> listConfiguracion;
 
@@ -49,6 +50,8 @@ public class CatalogosData {
     @SerializedName("CatalogoAniosRevision")
     @Expose
     private CatalogoAnios catalogoAnios;
+
+    private List<HashMap<String, String>> CatalogoSettings;
 
     public List<Barco> getListBarcos() {
         return listBarcos;
@@ -120,5 +123,13 @@ public class CatalogosData {
 
     public void setCatalogoAnios(CatalogoAnios catalogoAnios) {
         this.catalogoAnios = catalogoAnios;
+    }
+
+    public List<HashMap<String, String>> getCatalogoSettings() {
+        return CatalogoSettings;
+    }
+
+    public void setCatalogoSettings(List<HashMap<String, String>> catalogoSettings) {
+        CatalogoSettings = catalogoSettings;
     }
 }

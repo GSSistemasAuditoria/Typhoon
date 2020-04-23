@@ -326,6 +326,11 @@ public class AnexosActivity extends AppCompatActivity {
                 if (nombre.endsWith(".pdf") || nombre.endsWith(".PDF")) {
                     try {
                         String base64 = Utils.fileToBase64(AnexosActivity.this, uri);
+                        byte[] bytesPdf = Utils.base64ToFile(base64);
+                        int size = bytesPdf.length;
+                        if (size > getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE).getInt(Constants.SP_SIZE_EVIDENCIAS, 10485760)){
+                            return "El tamaño del PDF es demasiado grande";
+                        }
                         Anexo anexo = adapterExpandableAnexos.getListAnexosHeader().get(idrubro).getListSubAnexos().get(requestCode);
                         if (anexo.getNombreArchivo() != null) {
                             flagCrea = false;

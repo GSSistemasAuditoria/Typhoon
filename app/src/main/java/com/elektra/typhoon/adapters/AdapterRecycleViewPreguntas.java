@@ -647,7 +647,7 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                     //Bitmap bitmap = null;descomentar si se requiere
                     Pregunta pregunta = listPreguntas.get(numeroPregunta);
                     EvidenciasDBMethods evidenciasDBMethods = new EvidenciasDBMethods(activity);
-                    Evidencia evidencia = evidenciasDBMethods.readEvidencia(
+                    /*Evidencia evidencia = evidenciasDBMethods.readEvidencia(
                             "SELECT ID_EVIDENCIA,NOMBRE,CONTENIDO,ID_ESTATUS,ID_ETAPA,ID_REVISION,ID_CHECKLIST," +
                                     "ID_RUBRO,ID_PREGUNTA,ID_REGISTRO,ID_BARCO,LATITUDE,LONGITUDE,AGREGADO_COORDINADOR,NUEVO,FECHA_MOD," +
                                     "LOCATION,ID_ROL,ID_USUARIO,AGREGADO_LIDER FROM " + evidenciasDBMethods.TP_TRAN_CL_EVIDENCIA + " WHERE ID_EVIDENCIA = ? AND ID_REVISION = ? " +
@@ -660,10 +660,12 @@ public class AdapterRecycleViewPreguntas extends RecyclerView.Adapter<AdapterRec
                             bitmap = evidencia.getOriginalBitmap();
                         }
                     }//*/
-                    if (evidencia != null) {
+                    //if (evidencia != null) {
+                    Evidencia mEvidencia = evidenciasDBMethods.readContenidoEvidencia(identificador, true);
+                    if (mEvidencia != null){
                         //bitmap = evidencia.getOriginalBitmap();descomentar si se requiere
                         //mostrarDocumento(view, identificador, numeroPregunta, activity, bitmap,evidencia.getContenido());descomentar si se requiere
-                        mostrarDocumento(view, identificador, numeroPregunta, activity, evidencia.getOriginalBitmap(), evidencia.getContenido(), evidencia.getLocation());
+                        mostrarDocumento(view, identificador, numeroPregunta, activity, mEvidencia.getOriginalBitmap(), mEvidencia.getContenido(), mEvidencia.getLocation());
                     } else {
                         Utils.message(activity, "No se pudo cargar la imagen");
                     }

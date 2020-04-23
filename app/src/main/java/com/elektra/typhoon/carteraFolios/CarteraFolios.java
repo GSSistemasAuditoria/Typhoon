@@ -50,6 +50,7 @@ import com.elektra.typhoon.database.CatalogosDBMethods;
 import com.elektra.typhoon.database.ChecklistDBMethods;
 import com.elektra.typhoon.database.FoliosDBMethods;
 import com.elektra.typhoon.database.NotificacionesDBMethods;
+import com.elektra.typhoon.database.TyphoonDataBase;
 import com.elektra.typhoon.database.UsuarioDBMethods;
 import com.elektra.typhoon.encryption.Encryption;
 import com.elektra.typhoon.gps.GPSTracker;
@@ -311,6 +312,21 @@ public class CarteraFolios extends AppCompatActivity {
                             Utils.nuevaInstalacionDialog(CarteraFolios.this);
                         } else if (item.getItemId() == R.id.actualizarRevisiones) {
                             obtenerFolios(-1, -1, -1);
+                        } else if (item.getItemId() == R.id.enviar_log){
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        String errores = TyphoonDataBase.getErrores(CarteraFolios.this);
+                                        if (!errores.isEmpty()) {
+                                            Utils.getInterfaceServiceLog().setLogMovil(new com.elektra.typhoon.objetos.request.Log("TyphoonApp", 2,
+                                                    errores)).execute();
+                                        }
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }).start();
                         }
                         return true;
                     }
@@ -479,7 +495,6 @@ public class CarteraFolios extends AppCompatActivity {
                             //try {
 
                             String jwt = encryption.encryptAES(response.headers().get("Authorization"));
-                            sharedPreferences.edit().putString(Constants.SP_JWT_TAG, jwt).apply();
 
                             BarcoDBMethods barcoDBMethods = new BarcoDBMethods(CarteraFolios.this);
                             CatalogosDBMethods catalogosDBMethods = new CatalogosDBMethods(CarteraFolios.this);
@@ -539,6 +554,18 @@ public class CarteraFolios extends AppCompatActivity {
                                     }
                                     if (configuracion.getConfiguracion().equals("ValidaFechaEvidencias")) {
                                         ed.putString(Constants.SP_VALIDA_FECHA, encryption.encryptAES(configuracion.getArgumento()));
+                                        ed.apply();
+                                    }
+                                    if (configuracion.getConfiguracion().equals(Constants.SP_SIZE_EVIDENCIAS)){
+                                        ed.putInt(Constants.SP_SIZE_EVIDENCIAS, Integer.parseInt(configuracion.getArgumento()));
+                                        ed.apply();
+                                    }
+                                    if (configuracion.getConfiguracion().equals(Constants.WIDTH_EVIDENCIA)){
+                                        ed.putInt(Constants.WIDTH_EVIDENCIA, Integer.parseInt(configuracion.getArgumento()));
+                                        ed.apply();
+                                    }
+                                    if (configuracion.getConfiguracion().equals(Constants.HEIGTH_EVIDENCIA)){
+                                        ed.putInt(Constants.HEIGTH_EVIDENCIA, Integer.parseInt(configuracion.getArgumento()));
                                         ed.apply();
                                     }
                                 }

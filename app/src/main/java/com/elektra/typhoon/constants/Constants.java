@@ -59,4 +59,8 @@ public class Constants {
     public final static String SP_GPS_GEOCERCA = "gpsGeocerca";
     public final static String SP_VALIDA_FECHA = "validaFecha";
     public final static String SP_FIREBASE_TOKEN = "firebaseToken";
+    public static final String SP_SIZE_EVIDENCIAS = "SizeEvidencias";
+
+    public static final String WIDTH_EVIDENCIA = "Evidencia_width";
+    public static final String HEIGTH_EVIDENCIA = "Evidencia_height";
 }

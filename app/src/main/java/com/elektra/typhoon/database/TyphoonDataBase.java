@@ -1,8 +1,11 @@
 package com.elektra.typhoon.database;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.elektra.typhoon.constants.Constants;
 
@@ -19,6 +22,9 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = Constants.DB_NAME;
     private static final int DATABASE_VERSION = 1;
     private Context context;
+
+    private String QUERY_CREATE_TABLE_LOG_ERROR = "CREATE TABLE LOG_ERROR (" +
+            "LOG TEXT)";
 
     public TyphoonDataBase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -50,6 +56,7 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(AnexosDBMethods.QUERY_CREATE_TABLE_TP_TRAN_ANEXOS);
         sqLiteDatabase.execSQL(CatalogosDBMethods.QUERY_CREATE_TABLE_TP_CAT_ANIOS);
         sqLiteDatabase.execSQL(NotificacionesDBMethods.QUERY_CREATE_TABLE_TP_TRAN_NOTIFICACIONES);
+        sqLiteDatabase.execSQL(QUERY_CREATE_TABLE_LOG_ERROR);
     }
 
     public void deleteAll(){
@@ -75,11 +82,35 @@ public class TyphoonDataBase extends SQLiteOpenHelper {
         db.execSQL("delete from " + AnexosDBMethods.TP_REL_REVISION_ANEXOS);
         db.execSQL("delete from " + AnexosDBMethods.TP_CAT_ANEXOS);
         db.execSQL("delete from " + NotificacionesDBMethods.TP_TRAN_NOTIFICACIONES);
+        db.execSQL("delete from LOG_ERROR");
         db.close();
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
 
+    }
+
+    public static void createError(Context context, String error){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,Context.MODE_PRIVATE,null);
+        ContentValues mValues = new ContentValues();
+        mValues.put("LOG", error);
+        long result = db.insert("LOG_ERROR", null, mValues);
+        Log.e("TyphoonDB", "Result: " + result + " : Values: " + error);
+    }
+
+    public static String getErrores(Context context){
+        SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,Context.MODE_PRIVATE,null);
+        Cursor cursor = db.rawQuery("Select LOG from LOG_ERROR order by rowid desc limit 5", null);
+        String errores = "";
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                do{
+                    errores += cursor.getString(0) + "  |  ";
+                }while(cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        return errores;
     }
 }

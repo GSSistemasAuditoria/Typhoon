@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.elektra.typhoon.GlobalHandlerErrorActivity;
 import com.elektra.typhoon.R;
 import com.elektra.typhoon.adapters.AdapterExpandableChecklist;
 import com.elektra.typhoon.adapters.SpinnerBarcosAdapter;
@@ -80,7 +81,7 @@ import java.util.UUID;
  * Empresa: Elektra
  * Area: Auditoria Sistemas y Monitoreo de Alarmas
  */
-public class ChecklistBarcos extends AppCompatActivity {
+public class ChecklistBarcos extends GlobalHandlerErrorActivity {
     private final static String TAG = ChecklistBarcos.class.getName();
 
     private TextView textViewNombreBarco;
@@ -1269,6 +1270,7 @@ public class ChecklistBarcos extends AppCompatActivity {
 
         private String guardarEvidencia() {
             ResponseLogin.Usuario usuario = new UsuarioDBMethods(getApplicationContext()).readUsuario();
+            SharedPreferences sharedPreferences = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
             if (data != null) {
                 Bundle extras = data.getExtras();
                 //Imágen desde cámara
@@ -1286,7 +1288,7 @@ public class ChecklistBarcos extends AppCompatActivity {
                         Bitmap bitmap = Utils.getBitmap(getApplicationContext(), capturedImageUri);
                         bitmap = Utils.rotateImageIfRequired(getApplicationContext(), bitmap, capturedImageUri);
                         final Bitmap scaledBitmap = Utils.resizeImageBitmap(bitmap);
-                        bitmap = Utils.resizeImageBitmap(bitmap, 768, 1024);
+                        bitmap = Utils.resizeImageBitmap(bitmap, sharedPreferences.getInt(Constants.WIDTH_EVIDENCIA, 768), sharedPreferences.getInt(Constants.HEIGTH_EVIDENCIA, 1024));
                         String base64 = null;
                         String base64Preview = null;
                         int rubro = adapterExpandableChecklist.getRubroPosition();
@@ -1428,6 +1430,11 @@ public class ChecklistBarcos extends AppCompatActivity {
                     if (path.toLowerCase().contains("pdf")) {
                         try {
                             String base64 = Utils.fileToBase64(ChecklistBarcos.this, uri);
+                            byte[] bytesPdf = Utils.base64ToFile(base64);
+                            int size = bytesPdf.length;
+                            if (size > sharedPreferences.getInt(Constants.SP_SIZE_EVIDENCIAS, 10485760)){
+                                return "El tamaño del PDF es demasiado grande";
+                            }
                             RespuestaData datosRespuesta = null;
                             for (RespuestaData respuestaData : adapterExpandableChecklist.getListRubros().get(idrubro).getListRespuestas()) {
                                 if (respuestaData.getIdPregunta() == adapterExpandableChecklist.getListRubros().get(idrubro).getListPreguntasTemp().get(requestCode).getIdPregunta()) {
@@ -1567,7 +1574,7 @@ public class ChecklistBarcos extends AppCompatActivity {
                         Bitmap bitmap = null;
                         try {
                             bitmap = Utils.getBitmap(getApplicationContext(), uri);
-                            bitmap = Utils.resizeImageBitmap(bitmap, 768, 1024);
+                            bitmap = Utils.resizeImageBitmap(bitmap, sharedPreferences.getInt(Constants.WIDTH_EVIDENCIA, 768), sharedPreferences.getInt(Constants.HEIGTH_EVIDENCIA, 1024));
                             Bitmap scaledBitmap = Utils.resizeImageBitmap(bitmap);
                             String base64 = null;
                             String base64Preview = null;
@@ -1651,7 +1658,7 @@ public class ChecklistBarcos extends AppCompatActivity {
                     Bitmap bitmap = Utils.getBitmap(getApplicationContext(), capturedImageUri);
                     bitmap = Utils.rotateImageIfRequired(getApplicationContext(), bitmap, capturedImageUri);
                     final Bitmap scaledBitmap = Utils.resizeImageBitmap(bitmap);
-                    bitmap = Utils.resizeImageBitmap(bitmap, 768, 1024);
+                    bitmap = Utils.resizeImageBitmap(bitmap, sharedPreferences.getInt(Constants.WIDTH_EVIDENCIA, 768), sharedPreferences.getInt(Constants.HEIGTH_EVIDENCIA, 1024));
                     String base64 = null;
                     String base64Preview = null;
                     int rubro = adapterExpandableChecklist.getRubroPosition();
