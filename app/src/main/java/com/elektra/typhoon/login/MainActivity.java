@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (usuarioDB != null) {
                     if (!usuarioDB.getCorreo().trim().equals(usuario.trim()) && !usuarioDB.getIdUsuario().trim().equals(usuario.trim())) {
-                        nuevaInstalacionDialog(usuarioDB.getNombre(), usuarioDB.getIdUsuario());
+                        nuevaInstalacionDialog(usuarioDB.getNombre(), usuarioDB.getIdUsuario(),false);
                         return;
                     }
                 }
@@ -347,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
         return mInterfaceService;
     }
 
-    private void iniciarSesion(String usuario, String contrasena, String token, String tokenDSI) {
+    private void iniciarSesion(final String usuario, String contrasena, String token, String tokenDSI) {
         final ProgressDialog progressDialog = Utils.typhoonLoader(MainActivity.this, "Iniciando sesión...");
         final LoginLlaveMaestraVO mLlaveMaestraVO = new LoginLlaveMaestraVO();
         mLlaveMaestraVO.setDatosRequest(mLlaveMaestraVO.new DataLoginMasterKey());
@@ -413,6 +413,20 @@ public class MainActivity extends AppCompatActivity {
                     if (response.body() != null) {
                         if (response.body().getValidarEmpleado().getExito()) {
                             //try {
+                            ResponseLogin.Usuario usuarioDB = new UsuarioDBMethods(getApplicationContext()).readUsuario();
+                            if (usuarioDB != null) {
+                                if(usuarioDB.getInterno()){
+                                    if (!usuarioDB.getIdUsuario().trim().equals(response.body().getValidarEmpleado().getUsuario().getIdUsuario())) {
+                                        nuevaInstalacionDialog(usuarioDB.getNombre(), usuarioDB.getIdUsuario(),response.body().getValidarEmpleado().getUsuario().getInterno());
+                                        return;
+                                    }
+                                }else {
+                                    if (!usuarioDB.getCorreo().trim().equals(response.body().getValidarEmpleado().getUsuario().getCorreo())) {
+                                        nuevaInstalacionDialog(usuarioDB.getNombre(), usuarioDB.getIdUsuario(),response.body().getValidarEmpleado().getUsuario().getInterno());
+                                        return;
+                                    }
+                                }
+                            }
                             new UsuarioDBMethods(getApplicationContext()).createUsuario(response.body().getValidarEmpleado().getUsuario());
                             SharedPreferences sharedPrefs = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE);
                             sharedPrefs.edit().putBoolean(Constants.SP_LOGIN_TAG, true).apply();
@@ -566,7 +580,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }//*/
 
-    private void nuevaInstalacionDialog(final String usuario, final String idUsuario) {
+    private void nuevaInstalacionDialog(final String usuario, final String idUsuario, final boolean interno) {
         final LayoutInflater li = LayoutInflater.from(MainActivity.this);
         LinearLayout layoutDialog = (LinearLayout) li.inflate(R.layout.dialog_layout, null);
         TextView textViewCancelar = layoutDialog.findViewById(R.id.buttonCancelar);
@@ -599,7 +613,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             if (v.getId() == R.id.buttonAceptar || v.getId() == R.id.linearLayoutAceptar) {
-                                cerrarSesionService(idUsuario, true);
+                                cerrarSesionService(idUsuario, true,interno);
                             }
                             dialog.dismiss();
                         }
@@ -655,13 +669,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 //new NuevaInstalacion(CarteraFolios.this).execute();
                 //iniciarSesion(usuario, contrasena, firebaseToken, 1);
-                cerrarSesionService(idUsuario, false);
+                cerrarSesionService(idUsuario, false,false);
                 dialog.dismiss();
             }
         });
     }
 
-    private void cerrarSesionService(String idUsuario, final boolean borrarData) {
+    private void cerrarSesionService(final String idUsuario, final boolean borrarData,final boolean interno) {
         Call<CerrarSesionResponse> mServiceCerrarSesion = getInterfaceService().cerrarSesion(idUsuario);
         mServiceCerrarSesion.enqueue(new Callback<CerrarSesionResponse>() {
             @Override
@@ -673,7 +687,11 @@ public class MainActivity extends AppCompatActivity {
                                 sharedPrefs.edit().clear().apply();
                                 new TyphoonDataBase(MainActivity.this).deleteAll();
                             }
-                            entrar.performClick();
+                            if(interno){
+                                btnInterno.performClick();
+                            }else{
+                                entrar.performClick();
+                            }
                         } else {
                             //progressDialog.dismiss();
                             Utils.message(MainActivity.this, response.body().getCerrarSesion().getError());

@@ -27,9 +27,10 @@ public class Constants {
     //public static String URL_PUBLIC = "ofjcUcZ+Cnrw2m6EQ/yxhh9QANm3dmavmcMPkPRMY/RQ+WssvtEbr7CfeY2FvfPacZOi7lcfcis7c36WTrWhGw==";
 
 
-    //DSI
+    //DSI PRODUCCION
     public static final String URL_DSI = "https://auth.socio.gs/nidp/";
-
+    //DSI DESARROLLO
+    //public static final String URL_DSI = "https://authns.desadsi.gs/nidp/";
 
     //**********************************************************************************************
     public static String DB_NAME = "TyphoonDB";

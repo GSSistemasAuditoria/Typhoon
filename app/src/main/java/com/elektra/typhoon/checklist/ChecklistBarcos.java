@@ -1425,7 +1425,7 @@ public class ChecklistBarcos extends AppCompatActivity {
                     String path = Utils.getRealPathFromURI(ChecklistBarcos.this, uri);
                     //String path2 = Utils.getPathFromUri(ChecklistBarcos.this,uri);
                     int idrubro = adapterExpandableChecklist.getAdapterRecycleViewPreguntasTemp().getIdRubro();
-                    if (path.contains("pdf")) {
+                    if (path.toLowerCase().contains("pdf")) {
                         try {
                             String base64 = Utils.fileToBase64(ChecklistBarcos.this, uri);
                             RespuestaData datosRespuesta = null;
