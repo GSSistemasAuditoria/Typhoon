@@ -1214,6 +1214,7 @@ public class SincronizacionRequestService extends AsyncTask<String,String,String
                     subanexo.setIdEtapa(listDatosAnexos.get(0).getIdEtapa());
                     subanexo.setIdRevision(idRevision);
                     subanexo.setSeleccionado(listDatosAnexos.get(0).isSeleccionado());
+                    subanexo.setBase64(anexosDBMethods.readAnexosDocumento(subanexo.getIdSubAnexo()));
                 }
             }
         }

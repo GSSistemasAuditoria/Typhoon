@@ -132,7 +132,7 @@ public class SincronizacionJSON {
 
             List<SubAnexo> listSubAnexo = new ArrayList<>();
             for(Anexo anexo:listAnexos){
-                SubAnexo subAnexo = new SubAnexo(anexo.getIdSubAnexo(),anexo.getIdRevision(),anexo.getNombreArchivo(), anexosDBMethods.readAnexosDocumento(anexo.getIdAnexo()),anexo.getIdEtapa());
+                SubAnexo subAnexo = new SubAnexo(anexo.getIdSubAnexo(),anexo.getIdRevision(),anexo.getNombreArchivo(), anexosDBMethods.readAnexosDocumento(anexo.getIdSubAnexo()),anexo.getIdEtapa());
                 subAnexo.setFechaSincronizacion(anexo.getFechaSinc());
                 listSubAnexo.add(subAnexo);
                 List<HistoricoAnexo> listHistoricoanexo = historicoDBMethods.readHistoricoAnexo("SELECT ID_SUBANEXO,ID_REVISION,ID_ETAPA,ID_USUARIO,NOMBRE,MOTIVO_RECHAZO,FECHA_MOD,GUID,SUBANEXO_FCH_SINC,ID_ROL FROM " +
@@ -287,7 +287,7 @@ public class SincronizacionJSON {
 
                 List<SubAnexo> listSubAnexo = new ArrayList<>();
                 for (Anexo anexo : listAnexos) {
-                    SubAnexo subAnexo = new SubAnexo(anexo.getIdSubAnexo(), anexo.getIdRevision(), anexo.getNombreArchivo(), anexosDBMethods.readAnexosDocumento(anexo.getIdAnexo()), anexo.getIdEtapa());
+                    SubAnexo subAnexo = new SubAnexo(anexo.getIdSubAnexo(), anexo.getIdRevision(), anexo.getNombreArchivo(), anexosDBMethods.readAnexosDocumento(anexo.getIdSubAnexo()), anexo.getIdEtapa());
                     subAnexo.setFechaSincronizacion(anexo.getFechaSinc());
                     subAnexo.setIdRol(anexo.getIdRol());
                     subAnexo.setIdUsuario(anexo.getIdUsuario());

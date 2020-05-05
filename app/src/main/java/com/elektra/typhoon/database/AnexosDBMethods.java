@@ -272,7 +272,7 @@ public class AnexosDBMethods {
     public String readAnexosDocumento(int idAnexo){
         CursorWindowFixer.fix();
         SQLiteDatabase db = context.openOrCreateDatabase(Constants.DB_NAME,Context.MODE_PRIVATE,null);
-        Cursor cursor = db.rawQuery("Select DOCUMENTO from " + TP_TRAN_ANEXOS + " where ID_ANEXO = " + idAnexo, null);
+        Cursor cursor = db.rawQuery("Select DOCUMENTO from " + TP_TRAN_ANEXOS + " where ID_SUBANEXO = " + idAnexo, null);
         String result = null;
         if(cursor != null){
             if(cursor.moveToFirst()){
